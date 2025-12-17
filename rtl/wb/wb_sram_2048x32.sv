@@ -74,7 +74,7 @@ module wb_sram_2048x32
   assign sram_re = valid;
 
   /* SRAM instances */
-  RM_IHPSG13_1P_1024x32_c2_bm  #(
+  RM_IHPSG13_1P_1024x32_c2_bm_bist  #(
     // .MEMInitFile(MEMInitFile)
   ) sram1 (
         .A_CLK        (wb.clk),
@@ -85,10 +85,18 @@ module wb_sram_2048x32
         .A_DIN        (sram_wdata),
         .A_DLY        (1'b1),       // Internal timing delay setting
         .A_DOUT       (sram1_rdata),
-        .A_BM         (sram_bm)
+        .A_BM         (sram_bm),
+        .A_BIST_CLK   ('0),
+        .A_BIST_EN    ('0),
+        .A_BIST_MEN   ('0),
+        .A_BIST_WEN   ('0),
+        .A_BIST_REN   ('0),
+        .A_BIST_ADDR  ('0),
+        .A_BIST_DIN   ('0),
+        .A_BIST_BM    ('0)   
     );
 
-  RM_IHPSG13_1P_1024x32_c2_bm  #(
+  RM_IHPSG13_1P_1024x32_c2_bm_bist  #(
     // .MEMInitFile(MEMInitFile)
   ) sram2 (
         .A_CLK        (wb.clk),
@@ -99,6 +107,14 @@ module wb_sram_2048x32
         .A_DIN        (sram_wdata),
         .A_DLY        (1'b1),      
         .A_DOUT       (sram2_rdata),
-        .A_BM         (sram_bm)
+        .A_BM         (sram_bm),
+        .A_BIST_CLK   ('0),
+        .A_BIST_EN    ('0),
+        .A_BIST_MEN   ('0),
+        .A_BIST_WEN   ('0),
+        .A_BIST_REN   ('0),
+        .A_BIST_ADDR  ('0),
+        .A_BIST_DIN   ('0),
+        .A_BIST_BM    ('0)   
     );
 endmodule

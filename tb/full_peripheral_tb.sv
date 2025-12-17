@@ -22,35 +22,94 @@ module simple_system_tb;
     int fd;
 `endif
 
-    logic clk_sys, rst_sys_n, test_mode;
-    assign test_mode = 1'b0;
+    //==================================================
+    // Clock / reset
+    //==================================================
+    logic clk_sys;
+    logic rst_sys_n;
+    // logic test_mode = 1'b0;
  
-    // GPIO signals
-     wire [GPIO_COUNT-1:0] ext_pad_io;
+    
+    //==================================================
+    // GPIO PAD (single shared tristate net)
+    //==================================================
+    tri [GPIO_COUNT-1:0] ext_pad_io;
 
-    // Testbench driven GPIO control
-    logic [GPIO_COUNT-1:0] input_val;
+    // TB GPIO control
     logic [GPIO_COUNT-1:0] output_value;
     logic [GPIO_COUNT-1:0] out_valid;
 
-    // I2C signals
-    logic i2c_int; 
+    //==================================================
+    // I2C PADs
+    //==================================================
+    tri SDA;
+    tri SCL;
 
-    // I2C signals
-    wire  SDA, SCL;
+    // DUT-facing I2C signals
+    logic scl_pad_i, scl_pad_o, scl_padoen_o;
+    logic sda_pad_i, sda_pad_o, sda_padoen_o;
 
-    // Instantiate DUT
-    ibex_simple_system dut 
-    (
-        .clk_sys_Pad    (clk_sys),
-        .rst_sys_n_Pad  (rst_sys_n),  
-        .SDA_Pad        (SDA),
-        .SCL_Pad        (SCL),
-        .ext_pad        (ext_pad_io),
-        .test_mode_Pad        (test_mode)
+    // DUT-facing GPIO
+    logic [GPIO_COUNT-1:0] ext_pad_i;
+    logic [GPIO_COUNT-1:0] gpio_o;
+    logic [GPIO_COUNT-1:0] gpio_oe;
+
+    //==================================================
+    // DUT
+    //==================================================
+    ibex_simple_system dut (
+        .clk_sys      (clk_sys),
+        .rst_async_n  (rst_sys_n),
+
+        .scl_pad_i    (scl_pad_i),
+        .scl_pad_o    (scl_pad_o),
+        .scl_padoen_o (scl_padoen_o),
+
+        .sda_pad_i    (sda_pad_i),
+        .sda_pad_o    (sda_pad_o),
+        .sda_padoen_o (sda_padoen_o),
+
+        .ext_pad_i    (ext_pad_i),
+        .gpio_o       (gpio_o),
+        .gpio_oe      (gpio_oe)
     );
 
-    // Instantiate external EEPROM
+    //==================================================
+    // I2C tristate modeling (open-drain)
+    //==================================================
+    assign SCL       = scl_padoen_o ? 1'bz : scl_pad_o;
+    assign scl_pad_i = SCL;
+
+    assign SDA       = sda_padoen_o ? 1'bz : sda_pad_o;
+    assign sda_pad_i = SDA;
+
+    // I2C pull-ups
+    pullup(SCL);
+    pullup(SDA);
+
+
+    //==================================================
+    // GPIO tristate modeling
+    //==================================================
+    // DUT drives pads
+    assign ext_pad_io = gpio_oe ? gpio_o : 'z;
+
+    // DUT reads pads
+    assign ext_pad_i  = ext_pad_io;
+
+    // TB drives pads + pulldown
+    genvar j;
+    generate
+        for (j = 0; j < GPIO_COUNT; j++) begin : TB_GPIO
+        assign ext_pad_io[j] =
+            out_valid[j] ? output_value[j] : 1'bz;
+        pulldown(ext_pad_io[j]);
+        end
+    endgenerate
+
+    //==================================================
+    // External EEPROM
+    //==================================================
     M24CS512 #(
         .MEMInitFile(MEMInitFile)
     ) eeprom (
@@ -63,27 +122,12 @@ module simple_system_tb;
         .RESET  (1'b0)   // Reset without internal function
     );
 
+    //==================================================
     // Clock generation
+    //==================================================
     always begin
         #(CLK_PERIOD / 2) clk_sys = ~clk_sys;
     end
-
-    // GPIO inout signal control
-    assign input_val = ext_pad_io;
-    assign ext_pad_io = out_valid ? output_value : 'hZ;
-    
-    // Add pull-down resistors for inout signal
-    genvar j;
-    generate
-        for(j=0; j<GPIO_COUNT; j++)begin
-        assign ext_pad_io[j] = out_valid[j] ? output_value[j] : 'hZ;
-        pulldown(ext_pad_io[j]);
-        end
-    endgenerate
-
-    // Pull-up on I2C lines
-    pullup(SDA);
-    pullup(SCL);
 
 
     //==================================================
@@ -104,12 +148,13 @@ module simple_system_tb;
 
         // Add delay to let scan_en propagate, this is so we don't get $setup timing violations for postpnr 
         // SDF annotated simulation
-        #(CLK_PERIOD*1)
+        // #(CLK_PERIOD*1)
 
         // Initial top signal values
         clk_sys = 1'b0;
         out_valid = 0;
         rst_sys_n = 1'b0;
+
         #(CLK_PERIOD*4)
         rst_sys_n = 1'b1;
 
@@ -121,11 +166,11 @@ module simple_system_tb;
         #1_000_000;
 
         // Set GPIO8 (start the sw state machine)
-        out_valid = 1;
+        out_valid     = 1 << 8;
         output_value = 1 << 8;
-        #100; 
+      #100;
         
-        // Reset GPIO0
+        // Reset GPIO
         out_valid =  0; 
 
         // Wait for state machine to complete
@@ -155,7 +200,11 @@ module simple_system_tb;
 `ifdef SDF
     // SDF annotate (Add real delays) for post pnr sim
     initial begin
-        $sdf_annotate("../../pnr/pnrOutData/simple_system.sdf",simple_system_tb.dut,,"sdf.log","MAXIMUM");
+        $sdf_annotate("../../pnr/pnrOutData/simple_system.sdf",
+        simple_system_tb.dut,
+        ,
+        "sdf.log",
+        "MAXIMUM");
     end
 `endif
 

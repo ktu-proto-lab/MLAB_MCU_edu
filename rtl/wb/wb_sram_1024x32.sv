@@ -59,7 +59,7 @@ module wb_sram_1024x32
   assign sram_re = sram_me;
 
   /* SRAM instance */
-  RM_IHPSG13_1P_1024x32_c2_bm  #(
+  RM_IHPSG13_1P_1024x32_c2_bm_bist  #(
     // .MEMInitFile(MEMInitFile)
 	) sram (
         .A_CLK        (wb.clk),
@@ -70,7 +70,16 @@ module wb_sram_1024x32
         .A_DIN        (sram_wdata),
         .A_DLY        (1'b1),       // Internal timing delay setting
         .A_DOUT       (sram_rdata),
-        .A_BM         (sram_bm)
+        .A_BM         (sram_bm),
+        .A_BIST_CLK   ('0),
+        .A_BIST_EN    ('0),
+        .A_BIST_MEN   ('0),
+        .A_BIST_WEN   ('0),
+        .A_BIST_REN   ('0),
+        .A_BIST_ADDR  ('0),
+        .A_BIST_DIN   ('0),
+        .A_BIST_BM    ('0)    
+
     );
 
 endmodule

@@ -1,168 +1,170 @@
 `include "project_defs.svh"
 
-module ibex_simple_system (
-  input   logic   clk_sys_Pad,
-  input   logic   rst_sys_n_Pad,
-  inout   logic   SDA_Pad,
-  inout   logic   SCL_Pad,     
-  inout   logic [`GPIO_IOS-1:0] ext_pad,  // GPIOS_IOS macro in gpio_defines.v
+// module ibex_simple_system (
+//   input   logic   clk_sys_Pad,
+//   input   logic   rst_sys_n_Pad,
+//   inout   logic   SDA_Pad,
+//   inout   logic   SCL_Pad,     
+//   inout   logic [`GPIO_IOS-1:0] ext_pad,  // GPIOS_IOS macro in gpio_defines.v
 
-  input   logic   test_mode_Pad
-);
+//   input   logic   test_mode_Pad
+// );
 
-  //==================================================
-  // Signals connecting to intermediate top
-  //==================================================
-  logic clk_sys, rst_async_n;
-  logic scl_pad_i, scl_pad_o, scl_padoen_o;
-  logic sda_pad_i, sda_pad_o, sda_padoen_o;
+//   //==================================================
+//   // Signals connecting to intermediate top
+//   //==================================================
+//   logic clk_sys, rst_async_n;
+//   logic scl_pad_i, scl_pad_o, scl_padoen_o;
+//   logic sda_pad_i, sda_pad_o, sda_padoen_o;
 
-  logic [`GPIO_IOS-1:0] ext_pad_i;
-  logic [`GPIO_IOS-1:0] ext_pad_o;
-  logic [`GPIO_IOS-1:0] ext_pad_oe;
+//   logic [`GPIO_IOS-1:0] ext_pad_i;
+//   logic [`GPIO_IOS-1:0] ext_pad_o;
+//   logic [`GPIO_IOS-1:0] ext_pad_oe;
 
-  logic [`GPIO_IOS-1:0] gpio_o;
-  logic [`GPIO_IOS-1:0] gpio_oe;
+//   logic [`GPIO_IOS-1:0] gpio_o;
+//   logic [`GPIO_IOS-1:0] gpio_oe;
 
-  logic scan_en, scan_in, scan_out, test_mode;
+//   logic scan_en, scan_in, scan_out, test_mode;
 
-  //==================================================
-  // Instantiate intermediate top without pads
-  //==================================================
-  ibex_simple_system_int #(
-    .ICache(0)   // 0:prefetch buffer, 1:instruction cache
-  ) u_ibex_simple_system_int (
-  .clk_sys(clk_sys),
-  .rst_async_n(rst_async_n),
-  .scl_pad_i(scl_pad_i),
-  .scl_pad_o(scl_pad_o),
-  .scl_padoen_o(scl_padoen_o),
-  .sda_pad_i(sda_pad_i),
-  .sda_pad_o(sda_pad_o),
-  .sda_padoen_o(sda_padoen_o),
-  .ext_pad_i(ext_pad_i),
-  .gpio_o(gpio_o),
-  .gpio_oe(gpio_oe),
-  .scan_en(scan_en),
-  .scan_in(scan_in),
-  .scan_out(scan_out)
-);
+//   //==================================================
+//   // Instantiate intermediate top without pads
+//   //==================================================
+//   ibex_simple_system_int #(
+//     .ICache(0)   // 0:prefetch buffer, 1:instruction cache
+//   ) u_ibex_simple_system_int (
+//   .clk_sys(clk_sys),
+//   .rst_async_n(rst_async_n),
+//   .scl_pad_i(scl_pad_i),
+//   .scl_pad_o(scl_pad_o),
+//   .scl_padoen_o(scl_padoen_o),
+//   .sda_pad_i(sda_pad_i),
+//   .sda_pad_o(sda_pad_o),
+//   .sda_padoen_o(sda_padoen_o),
+//   .ext_pad_i(ext_pad_i),
+//   .gpio_o(gpio_o),
+//   .gpio_oe(gpio_oe),
+//   .scan_en(scan_en),
+//   .scan_in(scan_in),
+//   .scan_out(scan_out)
+// );
 
-  //==================================================
-  // Instantiate PADS
-  //==================================================
+//   //==================================================
+//   // Instantiate PADS
+//   //==================================================
 
-  // Generate GPIOs
-  genvar i;
+//   // Generate GPIOs
+//   genvar i;
 
-  generate
-    for(i = 0; i<`GPIO_IOS; i++)begin : GPIO
-`ifdef FPGA_Implementation
-// Use ext_pad as output only
-  // assign ext_pad[i] = ext_pad_o[i];
+//   generate
+//     for(i = 0; i<`GPIO_IOS; i++)begin : GPIO
+// `ifdef FPGA_Implementation
+// // Use ext_pad as output only
+//   // assign ext_pad[i] = ext_pad_o[i];
 
-// Use ext_pad as inout
-    IOBUF #(
-    .DRIVE(12), // Specify the output drive strength
-    .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE"
-    .IOSTANDARD("LVCMOS33"), // Specify the I/O standard
-    .SLEW("SLOW") // Specify the output slew rate
-  ) pad_io (
-    .O(ext_pad_i[i]),     // Buffer output
-    .IO(ext_pad[i]),   // Buffer inout port (connect directly to top-level port)
-    .I(ext_pad_o[i]),     // Buffer input
-    .T(~(ext_pad_oe[i]))      // 3-state enable input, high=input, low=output
-  );
-`else
-      // DOUT is output to core
-      ixc013_b16m pad_io (  .DOUT(ext_pad_i[i]), 
-                            .DIN(ext_pad_o[i]), 
-                            .OEN(~(ext_pad_oe[i])), 
-                            .PAD(ext_pad[i]));
-`endif
-    end
-  endgenerate
+// // Use ext_pad as inout
+//     IOBUF #(
+//     .DRIVE(12), // Specify the output drive strength
+//     .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE"
+//     .IOSTANDARD("LVCMOS33"), // Specify the I/O standard
+//     .SLEW("SLOW") // Specify the output slew rate
+//   ) pad_io (
+//     .O(ext_pad_i[i]),     // Buffer output
+//     .IO(ext_pad[i]),   // Buffer inout port (connect directly to top-level port)
+//     .I(ext_pad_o[i]),     // Buffer input
+//     .T(~(ext_pad_oe[i]))      // 3-state enable input, high=input, low=output
+//   );
+// `else
+//       // DOUT is output to core
+//       ixc013_b16m pad_io (  .DOUT(ext_pad_i[i]), 
+//                             .DIN(ext_pad_o[i]), 
+//                             .OEN(~(ext_pad_oe[i])), 
+//                             .PAD(ext_pad[i]));
+// `endif
+//     end
+//   endgenerate
   
-`ifdef FPGA_Implementation
-  assign clk_sys = clk_sys_Pad;
-  assign rst_async_n = rst_sys_n_Pad;
-  assign test_mode = test_mode_Pad;
-`else
-  // Faster (200MHz) input pads for CLK and RST (faster pads)
-  ixc013_i16x pad_clk_sys   (.DOUT(clk_sys),      .PAD(clk_sys_Pad));
-  ixc013_i16x pad_rst_sys   (.DOUT(rst_async_n),  .PAD(rst_sys_n_Pad));
-  ixc013_i16x pad_test_mode (.DOUT(test_mode),  .PAD(test_mode_Pad));
-`endif
+// `ifdef FPGA_Implementation
+//   assign clk_sys = clk_sys_Pad;
+//   assign rst_async_n = rst_sys_n_Pad;
+//   assign test_mode = test_mode_Pad;
+// `else
+//   // Faster (200MHz) input pads for CLK and RST (faster pads)
+//   ixc013_i16x pad_clk_sys   (.DOUT(clk_sys),      .PAD(clk_sys_Pad));
+//   ixc013_i16x pad_rst_sys   (.DOUT(rst_async_n),  .PAD(rst_sys_n_Pad));
+//   ixc013_i16x pad_test_mode (.DOUT(test_mode),  .PAD(test_mode_Pad));
+// `endif
 
-`ifdef FPGA_Implementation
-  IOBUF #(
-    .DRIVE(8), // Specify the output drive strength
-    .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE"
-    .IOSTANDARD("LVCMOS33"), // Specify the I/O standard
-    .SLEW("SLOW") // Specify the output slew rate
-  ) pad_SDA (
-    .O(sda_pad_i),     // Buffer output
-    .IO(SDA_Pad),   // Buffer inout port (connect directly to top-level port)
-    .I(sda_pad_o),     // Buffer input
-    .T(sda_padoen_o)      // 3-state enable input, high=input, low=output
-  );
-  IOBUF #(
-    .DRIVE(8), // Specify the output drive strength
-    .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE"
-    .IOSTANDARD("LVCMOS33"), // Specify the I/O standard
-    .SLEW("SLOW") // Specify the output slew rate
-  ) pad_SCL (
-    .O(scl_pad_i),     // Buffer output
-    .IO(SCL_Pad),   // Buffer inout port (connect directly to top-level port)
-    .I(scl_pad_o),     // Buffer input
-    .T(scl_padoen_o)      // 3-state enable input, high=input, low=output
-  );
-`else
+// `ifdef FPGA_Implementation
+//   IOBUF #(
+//     .DRIVE(8), // Specify the output drive strength
+//     .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE"
+//     .IOSTANDARD("LVCMOS33"), // Specify the I/O standard
+//     .SLEW("SLOW") // Specify the output slew rate
+//   ) pad_SDA (
+//     .O(sda_pad_i),     // Buffer output
+//     .IO(SDA_Pad),   // Buffer inout port (connect directly to top-level port)
+//     .I(sda_pad_o),     // Buffer input
+//     .T(sda_padoen_o)      // 3-state enable input, high=input, low=output
+//   );
+//   IOBUF #(
+//     .DRIVE(8), // Specify the output drive strength
+//     .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE"
+//     .IOSTANDARD("LVCMOS33"), // Specify the I/O standard
+//     .SLEW("SLOW") // Specify the output slew rate
+//   ) pad_SCL (
+//     .O(scl_pad_i),     // Buffer output
+//     .IO(SCL_Pad),   // Buffer inout port (connect directly to top-level port)
+//     .I(scl_pad_o),     // Buffer input
+//     .T(scl_padoen_o)      // 3-state enable input, high=input, low=output
+//   );
+// `else
 
-  // I2C comunication does not require to invert Output Enable (OEN) !!!
-  // (See GPIO and I2C docs)
-  // I2C pads
-  ixc013_b16m pad_SDA (   .DOUT(sda_pad_i), 
-                          .DIN(sda_pad_o), 
-                          .OEN(sda_padoen_o), 
-                          .PAD(SDA_Pad));
+//   // I2C comunication does not require to invert Output Enable (OEN) !!!
+//   // (See GPIO and I2C docs)
+//   // I2C pads
+//   ixc013_b16m pad_SDA (   .DOUT(sda_pad_i), 
+//                           .DIN(sda_pad_o), 
+//                           .OEN(sda_padoen_o), 
+//                           .PAD(SDA_Pad));
 
-  ixc013_b16m pad_SCL (   .DOUT(scl_pad_i), 
-                          .DIN(scl_pad_o), 
-                          .OEN(scl_padoen_o), 
-                          .PAD(SCL_Pad));
-`endif
+//   ixc013_b16m pad_SCL (   .DOUT(scl_pad_i), 
+//                           .DIN(scl_pad_o), 
+//                           .OEN(scl_padoen_o), 
+//                           .PAD(SCL_Pad));
+// `endif
 
-  //==================================================
-  // Scan
-  //==================================================
+//   //==================================================
+//   // Scan
+//   //==================================================
 
-  always_comb begin
-    // Default all pads to GPIO
-    ext_pad_o  = gpio_o;
-    ext_pad_oe = gpio_oe;
+//   always_comb begin
+//     // Default all pads to GPIO
+//     ext_pad_o  = gpio_o;
+//     ext_pad_oe = gpio_oe;
 
-    // Default scan signals
-    scan_in = 1'b0;
-    scan_en = 1'b0;
+//     // Default scan signals
+//     scan_in = 1'b0;
+//     scan_en = 1'b0;
 
-    if (test_mode) begin
-      // Scan_in from pad[2]
-      scan_in = ext_pad_i[2];
-      ext_pad_oe[2] = 1'b0; // input
+//     if (test_mode) begin
+//       // Scan_in from pad[2]
+//       scan_in = ext_pad_i[2];
+//       ext_pad_oe[2] = 1'b0; // input
 
-      // Scan_out to pad[3]
-      ext_pad_o[3]  = scan_out;
-      ext_pad_oe[3] = 1'b1; // output
+//       // Scan_out to pad[3]
+//       ext_pad_o[3]  = scan_out;
+//       ext_pad_oe[3] = 1'b1; // output
 
-      // Scan_en input from pad[4]
-      scan_en = ext_pad_i[4]; 
-      ext_pad_oe[4] = 1'b0; // input
-    end
-  end
+//       // Scan_en input from pad[4]
+//       scan_en = ext_pad_i[4]; 
+//       ext_pad_oe[4] = 1'b0; // input
+//     end
+//   end
   
-endmodule
-module ibex_simple_system_int #(
+// endmodule
+// module ibex_simple_system_int #(
+module ibex_simple_system #(
+
     parameter bit ICache        = 1'b0    // 0:prefetch buffer, 1:instruction cache
   )(
   input   logic   clk_sys,
@@ -178,11 +180,11 @@ module ibex_simple_system_int #(
   input   logic [`GPIO_IOS-1:0] ext_pad_i,
 
   output  logic [`GPIO_IOS-1:0] gpio_o,
-  output  logic [`GPIO_IOS-1:0] gpio_oe,
+  output  logic [`GPIO_IOS-1:0] gpio_oe
 
-  input   logic   scan_en,
-  input   logic   scan_in,
-  output  logic   scan_out
+  // input   logic   scan_en,
+  // input   logic   scan_in,
+  // output  logic   scan_out
 );
 
   //==================================================
