@@ -1,0 +1,9 @@
+# Post synthesis logic exuivalence checks (run from syn/)
+
+lec -xl -nogui -color -64 -dofile synOutData/rtl2intermediate.lec.do
+
+lec -xl -nogui -color -64 -dofile synOutData/intermediate2final.lec.do
+
+# Post P&R logic equivalence check (run from pnr/)
+
+lec -xl -nogui -color -64 -dofile LEC/ibex_simple_system/PnRvsSYN.tcl 

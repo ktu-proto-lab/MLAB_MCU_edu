@@ -1,0 +1,154 @@
+
+build/clean_project.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .vectors:
+
+80000000 <_vectors_start>:
+80000000:	0900006f          	j	80000090 <DEFAULT_IRQHandler>
+80000004:	08c0006f          	j	80000090 <DEFAULT_IRQHandler>
+80000008:	0880006f          	j	80000090 <DEFAULT_IRQHandler>
+8000000c:	0840006f          	j	80000090 <DEFAULT_IRQHandler>
+80000010:	0800006f          	j	80000090 <DEFAULT_IRQHandler>
+80000014:	07c0006f          	j	80000090 <DEFAULT_IRQHandler>
+80000018:	0780006f          	j	80000090 <DEFAULT_IRQHandler>
+8000001c:	0680006f          	j	80000084 <_vectors_end>
+80000020:	0700006f          	j	80000090 <DEFAULT_IRQHandler>
+80000024:	06c0006f          	j	80000090 <DEFAULT_IRQHandler>
+80000028:	0680006f          	j	80000090 <DEFAULT_IRQHandler>
+8000002c:	05c0006f          	j	80000088 <GPIO_IRQHandler>
+80000030:	0600006f          	j	80000090 <DEFAULT_IRQHandler>
+80000034:	05c0006f          	j	80000090 <DEFAULT_IRQHandler>
+80000038:	0580006f          	j	80000090 <DEFAULT_IRQHandler>
+8000003c:	0540006f          	j	80000090 <DEFAULT_IRQHandler>
+80000040:	0500006f          	j	80000090 <DEFAULT_IRQHandler>
+80000044:	0480006f          	j	8000008c <I2C_IRQHandler>
+80000048:	0480006f          	j	80000090 <DEFAULT_IRQHandler>
+8000004c:	0440006f          	j	80000090 <DEFAULT_IRQHandler>
+80000050:	0400006f          	j	80000090 <DEFAULT_IRQHandler>
+80000054:	03c0006f          	j	80000090 <DEFAULT_IRQHandler>
+80000058:	0380006f          	j	80000090 <DEFAULT_IRQHandler>
+8000005c:	0340006f          	j	80000090 <DEFAULT_IRQHandler>
+80000060:	0300006f          	j	80000090 <DEFAULT_IRQHandler>
+80000064:	02c0006f          	j	80000090 <DEFAULT_IRQHandler>
+80000068:	0280006f          	j	80000090 <DEFAULT_IRQHandler>
+8000006c:	0240006f          	j	80000090 <DEFAULT_IRQHandler>
+80000070:	0200006f          	j	80000090 <DEFAULT_IRQHandler>
+80000074:	01c0006f          	j	80000090 <DEFAULT_IRQHandler>
+80000078:	0180006f          	j	80000090 <DEFAULT_IRQHandler>
+8000007c:	0000                	.insn	2, 0x
+8000007e:	0000                	.insn	2, 0x
+80000080:	0140006f          	j	80000094 <reset_handler>
+
+Disassembly of section .text:
+
+80000084 <TIMER_IRQHandler>:
+  timer_irq_handler();
+#endif
+#if TIMER_IRQ_CALLBACK == 1
+  timer_irq_callback();
+#endif
+}
+80000084:	30200073          	mret
+
+80000088 <GPIO_IRQHandler>:
+
+void GPIO_IRQHandler(void) __attribute__((interrupt));
+
+void GPIO_IRQHandler(void) {
+80000088:	30200073          	mret
+
+8000008c <I2C_IRQHandler>:
+#endif
+}
+
+void I2C_IRQHandler(void) __attribute__((interrupt));
+
+void I2C_IRQHandler(void) {
+8000008c:	30200073          	mret
+
+80000090 <DEFAULT_IRQHandler>:
+#if I2C_IRQ_CALLBACK == 1
+  i2c_irq_callback();
+#endif
+}
+
+void DEFAULT_IRQHandler(void) { while (1); }
+80000090:	0000006f          	j	80000090 <DEFAULT_IRQHandler>
+
+80000094 <reset_handler>:
+80000094:	00000093          	li	ra,0
+80000098:	00008113          	mv	sp,ra
+8000009c:	00008193          	mv	gp,ra
+800000a0:	00008213          	mv	tp,ra
+800000a4:	00008293          	mv	t0,ra
+800000a8:	00008313          	mv	t1,ra
+800000ac:	00008393          	mv	t2,ra
+800000b0:	00008413          	mv	s0,ra
+800000b4:	00008493          	mv	s1,ra
+800000b8:	00008513          	mv	a0,ra
+800000bc:	00008593          	mv	a1,ra
+800000c0:	00008613          	mv	a2,ra
+800000c4:	00008693          	mv	a3,ra
+800000c8:	00008713          	mv	a4,ra
+800000cc:	00008793          	mv	a5,ra
+800000d0:	00008813          	mv	a6,ra
+800000d4:	00008893          	mv	a7,ra
+800000d8:	00008913          	mv	s2,ra
+800000dc:	00008993          	mv	s3,ra
+800000e0:	00008a13          	mv	s4,ra
+800000e4:	00008a93          	mv	s5,ra
+800000e8:	00008b13          	mv	s6,ra
+800000ec:	00008b93          	mv	s7,ra
+800000f0:	00008c13          	mv	s8,ra
+800000f4:	00008c93          	mv	s9,ra
+800000f8:	00008d13          	mv	s10,ra
+800000fc:	00008d93          	mv	s11,ra
+80000100:	00008e13          	mv	t3,ra
+80000104:	00008e93          	mv	t4,ra
+80000108:	00008f13          	mv	t5,ra
+8000010c:	00008f93          	mv	t6,ra
+80000110:	10001117          	auipc	sp,0x10001
+80000114:	ef010113          	addi	sp,sp,-272 # 90001000 <_stack_start>
+
+80000118 <_start>:
+80000118:	00800293          	li	t0,8
+8000011c:	30029073          	csrw	mstatus,t0
+80000120:	000212b7          	lui	t0,0x21
+80000124:	88028293          	addi	t0,t0,-1920 # 20880 <_stack_len+0x1f880>
+80000128:	30429073          	csrw	mie,t0
+8000012c:	10000d17          	auipc	s10,0x10000
+80000130:	ed4d0d13          	addi	s10,s10,-300 # 90000000 <_bss_end>
+80000134:	10000d97          	auipc	s11,0x10000
+80000138:	eccd8d93          	addi	s11,s11,-308 # 90000000 <_bss_end>
+8000013c:	01bd5863          	bge	s10,s11,8000014c <main_entry>
+
+80000140 <zero_loop>:
+80000140:	000d2023          	sw	zero,0(s10)
+80000144:	004d0d13          	addi	s10,s10,4
+80000148:	ffaddce3          	bge	s11,s10,80000140 <zero_loop>
+
+8000014c <main_entry>:
+8000014c:	00000513          	li	a0,0
+80000150:	00000593          	li	a1,0
+80000154:	00c000ef          	jal	80000160 <main>
+
+80000158 <sleep_loop>:
+80000158:	10500073          	wfi
+8000015c:	ffdff06f          	j	80000158 <sleep_loop>
+
+80000160 <main>:
+#include "int.h"
+
+int main() {
+  // MAIN USER CODE GOES HERE
+  return 0;
+}
+80000160:	00000513          	li	a0,0
+80000164:	00008067          	ret
+
+Disassembly of section .nops:
+
+80000168 <.nops>:
+80000168:	00000013          	nop
+8000016c:	00000013          	nop

@@ -1,0 +1,299 @@
+
+build/timer_example.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .vectors:
+
+80000000 <_vectors_start>:
+80000000:	13c0006f          	j	8000013c <DEFAULT_IRQHandler>
+80000004:	1380006f          	j	8000013c <DEFAULT_IRQHandler>
+80000008:	1340006f          	j	8000013c <DEFAULT_IRQHandler>
+8000000c:	1300006f          	j	8000013c <DEFAULT_IRQHandler>
+80000010:	12c0006f          	j	8000013c <DEFAULT_IRQHandler>
+80000014:	1280006f          	j	8000013c <DEFAULT_IRQHandler>
+80000018:	1240006f          	j	8000013c <DEFAULT_IRQHandler>
+8000001c:	0700006f          	j	8000008c <TIMER_IRQHandler>
+80000020:	11c0006f          	j	8000013c <DEFAULT_IRQHandler>
+80000024:	1180006f          	j	8000013c <DEFAULT_IRQHandler>
+80000028:	1140006f          	j	8000013c <DEFAULT_IRQHandler>
+8000002c:	0580006f          	j	80000084 <_vectors_end>
+80000030:	10c0006f          	j	8000013c <DEFAULT_IRQHandler>
+80000034:	1080006f          	j	8000013c <DEFAULT_IRQHandler>
+80000038:	1040006f          	j	8000013c <DEFAULT_IRQHandler>
+8000003c:	1000006f          	j	8000013c <DEFAULT_IRQHandler>
+80000040:	0fc0006f          	j	8000013c <DEFAULT_IRQHandler>
+80000044:	0440006f          	j	80000088 <I2C_IRQHandler>
+80000048:	0f40006f          	j	8000013c <DEFAULT_IRQHandler>
+8000004c:	0f00006f          	j	8000013c <DEFAULT_IRQHandler>
+80000050:	0ec0006f          	j	8000013c <DEFAULT_IRQHandler>
+80000054:	0e80006f          	j	8000013c <DEFAULT_IRQHandler>
+80000058:	0e40006f          	j	8000013c <DEFAULT_IRQHandler>
+8000005c:	0e00006f          	j	8000013c <DEFAULT_IRQHandler>
+80000060:	0dc0006f          	j	8000013c <DEFAULT_IRQHandler>
+80000064:	0d80006f          	j	8000013c <DEFAULT_IRQHandler>
+80000068:	0d40006f          	j	8000013c <DEFAULT_IRQHandler>
+8000006c:	0d00006f          	j	8000013c <DEFAULT_IRQHandler>
+80000070:	0cc0006f          	j	8000013c <DEFAULT_IRQHandler>
+80000074:	0c80006f          	j	8000013c <DEFAULT_IRQHandler>
+80000078:	0c40006f          	j	8000013c <DEFAULT_IRQHandler>
+8000007c:	0000                	.insn	2, 0x
+8000007e:	0000                	.insn	2, 0x
+80000080:	1480006f          	j	800001c8 <reset_handler>
+
+Disassembly of section .text:
+
+80000084 <GPIO_IRQHandler>:
+
+#include "main.h"
+
+void GPIO_IRQHandler(void) __attribute__((interrupt));
+
+void GPIO_IRQHandler(void) { while (1); }
+80000084:	0000006f          	j	80000084 <GPIO_IRQHandler>
+
+80000088 <I2C_IRQHandler>:
+
+void I2C_IRQHandler(void) __attribute__((interrupt));
+
+void I2C_IRQHandler(void) { while (1); }
+80000088:	0000006f          	j	80000088 <I2C_IRQHandler>
+
+8000008c <TIMER_IRQHandler>:
+
+void TIMER_IRQHandler(void) __attribute__((interrupt));
+
+void TIMER_IRQHandler(void) {
+8000008c:	fb010113          	addi	sp,sp,-80
+80000090:	02812e23          	sw	s0,60(sp)
+  timer_ack_intrq(timer_ptr);
+80000094:	90000437          	lui	s0,0x90000
+void TIMER_IRQHandler(void) {
+80000098:	02a12c23          	sw	a0,56(sp)
+  timer_ack_intrq(timer_ptr);
+8000009c:	00042503          	lw	a0,0(s0) # 90000000 <timer_ptr>
+void TIMER_IRQHandler(void) {
+800000a0:	04112623          	sw	ra,76(sp)
+800000a4:	04512423          	sw	t0,72(sp)
+800000a8:	04612223          	sw	t1,68(sp)
+800000ac:	04712023          	sw	t2,64(sp)
+800000b0:	02b12a23          	sw	a1,52(sp)
+800000b4:	02c12823          	sw	a2,48(sp)
+800000b8:	02d12623          	sw	a3,44(sp)
+800000bc:	02e12423          	sw	a4,40(sp)
+800000c0:	02f12223          	sw	a5,36(sp)
+800000c4:	03012023          	sw	a6,32(sp)
+800000c8:	01112e23          	sw	a7,28(sp)
+800000cc:	01c12c23          	sw	t3,24(sp)
+800000d0:	01d12a23          	sw	t4,20(sp)
+800000d4:	01e12823          	sw	t5,16(sp)
+800000d8:	01f12623          	sw	t6,12(sp)
+  timer_ack_intrq(timer_ptr);
+800000dc:	080000ef          	jal	8000015c <timer_ack_intrq>
+  timer_set(timer_ptr, (uint16_t)0x10U, (uint16_t)0x04U);
+800000e0:	00042503          	lw	a0,0(s0)
+800000e4:	00400613          	li	a2,4
+800000e8:	01000593          	li	a1,16
+800000ec:	08c000ef          	jal	80000178 <timer_set>
+}
+800000f0:	03c12403          	lw	s0,60(sp)
+800000f4:	04c12083          	lw	ra,76(sp)
+800000f8:	04812283          	lw	t0,72(sp)
+800000fc:	04412303          	lw	t1,68(sp)
+80000100:	04012383          	lw	t2,64(sp)
+80000104:	03812503          	lw	a0,56(sp)
+80000108:	03412583          	lw	a1,52(sp)
+8000010c:	03012603          	lw	a2,48(sp)
+80000110:	02c12683          	lw	a3,44(sp)
+80000114:	02812703          	lw	a4,40(sp)
+80000118:	02412783          	lw	a5,36(sp)
+8000011c:	02012803          	lw	a6,32(sp)
+80000120:	01c12883          	lw	a7,28(sp)
+80000124:	01812e03          	lw	t3,24(sp)
+80000128:	01412e83          	lw	t4,20(sp)
+8000012c:	01012f03          	lw	t5,16(sp)
+80000130:	00c12f83          	lw	t6,12(sp)
+80000134:	05010113          	addi	sp,sp,80
+80000138:	30200073          	mret
+
+8000013c <DEFAULT_IRQHandler>:
+
+void DEFAULT_IRQHandler(void) { while (1); }
+8000013c:	0000006f          	j	8000013c <DEFAULT_IRQHandler>
+
+80000140 <timer_init>:
+volatile timer_reg_map_t *timer_init() {
+  // Initialize clean Timer.
+  volatile timer_reg_map_t *const t =
+      (volatile timer_reg_map_t *)TIMER_BASE_ADDR;
+  // Clear all previous states of the Timer's Control register.
+  timer_ctrl_reg_shadow = 0;
+80000140:	900007b7          	lui	a5,0x90000
+80000144:	0007a223          	sw	zero,4(a5) # 90000004 <timer_ctrl_reg_shadow>
+  t->CTRL = timer_ctrl_reg_shadow;
+80000148:	200007b7          	lui	a5,0x20000
+8000014c:	0007a023          	sw	zero,0(a5) # 20000000 <_stack_len+0x1ffff000>
+  t->MOD = 0x0;
+80000150:	0007a223          	sw	zero,4(a5)
+
+  return t;
+}
+80000154:	20000537          	lui	a0,0x20000
+80000158:	00008067          	ret
+
+8000015c <timer_ack_intrq>:
+
+void timer_ack_intrq(volatile timer_reg_map_t *const t) {
+  // Direct write to a flag bit.
+  t->CTRL = TIMER_CTRL_FLAG;
+8000015c:	00400793          	li	a5,4
+80000160:	00f52023          	sw	a5,0(a0) # 20000000 <_stack_len+0x1ffff000>
+}
+80000164:	00008067          	ret
+
+80000168 <timer_clear_ctrl>:
+
+void timer_clear_ctrl(volatile timer_reg_map_t *const t) {
+  timer_ctrl_reg_shadow = 0;
+80000168:	900007b7          	lui	a5,0x90000
+8000016c:	0007a223          	sw	zero,4(a5) # 90000004 <timer_ctrl_reg_shadow>
+  t->CTRL = timer_ctrl_reg_shadow;
+80000170:	00052023          	sw	zero,0(a0)
+}
+80000174:	00008067          	ret
+
+80000178 <timer_set>:
+
+void timer_set(volatile timer_reg_map_t *const t, const uint16_t mod,
+               const uint8_t pre_scl) {
+  // Clear the prescaler value and set to the new
+  timer_ctrl_reg_shadow &= ~TIMER_CTRL_PRE_SCALR_MSK;
+80000178:	90000837          	lui	a6,0x90000
+8000017c:	00482783          	lw	a5,4(a6) # 90000004 <timer_ctrl_reg_shadow>
+80000180:	fffff6b7          	lui	a3,0xfffff
+  timer_ctrl_reg_shadow |= TIMER_CTRL_PRE_SCALR(pre_scl);
+80000184:	00001737          	lui	a4,0x1
+  timer_ctrl_reg_shadow &= ~TIMER_CTRL_PRE_SCALR_MSK;
+80000188:	0ff68693          	addi	a3,a3,255 # fffff0ff <_stack_start+0x6fffe0ff>
+  timer_ctrl_reg_shadow |= TIMER_CTRL_PRE_SCALR(pre_scl);
+8000018c:	00861613          	slli	a2,a2,0x8
+80000190:	f0070713          	addi	a4,a4,-256 # f00 <_min_stack+0xb00>
+  timer_ctrl_reg_shadow &= ~TIMER_CTRL_PRE_SCALR_MSK;
+80000194:	00d7f7b3          	and	a5,a5,a3
+  timer_ctrl_reg_shadow |= TIMER_CTRL_PRE_SCALR(pre_scl);
+80000198:	00e67633          	and	a2,a2,a4
+8000019c:	00c7e7b3          	or	a5,a5,a2
+
+  // Set Timer registers
+  t->MOD = (uint32_t)mod;
+800001a0:	00b52223          	sw	a1,4(a0)
+  timer_ctrl_reg_shadow |= TIMER_CTRL_PRE_SCALR(pre_scl);
+800001a4:	00f82223          	sw	a5,4(a6)
+  t->CTRL = timer_ctrl_reg_shadow;
+800001a8:	00f52023          	sw	a5,0(a0)
+}
+800001ac:	00008067          	ret
+
+800001b0 <timer_en>:
+
+void timer_en(volatile timer_reg_map_t *const t) {
+  timer_ctrl_reg_shadow |= (TIMER_CTRL_CNT_EN | TIMER_CTRL_ENA_INT);
+800001b0:	90000737          	lui	a4,0x90000
+800001b4:	00472783          	lw	a5,4(a4) # 90000004 <timer_ctrl_reg_shadow>
+800001b8:	0037e793          	ori	a5,a5,3
+800001bc:	00f72223          	sw	a5,4(a4)
+  t->CTRL = timer_ctrl_reg_shadow;
+800001c0:	00f52023          	sw	a5,0(a0)
+800001c4:	00008067          	ret
+
+800001c8 <reset_handler>:
+800001c8:	00000093          	li	ra,0
+800001cc:	00008113          	mv	sp,ra
+800001d0:	00008193          	mv	gp,ra
+800001d4:	00008213          	mv	tp,ra
+800001d8:	00008293          	mv	t0,ra
+800001dc:	00008313          	mv	t1,ra
+800001e0:	00008393          	mv	t2,ra
+800001e4:	00008413          	mv	s0,ra
+800001e8:	00008493          	mv	s1,ra
+800001ec:	00008513          	mv	a0,ra
+800001f0:	00008593          	mv	a1,ra
+800001f4:	00008613          	mv	a2,ra
+800001f8:	00008693          	mv	a3,ra
+800001fc:	00008713          	mv	a4,ra
+80000200:	00008793          	mv	a5,ra
+80000204:	00008813          	mv	a6,ra
+80000208:	00008893          	mv	a7,ra
+8000020c:	00008913          	mv	s2,ra
+80000210:	00008993          	mv	s3,ra
+80000214:	00008a13          	mv	s4,ra
+80000218:	00008a93          	mv	s5,ra
+8000021c:	00008b13          	mv	s6,ra
+80000220:	00008b93          	mv	s7,ra
+80000224:	00008c13          	mv	s8,ra
+80000228:	00008c93          	mv	s9,ra
+8000022c:	00008d13          	mv	s10,ra
+80000230:	00008d93          	mv	s11,ra
+80000234:	00008e13          	mv	t3,ra
+80000238:	00008e93          	mv	t4,ra
+8000023c:	00008f13          	mv	t5,ra
+80000240:	00008f93          	mv	t6,ra
+80000244:	10001117          	auipc	sp,0x10001
+80000248:	dbc10113          	addi	sp,sp,-580 # 90001000 <_stack_start>
+
+8000024c <_start>:
+8000024c:	00800293          	li	t0,8
+80000250:	30029073          	csrw	mstatus,t0
+80000254:	000212b7          	lui	t0,0x21
+80000258:	88028293          	addi	t0,t0,-1920 # 20880 <_stack_len+0x1f880>
+8000025c:	30429073          	csrw	mie,t0
+80000260:	10000d17          	auipc	s10,0x10000
+80000264:	da0d0d13          	addi	s10,s10,-608 # 90000000 <timer_ptr>
+80000268:	10000d97          	auipc	s11,0x10000
+8000026c:	da0d8d93          	addi	s11,s11,-608 # 90000008 <_bss_end>
+80000270:	01bd5863          	bge	s10,s11,80000280 <main_entry>
+
+80000274 <zero_loop>:
+80000274:	000d2023          	sw	zero,0(s10)
+80000278:	004d0d13          	addi	s10,s10,4
+8000027c:	ffaddce3          	bge	s11,s10,80000274 <zero_loop>
+
+80000280 <main_entry>:
+80000280:	00000513          	li	a0,0
+80000284:	00000593          	li	a1,0
+80000288:	00c000ef          	jal	80000294 <main>
+
+8000028c <sleep_loop>:
+8000028c:	10500073          	wfi
+80000290:	ffdff06f          	j	8000028c <sleep_loop>
+
+80000294 <main>:
+
+#include "timer.h"
+
+volatile timer_reg_map_t *timer_ptr;
+
+int main() {
+80000294:	ff010113          	addi	sp,sp,-16
+80000298:	00112623          	sw	ra,12(sp)
+8000029c:	00812423          	sw	s0,8(sp)
+  timer_ptr = timer_init();
+800002a0:	ea1ff0ef          	jal	80000140 <timer_init>
+800002a4:	90000437          	lui	s0,0x90000
+  timer_set(timer_ptr, (uint16_t)0x20U, (uint16_t)0xFU);
+800002a8:	00f00613          	li	a2,15
+800002ac:	02000593          	li	a1,32
+  timer_ptr = timer_init();
+800002b0:	00a42023          	sw	a0,0(s0) # 90000000 <timer_ptr>
+  timer_set(timer_ptr, (uint16_t)0x20U, (uint16_t)0xFU);
+800002b4:	ec5ff0ef          	jal	80000178 <timer_set>
+  timer_en(timer_ptr);
+800002b8:	00042503          	lw	a0,0(s0)
+800002bc:	ef5ff0ef          	jal	800001b0 <timer_en>
+  while (1);
+800002c0:	0000006f          	j	800002c0 <main+0x2c>
+
+Disassembly of section .nops:
+
+800002c4 <.nops>:
+800002c4:	00000013          	nop
+800002c8:	00000013          	nop

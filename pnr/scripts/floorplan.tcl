@@ -1,0 +1,101 @@
+# Apibudiname viso lusto ir celiu floorplan'o geometrija
+#create_floorplan -site CoreSite -box_size 0.0 0.0 1281 1281 310.0 310.0 971 971 320 320 961 961
+
+# Add a core margin between the PR boundary and the rows
+#create_floorplan -site CoreSite -core_density_size 1 0.7 34 34 34 34
+#create_floorplan -site CoreSite -die_size 2000 2000 34 34 34 34
+# Kvadratinis core
+
+# 150um pitch, maksimaliai suspausta kad tilptu atmintys ir uzliptu ant grid kartotinio
+# create_floorplan -site CoreSite -box_size 0.0 0.0 1659 1491 310.0 310.0 1349 1181 345 345 1314 1146
+
+# Increased floorplan for design with scan 2025-10-24
+# create_floorplan -site CoreSite -box_size 0.0 0.0 1659 1533 310.0 310.0 1349 1223 345 345 1314 1188
+
+# New floorplan to put memories together also moving IO
+create_floorplan -site CoreSite -box_size 0.0 0.0 1533 1659 310.0 310.0 1223 1349 345 345 1188 1314
+
+# Nuskaitome IO celiu isdeliojimo konfiguracijos faila 
+read_io_file IO_configs/ibex_simple_system.save_memstogether.io -no_die_size_adjust 
+#read_io_file pad_configs/ibex_simple_system_V1.save.io -no_die_size_adjust 
+
+# Tikriname ar teisingai apibreztas floorplan
+check_floorplan -out_file Reports/floorplan_check
+
+# Nustatom koordinaciu pradzios taska
+update_origin -lower_left
+
+#####################################
+# IO filler'iai
+#####################################
+# Move ESDCLAMP away from IO pads to avoid TM2_b1R DRC
+add_io_fillers -cells vddpad -prefix IOFILLER_ESDCLAMP -side w
+move_obj -direction up -distance 20 {IOFILLER_ESDCLAMP_W_0 IOFILLER_ESDCLAMP_W_1 \
+ IOFILLER_ESDCLAMP_W_2 IOFILLER_ESDCLAMP_W_3 IOFILLER_ESDCLAMP_W_4 IOFILLER_ESDCLAMP_W_5}
+
+add_io_fillers -cells vddpad -prefix IOFILLER_ESDCLAMP -side n
+move_obj -direction right -distance 20 {IOFILLER_ESDCLAMP_N_0 IOFILLER_ESDCLAMP_N_1 \
+ IOFILLER_ESDCLAMP_N_2 IOFILLER_ESDCLAMP_N_3 IOFILLER_ESDCLAMP_N_4}
+
+add_io_fillers -cells vddpad -prefix IOFILLER_ESDCLAMP -side e
+move_obj -direction up -distance 20 {IOFILLER_ESDCLAMP_E_0 IOFILLER_ESDCLAMP_E_1 \
+ IOFILLER_ESDCLAMP_E_2 IOFILLER_ESDCLAMP_E_3 IOFILLER_ESDCLAMP_E_4 IOFILLER_ESDCLAMP_E_5}
+
+add_io_fillers -cells vddpad -prefix IOFILLER_ESDCLAMP -side s
+move_obj -direction right -distance 20 {IOFILLER_ESDCLAMP_S_0 IOFILLER_ESDCLAMP_S_1 \
+ IOFILLER_ESDCLAMP_S_2 IOFILLER_ESDCLAMP_S_3 IOFILLER_ESDCLAMP_S_4}
+
+# Uzpildome tarpustarp paduku kad apjungtume paduku maitinimus
+add_io_fillers -cells filler10u -prefix IOFILLER
+add_io_fillers -cells filler4u -prefix IOFILLER
+add_io_fillers -cells filler2u -prefix IOFILLER
+add_io_fillers -cells filler1u -prefix IOFILLER 
+#add_io_fillers -cells filler1u -prefix IOFILLER -fill_any_gap
+
+# Uzfiksuojame paduku ir filler'iu pozicijas kad optimizavimo irankiai ju nejudintu
+set_db [get_db insts -if {.name == CornerCell*}] .place_status fixed -verbose
+set_db [get_db insts -if {.name == IOFILLER*}] .place_status fixed -verbose
+set_db [get_db insts -if {.name == VDD*}] .place_status fixed -verbose 
+set_db [get_db insts -if {.name == VSS*}] .place_status fixed -verbose 
+set_db [get_db insts -if {.name == pad_*}] .place_status fixed -verbose 
+set_db [get_db insts -if {.name == GPIO*}] .place_status fixed -verbose
+
+# Relative floorplan place macros
+create_relative_floorplan \
+    -ref_type core_boundary \
+    -ref ibex_simple_system \
+    -place u_ibex_simple_system_int/imem/sram1 \
+    -horizontal_edge_separate {2 0 2} \
+    -vertical_edge_separate {0 0 0}
+
+create_relative_floorplan \
+    -ref_type core_boundary \
+    -ref ibex_simple_system \
+    -place u_ibex_simple_system_int/imem/sram2 \
+    -horizontal_edge_separate {2 0 2} \
+    -vertical_edge_separate {2 0 2}
+
+create_relative_floorplan \
+    -ref_type core_boundary \
+    -ref ibex_simple_system \
+    -place u_ibex_simple_system_int/dmem/sram \
+    -horizontal_edge_separate {0 0 0} \
+    -vertical_edge_separate {0 0 0}
+
+# Rotate dmem 180 degrees
+set_db inst:u_ibex_simple_system_int/dmem/sram .orient mx
+
+#set_macro_place_constraint -pg_resource_model golden_mimic_power_mesh.tcl 
+#set_macro_place_constraint -min_space_to_core {6 6} 
+#set_macro_place_constraint -min_space_to_macro {8 8}
+
+#place_design -concurrent_macros 
+#place_macro_detail 
+
+set_instance_placement_status -all_hard_macros -status fixed
+
+delete_relative_floorplan -all
+
+# Issaugome floorplan'a
+write_db dbs/floorplan.enc
+

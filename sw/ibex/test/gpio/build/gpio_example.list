@@ -1,0 +1,369 @@
+
+build/gpio_example.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .vectors:
+
+80000000 <_vectors_start>:
+80000000:	1020006f          	j	80000102 <DEFAULT_IRQHandler>
+80000004:	0fe0006f          	j	80000102 <DEFAULT_IRQHandler>
+80000008:	0fa0006f          	j	80000102 <DEFAULT_IRQHandler>
+8000000c:	0f60006f          	j	80000102 <DEFAULT_IRQHandler>
+80000010:	0f20006f          	j	80000102 <DEFAULT_IRQHandler>
+80000014:	0ee0006f          	j	80000102 <DEFAULT_IRQHandler>
+80000018:	0ea0006f          	j	80000102 <DEFAULT_IRQHandler>
+8000001c:	08c0006f          	j	800000a8 <TIMER_IRQHandler>
+80000020:	0e20006f          	j	80000102 <DEFAULT_IRQHandler>
+80000024:	0de0006f          	j	80000102 <DEFAULT_IRQHandler>
+80000028:	0da0006f          	j	80000102 <DEFAULT_IRQHandler>
+8000002c:	0800006f          	j	800000ac <GPIO_IRQHandler>
+80000030:	0d20006f          	j	80000102 <DEFAULT_IRQHandler>
+80000034:	0ce0006f          	j	80000102 <DEFAULT_IRQHandler>
+80000038:	0ca0006f          	j	80000102 <DEFAULT_IRQHandler>
+8000003c:	0c60006f          	j	80000102 <DEFAULT_IRQHandler>
+80000040:	0c20006f          	j	80000102 <DEFAULT_IRQHandler>
+80000044:	0ba0006f          	j	800000fe <I2C_IRQHandler>
+80000048:	0bc0006f          	j	80000104 <UART_RX_HALF_FULL_IRQHandler>
+8000004c:	0ba0006f          	j	80000106 <UART_TX_HALF_EMPTY_IRQHandler>
+80000050:	0b80006f          	j	80000108 <UART_RX_NOT_EMPTY_IRQHandler>
+80000054:	0b60006f          	j	8000010a <UART_TX_NOT_FULL_IRQHandler>
+80000058:	0aa0006f          	j	80000102 <DEFAULT_IRQHandler>
+8000005c:	0a60006f          	j	80000102 <DEFAULT_IRQHandler>
+80000060:	0a20006f          	j	80000102 <DEFAULT_IRQHandler>
+80000064:	09e0006f          	j	80000102 <DEFAULT_IRQHandler>
+80000068:	09a0006f          	j	80000102 <DEFAULT_IRQHandler>
+8000006c:	0960006f          	j	80000102 <DEFAULT_IRQHandler>
+80000070:	0920006f          	j	80000102 <DEFAULT_IRQHandler>
+80000074:	08e0006f          	j	80000102 <DEFAULT_IRQHandler>
+80000078:	08a0006f          	j	80000102 <DEFAULT_IRQHandler>
+8000007c:	0000                	.insn	2, 0x
+8000007e:	0000                	.insn	2, 0x
+80000080:	0c00006f          	j	80000140 <reset_handler>
+
+Disassembly of section .text:
+
+80000084 <GPIO_EXTI_Callback>:
+
+  return 0;
+}
+
+void GPIO_EXTI_Callback(GPIO_HandleTypeDef *gpio) {
+  if (gpio->Interrupt_Status & GPIO_PIN_6) {
+80000084:	415c                	lw	a5,4(a0)
+80000086:	0407f713          	andi	a4,a5,64
+8000008a:	c711                	beqz	a4,80000096 <GPIO_EXTI_Callback+0x12>
+    shift_right = 1;
+8000008c:	90000737          	lui	a4,0x90000
+80000090:	4685                	li	a3,1
+80000092:	00d700a3          	sb	a3,1(a4) # 90000001 <shift_right>
+  }
+  if (gpio->Interrupt_Status & GPIO_PIN_7) {
+80000096:	0807f793          	andi	a5,a5,128
+8000009a:	c791                	beqz	a5,800000a6 <GPIO_EXTI_Callback+0x22>
+    shift_left = 1;
+8000009c:	900007b7          	lui	a5,0x90000
+800000a0:	4705                	li	a4,1
+800000a2:	00e78023          	sb	a4,0(a5) # 90000000 <shift_left>
+  }
+}
+800000a6:	8082                	ret
+
+800000a8 <TIMER_IRQHandler>:
+  timer_irq_handler();
+#endif
+#if TIMER_IRQ_CALLBACK == 1
+  timer_irq_callback();
+#endif
+}
+800000a8:	30200073          	mret
+
+800000ac <GPIO_IRQHandler>:
+
+void GPIO_IRQHandler(void) __attribute__((interrupt));
+
+void GPIO_IRQHandler(void) {
+800000ac:	7139                	addi	sp,sp,-64
+800000ae:	d62a                	sw	a0,44(sp)
+#if GPIO_IRQ_HANDLER == 1
+  gpio_irq_handler(&gpio);
+800000b0:	90000537          	lui	a0,0x90000
+800000b4:	00450513          	addi	a0,a0,4 # 90000004 <gpio>
+void GPIO_IRQHandler(void) {
+800000b8:	de06                	sw	ra,60(sp)
+800000ba:	dc16                	sw	t0,56(sp)
+800000bc:	da1a                	sw	t1,52(sp)
+800000be:	d81e                	sw	t2,48(sp)
+800000c0:	d42e                	sw	a1,40(sp)
+800000c2:	d232                	sw	a2,36(sp)
+800000c4:	d036                	sw	a3,32(sp)
+800000c6:	ce3a                	sw	a4,28(sp)
+800000c8:	cc3e                	sw	a5,24(sp)
+800000ca:	ca42                	sw	a6,20(sp)
+800000cc:	c846                	sw	a7,16(sp)
+800000ce:	c672                	sw	t3,12(sp)
+800000d0:	c476                	sw	t4,8(sp)
+800000d2:	c27a                	sw	t5,4(sp)
+800000d4:	c07e                	sw	t6,0(sp)
+  gpio_irq_handler(&gpio);
+800000d6:	28b9                	jal	80000134 <gpio_irq_handler>
+#endif
+#if GPIO_IRQ_CALLBACK == 1
+  gpio_irq_callback();
+#endif
+}
+800000d8:	50f2                	lw	ra,60(sp)
+800000da:	52e2                	lw	t0,56(sp)
+800000dc:	5352                	lw	t1,52(sp)
+800000de:	53c2                	lw	t2,48(sp)
+800000e0:	5532                	lw	a0,44(sp)
+800000e2:	55a2                	lw	a1,40(sp)
+800000e4:	5612                	lw	a2,36(sp)
+800000e6:	5682                	lw	a3,32(sp)
+800000e8:	4772                	lw	a4,28(sp)
+800000ea:	47e2                	lw	a5,24(sp)
+800000ec:	4852                	lw	a6,20(sp)
+800000ee:	48c2                	lw	a7,16(sp)
+800000f0:	4e32                	lw	t3,12(sp)
+800000f2:	4ea2                	lw	t4,8(sp)
+800000f4:	4f12                	lw	t5,4(sp)
+800000f6:	4f82                	lw	t6,0(sp)
+800000f8:	6121                	addi	sp,sp,64
+800000fa:	30200073          	mret
+
+800000fe <I2C_IRQHandler>:
+
+void I2C_IRQHandler(void) __attribute__((interrupt));
+
+void I2C_IRQHandler(void) {
+800000fe:	30200073          	mret
+
+80000102 <DEFAULT_IRQHandler>:
+  i2c_irq_callback();
+#endif
+}
+
+void DEFAULT_IRQHandler(void) {
+  while (1)
+80000102:	a001                	j	80000102 <DEFAULT_IRQHandler>
+
+80000104 <UART_RX_HALF_FULL_IRQHandler>:
+}
+
+void UART_RX_HALF_FULL_IRQHandler(void) __attribute__((interrupt));
+
+void UART_RX_HALF_FULL_IRQHandler(void) {
+  while (1)
+80000104:	a001                	j	80000104 <UART_RX_HALF_FULL_IRQHandler>
+
+80000106 <UART_TX_HALF_EMPTY_IRQHandler>:
+}
+
+void UART_TX_HALF_EMPTY_IRQHandler(void) __attribute__((interrupt));
+
+void UART_TX_HALF_EMPTY_IRQHandler(void) {
+  while (1)
+80000106:	a001                	j	80000106 <UART_TX_HALF_EMPTY_IRQHandler>
+
+80000108 <UART_RX_NOT_EMPTY_IRQHandler>:
+}
+
+void UART_RX_NOT_EMPTY_IRQHandler(void) __attribute__((interrupt));
+
+void UART_RX_NOT_EMPTY_IRQHandler(void) {
+  while (1)
+80000108:	a001                	j	80000108 <UART_RX_NOT_EMPTY_IRQHandler>
+
+8000010a <UART_TX_NOT_FULL_IRQHandler>:
+}
+
+void UART_TX_NOT_FULL_IRQHandler(void) __attribute__((interrupt));
+
+void UART_TX_NOT_FULL_IRQHandler(void) {
+  while (1)
+8000010a:	a001                	j	8000010a <UART_TX_NOT_FULL_IRQHandler>
+
+8000010c <GPIO_Init>:
+
+#include "gpio.h"
+
+void GPIO_Init(GPIO_HandleTypeDef *gpio) {
+  // Initialize register pointer to GPIO peripheral
+  gpio->regs = (volatile GPIO_reg_map_t *)GPIO_BASE_ADDR;
+8000010c:	400007b7          	lui	a5,0x40000
+80000110:	c11c                	sw	a5,0(a0)
+}
+80000112:	8082                	ret
+
+80000114 <GPIO_WritePin>:
+ *            @arg GPIO_PIN_SET: to set the port pin
+ * @retval None
+ */
+void GPIO_WritePin(GPIO_HandleTypeDef *gpio, uint32_t GPIO_Pin, GPIO_PinState PinState) {
+  if (PinState != GPIO_PIN_RESET) {
+    gpio->regs->OUT |= GPIO_Pin;
+80000114:	411c                	lw	a5,0(a0)
+80000116:	43d8                	lw	a4,4(a5)
+  if (PinState != GPIO_PIN_RESET) {
+80000118:	c601                	beqz	a2,80000120 <GPIO_WritePin+0xc>
+    gpio->regs->OUT |= GPIO_Pin;
+8000011a:	8f4d                	or	a4,a4,a1
+8000011c:	c3d8                	sw	a4,4(a5)
+8000011e:	8082                	ret
+  } else {
+    gpio->regs->OUT &= ~GPIO_Pin;
+80000120:	fff5c593          	not	a1,a1
+80000124:	8df9                	and	a1,a1,a4
+80000126:	c3cc                	sw	a1,4(a5)
+  }
+}
+80000128:	8082                	ret
+
+8000012a <GPIO_Toggle>:
+ *         This parameter can be any combination of GPIO_PIN_x where x can be (0..11).
+ * @retval None
+ */
+void GPIO_Toggle(GPIO_HandleTypeDef *gpio, uint32_t GPIO_Pin) {
+  // XOR to toggle
+  gpio->regs->OUT ^= GPIO_Pin;
+8000012a:	4118                	lw	a4,0(a0)
+8000012c:	435c                	lw	a5,4(a4)
+8000012e:	8fad                	xor	a5,a5,a1
+80000130:	c35c                	sw	a5,4(a4)
+}
+80000132:	8082                	ret
+
+80000134 <gpio_irq_handler>:
+
+void gpio_irq_handler(GPIO_HandleTypeDef *gpio) {
+  // Record interrupt in handle and clear INTS register
+  gpio->Interrupt_Status = gpio->regs->INTS;
+80000134:	4118                	lw	a4,0(a0)
+80000136:	4f54                	lw	a3,28(a4)
+80000138:	c154                	sw	a3,4(a0)
+  gpio->regs->INTS = 0;
+8000013a:	00072e23          	sw	zero,28(a4)
+  // Callback for User
+  GPIO_EXTI_Callback(gpio);
+8000013e:	b799                	j	80000084 <GPIO_EXTI_Callback>
+
+80000140 <reset_handler>:
+80000140:	00000093          	li	ra,0
+80000144:	8106                	mv	sp,ra
+80000146:	8186                	mv	gp,ra
+80000148:	8206                	mv	tp,ra
+8000014a:	8286                	mv	t0,ra
+8000014c:	8306                	mv	t1,ra
+8000014e:	8386                	mv	t2,ra
+80000150:	8406                	mv	s0,ra
+80000152:	8486                	mv	s1,ra
+80000154:	8506                	mv	a0,ra
+80000156:	8586                	mv	a1,ra
+80000158:	8606                	mv	a2,ra
+8000015a:	8686                	mv	a3,ra
+8000015c:	8706                	mv	a4,ra
+8000015e:	8786                	mv	a5,ra
+80000160:	8806                	mv	a6,ra
+80000162:	8886                	mv	a7,ra
+80000164:	8906                	mv	s2,ra
+80000166:	8986                	mv	s3,ra
+80000168:	8a06                	mv	s4,ra
+8000016a:	8a86                	mv	s5,ra
+8000016c:	8b06                	mv	s6,ra
+8000016e:	8b86                	mv	s7,ra
+80000170:	8c06                	mv	s8,ra
+80000172:	8c86                	mv	s9,ra
+80000174:	8d06                	mv	s10,ra
+80000176:	8d86                	mv	s11,ra
+80000178:	8e06                	mv	t3,ra
+8000017a:	8e86                	mv	t4,ra
+8000017c:	8f06                	mv	t5,ra
+8000017e:	8f86                	mv	t6,ra
+80000180:	10001117          	auipc	sp,0x10001
+80000184:	e8010113          	addi	sp,sp,-384 # 90001000 <_stack_start>
+
+80000188 <_start>:
+80000188:	42a1                	li	t0,8
+8000018a:	30029073          	csrw	mstatus,t0
+8000018e:	000212b7          	lui	t0,0x21
+80000192:	88028293          	addi	t0,t0,-1920 # 20880 <_stack_len+0x1f880>
+80000196:	30429073          	csrw	mie,t0
+8000019a:	10000d17          	auipc	s10,0x10000
+8000019e:	e66d0d13          	addi	s10,s10,-410 # 90000000 <shift_left>
+800001a2:	10000d97          	auipc	s11,0x10000
+800001a6:	e6ad8d93          	addi	s11,s11,-406 # 9000000c <_bss_end>
+800001aa:	01bd5763          	bge	s10,s11,800001b8 <main_entry>
+
+800001ae <zero_loop>:
+800001ae:	000d2023          	sw	zero,0(s10)
+800001b2:	0d11                	addi	s10,s10,4
+800001b4:	ffaddde3          	bge	s11,s10,800001ae <zero_loop>
+
+800001b8 <main_entry>:
+800001b8:	4501                	li	a0,0
+800001ba:	4581                	li	a1,0
+800001bc:	00a000ef          	jal	800001c6 <main>
+
+800001c0 <sleep_loop>:
+800001c0:	10500073          	wfi
+800001c4:	bff5                	j	800001c0 <sleep_loop>
+
+800001c6 <main>:
+int main() {
+800001c6:	1141                	addi	sp,sp,-16
+800001c8:	c422                	sw	s0,8(sp)
+  GPIO_Init(&gpio);
+800001ca:	90000437          	lui	s0,0x90000
+800001ce:	00440513          	addi	a0,s0,4 # 90000004 <gpio>
+int main() {
+800001d2:	c606                	sw	ra,12(sp)
+  gpio.regs->OE = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 |
+800001d4:	00440413          	addi	s0,s0,4
+  GPIO_Init(&gpio);
+800001d8:	3f15                	jal	8000010c <GPIO_Init>
+  gpio.regs->OE = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 |
+800001da:	401c                	lw	a5,0(s0)
+800001dc:	03f00713          	li	a4,63
+    if (shift_right) {
+800001e0:	900008b7          	lui	a7,0x90000
+  gpio.regs->OE = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 |
+800001e4:	c798                	sw	a4,8(a5)
+  gpio.regs->CTRL = ENABLE_INT;
+800001e6:	4705                	li	a4,1
+800001e8:	cf98                	sw	a4,24(a5)
+  gpio.regs->INTE = GPIO_PIN_6 | GPIO_PIN_7;
+800001ea:	0c000713          	li	a4,192
+800001ee:	c7d8                	sw	a4,12(a5)
+    } else if ((shift_left)) {
+800001f0:	90000837          	lui	a6,0x90000
+        gpio.regs->OUT = (1 << i);
+800001f4:	02000513          	li	a0,32
+800001f8:	45c1                	li	a1,16
+800001fa:	4621                	li	a2,8
+800001fc:	4691                	li	a3,4
+800001fe:	4709                	li	a4,2
+    if (shift_right) {
+80000200:	0018c303          	lbu	t1,1(a7) # 90000001 <shift_right>
+80000204:	00030a63          	beqz	t1,80000218 <main+0x52>
+      shift_right = 0;
+80000208:	000880a3          	sb	zero,1(a7)
+        gpio.regs->OUT = (1 << i);
+8000020c:	c3d8                	sw	a4,4(a5)
+8000020e:	c3d4                	sw	a3,4(a5)
+80000210:	c3d0                	sw	a2,4(a5)
+80000212:	c3cc                	sw	a1,4(a5)
+80000214:	c3c8                	sw	a0,4(a5)
+      for (int i = 1; i < 6; i++) {
+80000216:	b7ed                	j	80000200 <main+0x3a>
+    } else if ((shift_left)) {
+80000218:	00084303          	lbu	t1,0(a6) # 90000000 <shift_left>
+8000021c:	fe0302e3          	beqz	t1,80000200 <main+0x3a>
+      shift_left = 0;
+80000220:	00080023          	sb	zero,0(a6)
+        gpio.regs->OUT = (1 << i);
+80000224:	c3c8                	sw	a0,4(a5)
+80000226:	c3cc                	sw	a1,4(a5)
+80000228:	c3d0                	sw	a2,4(a5)
+8000022a:	c3d4                	sw	a3,4(a5)
+8000022c:	c3d8                	sw	a4,4(a5)
+      for (int i = 5; i > 0; i--) {
+8000022e:	bfc9                	j	80000200 <main+0x3a>
