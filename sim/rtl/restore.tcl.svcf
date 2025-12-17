@@ -1,0 +1,827 @@
+# SimVision Command Script (Fri Oct 24 09:45:40 AM EEST 2025)
+#
+# Version 24.03.s004
+#
+# You can restore this configuration with:
+#
+#     simvision -input restore.tcl.svcf
+#
+
+
+#
+# Preferences
+#
+preferences set plugin-enable-svdatabrowser-new 1
+preferences set plugin-enable-groupscope 0
+preferences set plugin-enable-interleaveandcompare 0
+preferences set plugin-enable-waveformfrequencyplot 0
+preferences set toolbar-Windows-MemViewer {
+  usual
+  position -pos 1
+}
+preferences set toolbar-Windows-WatchList {
+  usual
+  position -pos 2
+}
+preferences set toolbar-SimControl-MemViewer {
+  usual
+  position -pos 0 -anchor e
+}
+preferences set toolbar-SimControl-WaveWindow {
+  usual
+  position -anchor e
+}
+preferences set toolbar-txe_waveform_toggle-WaveWindow {
+  usual
+  position -pos 1
+}
+preferences set toolbar-Windows-WaveWindow {
+  usual
+  position -pos 2
+}
+preferences set cursorctl-dont-show-sync-warning 1
+preferences set toolbar-Windows-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-SimControl-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-Search-Console {
+  usual
+  position -pos 2
+}
+preferences set toolbar-Standard-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-Standard-Console {
+  usual
+  position -pos 1
+}
+preferences set toolbar-TimeSearch-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-sendToIndago-WaveWindow {
+  usual
+  position -pos 1
+}
+#
+# Groups
+#
+catch {group new -name TB -overlay 0}
+catch {group new -name IMEM -overlay 0}
+catch {group new -name RegFile -overlay 0}
+catch {group new -name IMEM_Swb -overlay 0}
+catch {group new -name IMEM_wb_s -overlay 0}
+catch {group new -name Ibex -overlay 0}
+catch {group new -name IMEM_wb_m -overlay 0}
+catch {group new -name {Group 18} -overlay 0}
+catch {group new -name {Group 19} -overlay 0}
+catch {group new -name IMEM_if -overlay 0}
+catch {group new -name DMEM -overlay 0}
+catch {group new -name DMEM_wb_s -overlay 0}
+catch {group new -name DMEM_wb_m -overlay 0}
+catch {group new -name GPIO -overlay 0}
+catch {group new -name GPIO_wb_s -overlay 0}
+catch {group new -name I2C_wb_s -overlay 0}
+catch {group new -name I2C -overlay 0}
+catch {group new -name DMEM_if -overlay 0}
+catch {group new -name EEPROM_regs -overlay 0}
+catch {group new -name Bootloader_wb_m -overlay 0}
+catch {group new -name Bootloader -overlay 0}
+catch {group new -name I2c_fsm -overlay 0}
+catch {group new -name wb_fsm -overlay 0}
+catch {group new -name PIT -overlay 0}
+catch {group new -name PIT_wb_s -overlay 0}
+catch {group new -name UART -overlay 0}
+catch {group new -name PageBuffers -overlay 0}
+catch {group new -name UART_wb_s -overlay 0}
+catch {group new -name UART_RX -overlay 0}
+catch {group new -name SRAM1 -overlay 0}
+catch {group new -name SRAM2 -overlay 0}
+catch {group new -name UART_TX -overlay 0}
+group using TB
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.SCL}]} ] \
+    [subst  {[format {simple_system_tb.SDA}]} ] \
+    [subst  {[format {simple_system_tb.clk_sys}]} ] \
+    [subst  {[format {simple_system_tb.rst_sys_n}]} ] \
+    [subst  {[format {simple_system_tb.ext_pad_io[9:0]}]} ] \
+    UART_RX \
+    UART_TX
+group using IMEM
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1_me}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2_me}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ] \
+    IMEM_wb_s
+group using RegFile
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[0:31]}]} ]
+group using IMEM_Swb
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.rst}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.err}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.ack}]} ]
+group using IMEM_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.rst}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.ack}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[0].slave.err}]} ]
+group using Ibex
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.u_ibex_core.rst_ni}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.u_ibex_core.pc_if[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.u_ibex_core.pc_id[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.u_ibex_core.instr_rdata_id[31:0]}]} ] \
+    IMEM_if \
+    DMEM_if \
+    IMEM_wb_m \
+    DMEM_wb_m
+group using IMEM_wb_m
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.rst}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.ack}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[1].master.err}]} ]
+group using {Group 18}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using {Group 19}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using IMEM_if
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.instr_rvalid_i}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.instr_gnt_i}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.instr_err_i}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.instr_rdata_intg_i[6:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.instr_rdata_core[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.instr_rdata_i[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.instr_addr_o[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.instr_req_o}]} ] \
+    SRAM1 \
+    SRAM2
+group using DMEM
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_ADDR[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_BM[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_CLK}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_DIN[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_DLY}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_DOUT[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_MEN}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_REN}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.A_WEN}]} ] \
+    DMEM_wb_s
+group using DMEM_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.rst}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.ack}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[1].slave.err}]} ]
+group using DMEM_wb_m
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.err}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.ack}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.rst}]} ]
+group using GPIO
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.rgpio_ctrl[1:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.aux_i[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.rgpio_ctrl[1:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.rgpio_eclk[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.rgpio_in[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.rgpio_inte[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.rgpio_oe[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.rgpio_out[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
+    GPIO_wb_s
+group using GPIO_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.err}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.ack}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[2].slave.rst}]} ]
+group using I2C_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.ack}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.err}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.rst}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[3].slave.we}]} ]
+group using I2C
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.scl_pad_i}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.scl_pad_o}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.scl_padoen_o}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.sda_pad_i}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.sda_pad_o}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.sda_padoen_o}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.i2c_al}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.cr[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.prer[15:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.txr[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.rxr[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.sr[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.ctr[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.int_o}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.arst_i}]} ] \
+    I2C_wb_s
+group using DMEM_if
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.addr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.be[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.err}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.gnt}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.rdata[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.req}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.rst_n}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.rvalid}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.wdata[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.we}]} ]
+group using EEPROM_regs
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.eeprom.AddressPointer[15:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer[0:127]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.MemoryBlock[0:65535]}]} ]
+group using Bootloader_wb_m
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.rst}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.err}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbm[0].master.ack}]} ]
+group using Bootloader
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.state[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.mem_addr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.data_word[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.busy}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.done}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.start}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.wdata[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.next_state[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.last_read}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.mem_index[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.next_mem_index[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.next_rst_core_n}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.rdata[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.rst_core_n}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.sram_access}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.next_page_buffer_index[6:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.page_buffer_index[6:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.addr_pointer[15:0]}]} ] \
+    I2c_fsm \
+    Bootloader_wb_m
+group using I2c_fsm
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.state[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.wb_done}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.wb_busy}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.wb_addr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.wb_wdata[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.wb_we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.wb_start}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.wb_rdata[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.w_data[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.sram_access}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.r_data[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.mem_addr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.last_read}]} ] \
+    wb_fsm
+group using wb_fsm
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.state[1:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.wdata[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.addr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.start}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.rdata[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.done}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader.i_i2c_fsm.i_wb_access.busy}]} ]
+group using PIT
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.pit_irq_o}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.u_wb_pit.cnt_n[15:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.u_wb_pit.mod_value[15:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.u_wb_pit.pit_pre_scl[3:0]}]} ] \
+    PIT_wb_s
+group using PIT_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.err}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.ack}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.stall}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.sel[3:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.adr[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.stb}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.cyc}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.clk}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.rst}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.wbs[4].slave.we}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.pit_irq_o}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.sel_to_pit[1:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.data_to_pit[15:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.data_from_pit[15:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_pit.delayed_pit_ack}]} ]
+group using UART
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    UART_wb_s
+group using PageBuffers
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_00[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_01[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_02[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_03[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_04[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_05[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_06[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_07[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_08[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_09[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.eeprom.PageBuffer_10[7:0]}]} ]
+group using UART_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using UART_RX
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.r_SM_Main[2:0]}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.r_RX_DV}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.r_RX_Byte[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.r_Clock_Count[10:0]}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.r_Bit_Index[2:0]}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.o_RX_DV}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.o_RX_Byte[7:0]}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.i_RX_Serial}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.i_Clock}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.RX_STOP_BIT}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.RX_START_BIT}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.RX_DATA_BITS}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.IDLE}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.CLKS_PER_BIT}]} ] \
+    [subst  {[format {simple_system_tb.UART_RX_Inst.CLEANUP}]} ]
+group using SRAM1
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_ADDR[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_BM[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_CLK}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_DIN[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_DLY}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_DOUT[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_MEN}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_REN}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.A_WEN}]} ]
+group using SRAM2
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_ADDR[9:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_BM[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_CLK}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_DIN[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_DLY}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_DOUT[31:0]}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_MEN}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_REN}]} ] \
+    [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.A_WEN}]} ]
+group using UART_TX
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+
+#
+# Mnemonic Maps
+#
+mmap new  -reuse -name {Boolean as Logic} -radix %b -contents {{%c=FALSE -edgepriority 1 -shape low}
+{%c=TRUE -edgepriority 1 -shape high}}
+mmap new  -reuse -name {Example Map} -radix %x -contents {{%b=11???? -bgcolor orange -label REG:%x -linecolor yellow -shape bus}
+{%x=1F -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=2C -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=* -label %x -linecolor gray -shape bus}}
+
+#
+# Design Browser windows
+#
+if {[catch {window new WatchList -name "Design Browser 1" -geometry 1046x892+512+19}] != ""} {
+    window geometry "Design Browser 1" 1046x892+512+19
+}
+window target "Design Browser 1" on
+browser using {Design Browser 1}
+browser set -scope [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader}]} ]
+browser set \
+    -signalsort name
+browser yview see [subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_bootloader}]} ]
+browser timecontrol set -lock 0
+
+#
+# Waveform windows
+#
+if {[catch {window new WaveWindow -name "Waveform 1" -geometry 1440x1027+-1+26}] != ""} {
+    window geometry "Waveform 1" 1440x1027+-1+26
+}
+window target "Waveform 1" on
+waveform using {Waveform 1}
+waveform sidebar visibility partial
+waveform set \
+    -primarycursor TimeA \
+    -signalnames name \
+    -signalwidth 173 \
+    -units ns \
+    -valuewidth 82
+waveform baseline set -time 0
+
+
+set groupId0 [waveform add -groups TB]
+
+set groupId1 [waveform find -name UART_RX]
+waveform hierarchy collapse $groupId1
+
+
+set groupId1 [waveform find -name UART_TX]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups IMEM]
+
+set groupId1 [waveform find -name IMEM_wb_s]
+waveform hierarchy collapse $groupId1
+
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups DMEM]
+
+set groupId1 [waveform find -name DMEM_wb_s]
+waveform hierarchy collapse $groupId1
+
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups Bootloader]
+
+set groupId1 [waveform find -name I2c_fsm]
+
+set groupId2 [waveform find -name wb_fsm]
+
+waveform hierarchy collapse $groupId1
+
+
+set groupId1 [waveform find -name Bootloader_wb_m]
+waveform hierarchy collapse $groupId1
+
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups Ibex]
+
+set groupId1 [waveform find -name IMEM_if]
+
+set groupId2 [waveform find -name SRAM1]
+
+
+set groupId2 [waveform find -name SRAM2]
+
+waveform hierarchy collapse $groupId1
+
+
+set groupId1 [waveform find -name DMEM_if]
+set gpGlist1 [waveform hierarchy contents $groupId1]
+set gpID1 [lindex $gpGlist1 0]
+foreach {name attrs} [subst  {
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.addr[31:0]}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.be[3:0]}]} {-radix %b}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.clk}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.err}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.gnt}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.rdata[31:0]}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.req}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.rst_n}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.rvalid}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.wdata[31:0]}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.data_core.slave.we}]} {}
+}] childcmds {
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+    {}
+} {
+    set expected [ join [waveform signals -format path $gpID1] ]
+    if {[string equal $name $expected] || $name == "cdivider"} {
+        if {$attrs != ""} {
+            eval waveform format $gpID1 $attrs
+        }
+        if { $childcmds != ""} {
+            eval $childcmds
+        }
+    }
+    set gpGlist1 [lrange $gpGlist1 1 end]
+    set gpID1 [lindex $gpGlist1 0]
+}
+waveform hierarchy collapse $groupId1
+
+
+set groupId1 [waveform find -name IMEM_wb_m]
+waveform hierarchy collapse $groupId1
+
+
+set groupId1 [waveform find -name DMEM_wb_m]
+waveform hierarchy collapse $groupId1
+
+set gpGlist0 [waveform hierarchy contents $groupId0]
+set gpID0 [lindex $gpGlist0 0]
+foreach {name attrs} [subst  {
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.u_ibex_core.rst_ni}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.u_ibex_core.pc_if[31:0]}]} {}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.u_ibex_core.pc_id[31:0]}]} {-color #00ffff}
+    {[format {simple_system_tb.dut.u_ibex_simple_system_int.u_wb_ibex_top.inst_ibex_top.u_ibex_core.instr_rdata_id[31:0]}]} {}
+    groupId123 {}
+    groupId154 {}
+    groupId167 {}
+    groupId178 {}
+}] childcmds {
+    {}
+    {}
+    {}
+    {}
+} {
+    set expected [ join [waveform signals -format path $gpID0] ]
+    if {[string equal $name $expected] || $name == "cdivider"} {
+        if {$attrs != ""} {
+            eval waveform format $gpID0 $attrs
+        }
+        if { $childcmds != ""} {
+            eval $childcmds
+        }
+    }
+    set gpGlist0 [lrange $gpGlist0 1 end]
+    set gpID0 [lindex $gpGlist0 0]
+}
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups PIT]
+
+set groupId1 [waveform find -name PIT_wb_s]
+waveform hierarchy collapse $groupId1
+
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups GPIO]
+
+set groupId1 [waveform find -name GPIO_wb_s]
+waveform hierarchy collapse $groupId1
+
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups I2C]
+
+set groupId1 [waveform find -name I2C_wb_s]
+waveform hierarchy collapse $groupId1
+
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups UART]
+
+set groupId1 [waveform find -name UART_wb_s]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups RegFile]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups EEPROM_regs]
+waveform hierarchy collapse $groupId0
+
+
+waveform xview limits 725672105.06ns 725755445.79ns
+
+#
+# Waveform Window Links
+#
+
+#
+# Memory Viewer windows
+#
+if {[catch {window new MemViewer -name "Memory Viewer 1" -geometry 671x570+1444+252}] != ""} {
+    window geometry "Memory Viewer 1" 671x570+1444+252
+}
+window target "Memory Viewer 1" on
+memviewer using {Memory Viewer 1}
+memviewer set \
+-primarycursor TimeA \
+-units ps \
+-radix default \
+-addressradix default \
+-addressorder MSBtoLSB
+
+memviewer add [subst  {[format {simple_system_tb.eeprom.MemoryBlock[0:65535]}]} ]
+
+# Load memory viewer instances
+memviewer add -instanceonly  \
+	[subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram1.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ] \
+	[subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.dmem.sram.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ] \
+	[subst  {[format {simple_system_tb.dut.u_ibex_simple_system_int.imem.sram2.i_SRAM_1P_behavioral_bm.memory[0:1023]}]} ]
+
+memviewer sidebar visibility partial
+
+#
+# Console windows
+#
+console set -windowname Console
+window geometry Console 1156x466+316+870
+
+#
+# Layout selection
+#
+

@@ -114,8 +114,9 @@ module simple_system_tb;
         rst_sys_n = 1'b1;
 
         tb.wait_bootloader;
+`ifdef BOOT_WRITEBACK
         tb.memory_write_back_test;
-        
+`endif
         // Wait for startup code to finish and for main to jump into while(1)
         #1_000_000;
 

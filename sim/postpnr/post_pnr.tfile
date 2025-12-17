@@ -1,0 +1,3 @@
+PATH simple_system_tb.dut.u_ibex_simple_system_int.u_gpio.u_wb_gpio.\sync_reg[*] -notifier -tcheck
+
+PATH simple_system_tb.dut.u_ibex_simple_system_int.u_i2c.u_wb_i2c.byte_controller.bit_controller.\cSDA_reg[0] -notifier -tcheck

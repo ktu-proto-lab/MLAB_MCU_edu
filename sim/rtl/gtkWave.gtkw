@@ -1,0 +1,147 @@
+[*]
+[*] GTKWave Analyzer v3.3.121 (w)1999-2024 BSI
+[*] Thu Aug  7 18:36:58 2025
+[*]
+[dumpfile] "/home/rock/Documents/uni/lustai/MLAB_riscv_mcu/sim/rtl/output.vcd"
+[dumpfile_mtime] "Thu Aug  7 18:36:35 2025"
+[dumpfile_size] 3702771046
+[savefile] "/home/rock/Documents/uni/lustai/MLAB_riscv_mcu/sim/rtl/gtkWave.gtkw"
+[timestart] 119300000000
+[size] 1280 936
+[pos] -1 -1
+*-32.193256 124151956250 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] simple_system_tb.
+[treeopen] simple_system_tb.dut.
+[treeopen] simple_system_tb.dut.u_i2c.
+[treeopen] simple_system_tb.dut.u_pit.
+[treeopen] simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.
+[sst_width] 220
+[signals_width] 190
+[sst_expanded] 1
+[sst_vpaned_height] 538
+@28
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.clk
+simple_system_tb.dut.u_wb_ibex_top.data_core.rst_n
+@22
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.u_ibex_core.pc_id[31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.u_ibex_core.pc_if[31:0]
+@c00200
+-reg
+@22
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[0][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[1][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[2][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[3][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[4][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[5][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[6][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[7][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[8][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[9][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[10][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[11][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[12][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[13][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[14][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[15][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[16][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[17][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[18][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[19][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[20][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[21][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[22][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[23][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[24][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[25][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[26][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[27][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[28][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[29][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[30][31:0]
+simple_system_tb.dut.u_wb_ibex_top.inst_ibex_top.gen_regfile_ff.register_file_i.rf_reg[31][31:0]
+@1401200
+-reg
+@28
+simple_system_tb.dut.SCL_Pad
+simple_system_tb.dut.SDA_Pad
+@c00200
+-eeprom
+@22
+simple_system_tb.eeprom.AddressPointer[15:0]
+simple_system_tb.eeprom.PageBuffer_00[7:0]
+simple_system_tb.eeprom.PageBuffer_01[7:0]
+simple_system_tb.eeprom.PageBuffer_02[7:0]
+simple_system_tb.eeprom.PageBuffer_03[7:0]
+simple_system_tb.eeprom.PageBuffer_04[7:0]
+@1401200
+-eeprom
+@c00200
+-I2C
+@22
+simple_system_tb.dut.u_i2c.u_i2c.prer[15:0]
+simple_system_tb.dut.u_i2c.u_i2c.txr[7:0]
+simple_system_tb.dut.u_i2c.u_i2c.rxr[7:0]
+@28
+simple_system_tb.dut.u_i2c.u_i2c.cr[7:0]
+simple_system_tb.dut.u_i2c.u_i2c.sr[7:0]
+@c00028
+simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+@28
+(0)simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+(1)simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+(2)simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+(3)simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+(4)simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+(5)simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+(6)simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+(7)simple_system_tb.dut.u_i2c.u_i2c.ctr[7:0]
+@1401200
+-group_end
+@c00200
+-I2C_wb
+@28
+simple_system_tb.dut.u_i2c.wb.ack
+@22
+simple_system_tb.dut.u_i2c.wb.adr[31:0]
+@28
+simple_system_tb.dut.u_i2c.wb.clk
+simple_system_tb.dut.u_i2c.wb.cyc
+@22
+simple_system_tb.dut.u_i2c.wb.dat_m[31:0]
+simple_system_tb.dut.u_i2c.wb.dat_s[31:0]
+@28
+simple_system_tb.dut.u_i2c.wb.err
+simple_system_tb.dut.u_i2c.wb.rst
+@22
+simple_system_tb.dut.u_i2c.wb.sel[3:0]
+@28
+simple_system_tb.dut.u_i2c.wb.stall
+simple_system_tb.dut.u_i2c.wb.stb
+simple_system_tb.dut.u_i2c.wb.we
+@1401200
+-I2C_wb
+-I2C
+@800200
+-i2c_debouncer_SCL
+@1000200
+-i2c_debouncer_SCL
+@800200
+-i2c_debouncer_SDA
+@1000200
+-i2c_debouncer_SDA
+@800200
+-PIT
+@22
+simple_system_tb.dut.u_pit.data_from_pit[15:0]
+simple_system_tb.dut.u_pit.data_to_pit[15:0]
+@28
+simple_system_tb.dut.u_pit.delayed_pit_ack
+simple_system_tb.dut.u_pit.pit_irq_o
+simple_system_tb.dut.u_pit.sel_to_pit[1:0]
+@23
+simple_system_tb.dut.u_pit.u_pit.cnt_n[15:0]
+@1000200
+-PIT
+[pattern_trace] 1
+[pattern_trace] 0

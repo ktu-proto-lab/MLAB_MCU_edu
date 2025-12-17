@@ -17,8 +17,8 @@
 
 `else
 // Higher I2c frequency for simulation
-// `define BOOT_I2C_PRESCALER 16'd15
-`define BOOT_I2C_PRESCALER 16'd39 //80MHz sysclock, 400kHz i2c
+`define BOOT_I2C_PRESCALER 16'd15       //80MHz sysclock, 1MHz i2c
+// `define BOOT_I2C_PRESCALER 16'd39    //80MHz sysclock, 400kHz i2c
 `endif
 
 // Peripheral base addresses
@@ -32,12 +32,17 @@
 
 `define PIT_BASE_ADDR   32'h2000_0000
 
-
-// I2C debouncer register size (wait unitl full register fills with ones)
-`define I2C_DEBOUNCER_REG_SIZE 1
-
 // GPIO Count
 `define GPIO_IOS 10
 
 `define UART_NO_FIFO
+
+// Uncomment the following to enable bootloader writeback to eeprom after initial boot
+// `define BOOT_WRITEBACK
+
+// THE FOLLOWING IS UNUSED
+// I2C debouncer register size (wait unitl full register fills with ones)
+// `define I2C_DEBOUNCER_REG_SIZE 1
+
+
 

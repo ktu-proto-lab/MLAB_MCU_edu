@@ -1,0 +1,541 @@
+# SimVision Command Script (Thu Oct 23 10:14:40 AM EEST 2025)
+#
+# Version 24.03.s004
+#
+# You can restore this configuration with:
+#
+#     simvision -input restore.tcl.svcf
+#  or simvision -input restore.tcl.svcf database1 database2 ...
+#
+
+
+#
+# Preferences
+#
+preferences set plugin-enable-svdatabrowser-new 1
+preferences set plugin-enable-groupscope 0
+preferences set plugin-enable-interleaveandcompare 0
+preferences set plugin-enable-waveformfrequencyplot 0
+preferences set toolbar-SimControl-WaveWindow {
+  usual
+  position -anchor e
+}
+preferences set toolbar-txe_waveform_toggle-WaveWindow {
+  usual
+  position -pos 1
+}
+preferences set toolbar-Windows-WaveWindow {
+  usual
+  position -pos 2
+}
+preferences set cursorctl-dont-show-sync-warning 1
+preferences set toolbar-Windows-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-SimControl-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-Search-Console {
+  usual
+  position -pos 2
+}
+preferences set toolbar-Standard-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-Standard-Console {
+  usual
+  position -pos 1
+}
+preferences set toolbar-TimeSearch-WatchWindow {
+  usual
+  shown 0
+}
+preferences set toolbar-sendToIndago-WaveWindow {
+  usual
+  position -pos 1
+}
+
+#
+# PPE data
+#
+array set dbNames ""
+set dbNames(realName1) [database require waves  -hints {
+	file ./waves.shm/waves-1.trn
+	file /eda/mlab_shares/Skaitmena/IbexD/MLAB_riscv_mcu/sim/postsyn/waves.shm/waves-1.trn
+}]
+#
+# Groups
+#
+catch {group new -name TB -overlay 0}
+catch {group new -name IMEM -overlay 0}
+catch {group new -name RegFile -overlay 0}
+catch {group new -name IMEM_Swb -overlay 0}
+catch {group new -name IMEM_wb_s -overlay 0}
+catch {group new -name Ibex -overlay 0}
+catch {group new -name IMEM_wb_m -overlay 0}
+catch {group new -name {Group 18} -overlay 0}
+catch {group new -name {Group 19} -overlay 0}
+catch {group new -name IMEM_if -overlay 0}
+catch {group new -name DMEM -overlay 0}
+catch {group new -name DMEM_wb_s -overlay 0}
+catch {group new -name DMEM_wb_m -overlay 0}
+catch {group new -name GPIO -overlay 0}
+catch {group new -name GPIO_wb_s -overlay 0}
+catch {group new -name I2C_wb_s -overlay 0}
+catch {group new -name I2C -overlay 0}
+catch {group new -name DMEM_if -overlay 0}
+catch {group new -name EEPROM_regs -overlay 0}
+catch {group new -name Bootloader_wb_m -overlay 0}
+catch {group new -name Bootloader -overlay 0}
+catch {group new -name I2c_fsm -overlay 0}
+catch {group new -name wb_fsm -overlay 0}
+catch {group new -name PIT -overlay 0}
+catch {group new -name PIT_wb_s -overlay 0}
+catch {group new -name PADS -overlay 0}
+group using TB
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.SCL}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.SDA}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.clk_sys}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.rst_sys_n}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.ext_pad_io[9:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.dut.ext_pad[9:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.dut.ext_pad_i[9:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.dut.ext_pad_o[9:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.dut.ext_pad_oe[9:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.dut.gpio_o[9:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.dut.gpio_oe[9:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.test_mode}]} ]
+group using IMEM
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    IMEM_wb_s
+group using RegFile
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using IMEM_Swb
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using IMEM_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using Ibex
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    IMEM_if \
+    DMEM_if \
+    IMEM_wb_m \
+    DMEM_wb_m
+group using IMEM_wb_m
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using {Group 18}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using {Group 19}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using IMEM_if
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using DMEM
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    DMEM_wb_s
+group using DMEM_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using DMEM_wb_m
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using GPIO
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    GPIO_wb_s
+group using GPIO_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using I2C_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using I2C
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.dut.SCL_Pad}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.dut.SDA_Pad}]} ] \
+    I2C_wb_s
+group using DMEM_if
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using EEPROM_regs
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_00[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_01[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_02[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_03[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_04[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_05[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_06[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_07[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_08[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_09[7:0]}]} ] \
+    [subst  {$dbNames(realName1)::[format {simple_system_tb.eeprom.PageBuffer_10[7:0]}]} ]
+group using Bootloader_wb_m
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using Bootloader
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    I2c_fsm \
+    Bootloader_wb_m
+group using I2c_fsm
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    wb_fsm
+group using wb_fsm
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using PIT
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    PIT_wb_s
+group using PIT_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using PADS
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+
+#
+# Mnemonic Maps
+#
+mmap new  -reuse -name {Boolean as Logic} -radix %b -contents {{%c=FALSE -edgepriority 1 -shape low}
+{%c=TRUE -edgepriority 1 -shape high}}
+mmap new  -reuse -name {Example Map} -radix %x -contents {{%b=11???? -bgcolor orange -label REG:%x -linecolor yellow -shape bus}
+{%x=1F -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=2C -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=* -label %x -linecolor gray -shape bus}}
+
+#
+# Design Browser windows
+#
+if {[catch {window new WatchList -name "Design Browser 1" -geometry 1278x767+1193+77}] != ""} {
+    window geometry "Design Browser 1" 1278x767+1193+77
+}
+window target "Design Browser 1" on
+browser using {Design Browser 1}
+browser set \
+    -signalsort name
+browser timecontrol set -lock 0
+
+#
+# Waveform windows
+#
+if {[catch {window new WaveWindow -name "Waveform 1" -geometry 1920x1016+2559+-1}] != ""} {
+    window geometry "Waveform 1" 1920x1016+2559+-1
+}
+window target "Waveform 1" on
+waveform using {Waveform 1}
+waveform sidebar select designbrowser
+waveform set \
+    -primarycursor TimeA \
+    -signalnames name \
+    -signalwidth 173 \
+    -units ns \
+    -valuewidth 54
+waveform baseline set -time 0
+
+
+set groupId0 [waveform add -groups TB]
+
+
+set groupId0 [waveform add -groups IMEM]
+
+set groupId1 [waveform find -name IMEM_wb_s]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups DMEM]
+
+set groupId1 [waveform find -name DMEM_wb_s]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups Bootloader]
+
+set groupId1 [waveform find -name I2c_fsm]
+
+set groupId2 [waveform find -name wb_fsm]
+
+
+set groupId1 [waveform find -name Bootloader_wb_m]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups Ibex]
+
+set groupId1 [waveform find -name IMEM_if]
+
+set groupId1 [waveform find -name DMEM_if]
+
+set groupId1 [waveform find -name IMEM_wb_m]
+
+set groupId1 [waveform find -name DMEM_wb_m]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups I2C]
+
+set groupId1 [waveform find -name I2C_wb_s]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups GPIO]
+
+set groupId1 [waveform find -name GPIO_wb_s]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups PIT]
+
+set groupId1 [waveform find -name PIT_wb_s]
+waveform hierarchy collapse $groupId0
+
+
+set groupId0 [waveform add -groups RegFile]
+
+set groupId0 [waveform add -groups EEPROM_regs]
+waveform hierarchy collapse $groupId0
+
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.eeprom.AddressPointer[15:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.clk_sys}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.i2c_int}]}
+	} ]]
+
+set groupId0 [waveform add -groups PADS]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[0].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[0].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[0].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[0].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[1].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[1].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[1].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[1].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[2].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[2].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[2].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[2].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[3].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[3].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[3].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[3].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[4].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[4].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[4].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[4].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[5].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[5].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[5].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[5].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[6].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[6].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[6].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[6].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[7].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[7].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[7].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[7].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[8].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[8].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[8].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[8].pad_io .PAD}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[9].pad_io .DIN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[9].pad_io .DOUT}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[9].pad_io .OEN}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{$dbNames(realName1)::[format {simple_system_tb.dut.\GPIO[9].pad_io .PAD}]}
+	} ]]
+
+waveform xview limits 123648517.52ns 126100150ns
+
+#
+# Waveform Window Links
+#
+
+#
+# Memory Viewer windows
+#
+if {[catch {window new MemViewer -name "Memory Viewer 1" -geometry 1050x784+1136+149}] != ""} {
+    window geometry "Memory Viewer 1" 1050x784+1136+149
+}
+window target "Memory Viewer 1" on
+memviewer using {Memory Viewer 1}
+memviewer set \
+-primarycursor TimeA \
+-units ps \
+-radix default \
+-addressradix default \
+-addressorder MSBtoLSB
+
+memviewer sidebar visibility partial
+
+#
+# Console windows
+#
+console set -windowname Console
+window geometry Console 1156x466+261+564
+
+#
+# Layout selection
+#
+

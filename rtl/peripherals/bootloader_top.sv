@@ -206,9 +206,12 @@ module bootloader_top (
                     start   = 1;           
                 end else if (done) begin
                     next_mem_index = mem_index + 4;
-                    // next_state = (last_read) ? BOOT_FINISH : READ_DATA_BYTE0;
                     next_addr_pointer = `EEPROM_WRITE_ADDR;
+`ifdef BOOT_WRITEBACK
                     next_state = (last_read) ? WRITE_SLAVE_ADDR_W_BIT : READ_DATA_BYTE0;
+`else
+                    next_state = (last_read) ? BOOT_FINISH : READ_DATA_BYTE0;
+`endif            
                 end   
             end
             
