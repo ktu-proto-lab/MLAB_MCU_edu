@@ -12,7 +12,7 @@ set OUTPUT_DLY [expr 0.5*$CYCLE]
 # CLOCK CONSTRAINTS
 # -------------------------------------
 # System clock
-create_clock -name clk_sys -period $CYCLE -waveform [list 0 [expr 0.5*$CYCLE]] [get_ports clk_sys_Pad]
+create_clock -name clk_sys -period $CYCLE -waveform [list 0 [expr 0.5*$CYCLE]] [get_ports clk_sys]
 
 # Virtual I2C SCL
 # create_clock -name scl_virtual -period $I2C_CYCLE -waveform [list 0 [expr 0.5*$I2C_CYCLE]] [get_ports SCL_Pad]
@@ -30,11 +30,11 @@ set_clock_uncertainty 0.05 [get_clocks clk_sys] -hold
 # Delays outside the chip
 
 # Set any input/output delays so genus doesn't show unconstrained inputs/outputs
-set_input_delay -max $INPUT_DLY -clock clk_sys [get_ports {rst_sys_n_Pad ext_pad* SCL_Pad* SDA_Pad* test_mode_Pad}]
-set_input_delay -min 0 -clock clk_sys [get_ports {rst_sys_n_Pad ext_pad* SCL_Pad* SDA_Pad* test_mode_Pad}]
+set_input_delay -max $INPUT_DLY -clock clk_sys [get_ports {rst_async_n scl_pad_i sda_pad_i ext_pad*}]
+set_input_delay -min 0 -clock clk_sys [get_ports {rst_async_n scl_pad_i sda_pad_i ext_pad*}]
 
-set_output_delay -max $OUTPUT_DLY -clock clk_sys [get_ports {ext_pad* SCL_Pad* SDA_Pad*}]
-set_input_delay -min 0 -clock clk_sys [get_ports {ext_pad* SCL_Pad* SDA_Pad*}]
+set_output_delay -max $OUTPUT_DLY -clock clk_sys [get_ports {scl_pad_o scl_padoen_o sda_pad_o sda_padoen_o gpio_o* gpio_oe*}]
+set_output_delay -min 0 -clock clk_sys [get_ports {scl_pad_o scl_padoen_o sda_pad_o sda_padoen_o gpio_o* gpio_oe*}]
 
 # I2C input delays (from 24CS512)W
 
@@ -66,18 +66,26 @@ set_load 0.05 [all_outputs]
 # set_dont_touch [get_cells {u_i2c/u_i2c/byte_controller/bit_controller/cSCL_reg[0] \
 #                            u_i2c/u_i2c/byte_controller/bit_controller/cSCL_reg[1]}]
 
-set_false_path -from [get_ports test_mode_Pad]
+# set_false_path -from [get_ports test_mode_Pad]
 # False paths for I2C lines because synchronizers on inputs
-set_false_path -to [get_ports SCL_Pad*]
-set_false_path -from [get_ports SCL_Pad*] 
-# -to [get_pins u_i2c/u_i2c/byte_controller/bit_controller/cSCL_reg[1]/D]
-set_false_path -to [get_ports SDA_Pad*]
-set_false_path -from [get_ports SDA_Pad*]
+# set_false_path -to [get_ports SCL_Pad*]
+# set_false_path -from [get_ports SCL_Pad*] 
+# # -to [get_pins u_i2c/u_i2c/byte_controller/bit_controller/cSCL_reg[1]/D]
+# set_false_path -to [get_ports SDA_Pad*]
+# set_false_path -from [get_ports SDA_Pad*]
 
-# False path for Reset synchronizer (Does this also exclude check between stablization DFFs?)
-# set_false_path -from [get_ports {rst_sys_n_Pad}] -to [all_registers]
-set_disable_timing [get_ports rst_sys_n_Pad]
+# # False path for Reset synchronizer (Does this also exclude check between stablization DFFs?)
+# # set_false_path -from [get_ports {rst_sys_n_Pad}] -to [all_registers]
+# set_disable_timing [get_ports rst_sys_n_Pad]
 
-# False path for GPIOs
-set_false_path -to [get_ports ext_pad*]
+# # False path for GPIOs
+# set_false_path -to [get_ports ext_pad*]
+# set_false_path -from [get_ports ext_pad*]
+
+
+set_false_path -from [get_ports scl_pad_i] 
+set_false_path -from [get_ports sda_pad_i] 
+
+set_disable_timing [get_ports rst_async_n]
+
 set_false_path -from [get_ports ext_pad*]
