@@ -30,16 +30,16 @@ set_db lbr_seq_in_out_phase_opto true
 ###############################################################
 
 #set_db init_lib_search_path "/eda/cad_run/sg13g2/digital/"
-set_db init_hdl_search_path "../rtl/core ../rtl/include ../rtl/pdk ../rtl/peripherals ../rtl/primitives ../rtl/wb"
+set_db init_hdl_search_path "../rtl/include"
 
 # Use slow libs, because we are interested in setup time during synthesis
 
 read_libs "/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_slow_1p08V_125C.lib \
 /eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x32_c2_bm_bist_slow_1p08V_125C.lib"
 
-# read_physical -lef "/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_tech.lef \
-# /eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_stdcell.lef \
-# /eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lef/RM_IHPSG13_1P_1024x32_c2_bm_bist.lef"
+read_physical -lef "/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_tech.lef \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_stdcell.lef \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lef/RM_IHPSG13_1P_1024x32_c2_bm_bist.lef"
 
 ####################################################################
 ## Load Design

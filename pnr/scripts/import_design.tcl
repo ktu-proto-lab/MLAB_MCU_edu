@@ -10,34 +10,32 @@ set_db timing_analysis_type ocv
 # Don't add assigns for LVS
 set_db init_no_new_assigns 1
 
-#Ignore scan chain checks
-set_db place_global_ignore_scan false
+#Ignore scan chain checks TODO: keep this commented or not?
+# set_db place_global_ignore_scan false
 #####################################
 # FILE IMPORT
 #####################################
 # MMMC failas - lusto funkciniu rezimu ir PVT (Process, Voltage, Temperature) variacijos kampai
-read_mmmc ibex_mmmc_scan.view
+read_mmmc ibex_mmmc.view
 
 # Nuskaitom technologijos (metalai, via), std celiu, fiziniu parametru, io celiu .lef bibliotekas
 read_physical -lef { \
-/eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/lef/ixc013g2ng_tech.lef \
-/eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/lef/ixc013g2ng_stdcell_v5p7.lef \
-/eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/lef/ixc013g2ng_phys.lef \
-/eda/cad_run/sg13g2/digital/ixc013g2_iocell/lef/ixc013g2_iocell_v5p8.lef \
-/eda/cad_run/sg13g2/digital/RM_IHPSG13_1P_1024x32_c2_bm/lef/RM_IHPSG13_1P_1024x32_c2_bm.lef}
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_tech.lef \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_stdcell.lef \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lef/RM_IHPSG13_1P_1024x32_c2_bm_bist.lef}
 
 # Verilog netlist'as su pridetais IO padukais
 read_netlist ../syn/synOutData/post_syn_netlist.v
 
 # Pagal biblioteka nurodom kaip vadinasi maitinimo ir zemes mazgai (gali buti ir daugiau nei po viena sudetingesniame projekte)
-set_db init_power_nets {VDD VDDPAD}
-set_db init_ground_nets {VSS VSSPAD} 
+set_db init_power_nets {VDD}
+set_db init_ground_nets {VSS} 
 
 # Inicializuojame projekta
 init_design
 
 # read the scan chain
-read_def ../syn/synOutData/ibex_simple_system-scanDEF
+# read_def ../syn/synOutData/ibex_simple_system-scanDEF
 
 # Remove assigns incoming from syn
 delete_assigns -add_buffer -report
