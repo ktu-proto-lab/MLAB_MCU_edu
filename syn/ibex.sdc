@@ -1,8 +1,6 @@
-set CYCLE 12.5
-# I2C 1MHz SCL
-# set I2C_CYCLE 1000
-set INPUT_DLY [expr 0.5*$CYCLE]
-set OUTPUT_DLY [expr 0.5*$CYCLE]
+
+# System frequency 10MHz
+set CYCLE 100
 
 # Default INPUT / OUTPUT delay - half cycle
 set INPUT_DLY [expr 0.5*$CYCLE]

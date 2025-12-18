@@ -22,6 +22,9 @@ set_db lp_insert_clock_gating 0
 # Easier to debug but try to COMMENT and see usage difference
 set_db auto_ungroup none
 
+# IHP Open PDK has no preset flops need the following option to replace preset to reset flop
+set_db lbr_seq_in_out_phase_opto true
+
 ###############################################################
 ## Library setup
 ###############################################################
@@ -34,9 +37,9 @@ set_db init_hdl_search_path "../rtl/core ../rtl/include ../rtl/pdk ../rtl/periph
 read_libs "/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_slow_1p08V_125C.lib \
 /eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x32_c2_bm_bist_slow_1p08V_125C.lib"
 
-read_physical -lef "/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_tech.lef \
-/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_stdcell.lef \
-/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lef/RM_IHPSG13_1P_1024x32_c2_bm_bist.lef"
+# read_physical -lef "/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_tech.lef \
+# /eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_stdcell.lef \
+# /eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lef/RM_IHPSG13_1P_1024x32_c2_bm_bist.lef"
 
 ####################################################################
 ## Load Design
@@ -70,10 +73,10 @@ if {![file exists ${_REPORTS_PATH}]} {
   puts "Creating directory ${_REPORTS_PATH}"
 }
 
-if {![file exists ${_MODUS_WORKDIR}]} {
-  file mkdir ${_MODUS_WORKDIR}
-  puts "Creating directory ${_MODUS_WORKDIR}"
-}
+# if {![file exists ${_MODUS_WORKDIR}]} {
+#   file mkdir ${_MODUS_WORKDIR}
+#   puts "Creating directory ${_MODUS_WORKDIR}"
+# }
 
 ####################################################################
 ## Constraints Setup
@@ -284,18 +287,18 @@ report_summary -directory $_REPORTS_PATH
 ## DFT Reports
 #############################################
 
-report_scan_setup > $_REPORTS_PATH/${DESIGN}-DFTsetup_final
-write_scandef > $_OUTPUTS_PATH/${DESIGN}-scanDEF
+# report_scan_setup > $_REPORTS_PATH/${DESIGN}-DFTsetup_final
+# write_scandef > $_OUTPUTS_PATH/${DESIGN}-scanDEF
 
 ## check_atpg_rules -library <Verilog simulation library files> -compression -directory $MODUS_WORKDIR
 ## write_dft_jtag_boundary_verification -library <Verilog structural library files> -directory $MODUS_WORKDIR 
-write_dft_atpg \
-    -library { /eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/verilog/ixc013g2ng_stdcell.v \
-        /eda/cad_run/sg13g2/digital/ixc013g2_iocell/verilog/ixc013g2_iocell.v \
-        /eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/verilog/ixc013g2ng_primitives.v \
-        /eda/cad_run/sg13g2/digital/ixc013g2_iocell/verilog/ixc013g2_primitives.v \
-        }\
-    -directory $_MODUS_WORKDIR  
+# write_dft_atpg \
+#     -library { /eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/verilog/ixc013g2ng_stdcell.v \
+#         /eda/cad_run/sg13g2/digital/ixc013g2_iocell/verilog/ixc013g2_iocell.v \
+#         /eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/verilog/ixc013g2ng_primitives.v \
+#         /eda/cad_run/sg13g2/digital/ixc013g2_iocell/verilog/ixc013g2_primitives.v \
+#         }\
+#     -directory $_MODUS_WORKDIR  
   
 ######################################################################################################
 ## write backend file set (verilog, SDC, config, etc.)
