@@ -1,0 +1,33 @@
+# Innovus will use global built-in wireload RC models
+# Not really acceptable for tape-out
+
+create_library_set -name lib_max -timing { \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_slow_1p08V_125C.lib \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x32_c2_bm_bist_slow_1p08V_125C.lib}
+
+create_library_set -name lib_typ -timing { \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_typ_1p20V_25C.lib \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x32_c2_bm_bist_typ_1p20V_25C.lib}
+
+create_library_set -name lib_min -timing { \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_fast_1p32V_m40C.lib \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x32_c2_bm_bist_fast_1p32V_m55C.lib}
+
+create_timing_condition -name TC_max -library_set {lib_max}
+create_timing_condition -name TC_typ -library_set {lib_typ}
+create_timing_condition -name TC_min -library_set {lib_min}
+
+create_delay_corner -name DC_max -timing_condition {TC_max}
+create_delay_corner -name DC_typ -timing_condition {TC_typ}
+create_delay_corner -name DC_min -timing_condition {TC_min}
+
+create_constraint_mode -name CM_func -sdc_files {../syn/synOutData/post_syn.sdc}
+
+
+create_analysis_view -name func_max -constraint_mode {CM_func} -delay_corner {DC_max}
+create_analysis_view -name func_typ -constraint_mode {CM_func} -delay_corner {DC_typ}
+create_analysis_view -name func_min -constraint_mode {CM_func} -delay_corner {DC_min}
+
+
+set_analysis_view -setup {func_max} -hold {func_max func_typ func_min}
+

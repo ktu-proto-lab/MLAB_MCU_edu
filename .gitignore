@@ -92,7 +92,7 @@ pnr/*
 !pnr/IO_configs/
 !pnr/scripts/**
 !pnr/IO_configs/**
-
+!pnr/ibex_mmmc.view
 
 ##################################################
 ## FPGA IGNORE FILES
