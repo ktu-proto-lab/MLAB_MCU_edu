@@ -85,6 +85,25 @@ set_instance_placement_status -all_hard_macros -status fixed
 
 delete_relative_floorplan -all
 
+#####################################
+# Pin placement
+#####################################
+# Ext pads
+create_pin_group -spread_pins -pins ext_pad* -name ext_pads
+
+create_pin_guide -edge 2 -offset_start 35 -offset_end 455 -pin_group ext_pads
+
+# All other pins
+create_pin_group -spread_pins -pins * -name all
+
+create_pin_guide -edge 3 -offset_start 470 -offset_end 35 -pin_group all 
+
+# Isdelioja pin'us pagal paplace'inta dizaina
+assign_io_pins    
+
+# Check if placement was legal
+check_pin_assignment -out_file Reports/check_pin_assign.rpt
+
 # Issaugome floorplan'a
 write_db dbs/floorplan.enc
 

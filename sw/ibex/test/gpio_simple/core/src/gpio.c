@@ -6,11 +6,16 @@
 #include <stdint.h>
 #include "int.h"
 
-volatile uint32_t counter = 1;  // Checks data initialization
-volatile uint16_t stepper = 255;// Checks half-word instructions
+volatile uint32_t counter = 1;      // Checks data initialization in dmem
+volatile uint16_t stepper = 255;    // Checks half-word instructions
 
 volatile uint32_t  gpio_int_status = 0; // Holds interrupt status
+
 int main() {
+    //####################################################
+    // General CPU testing
+    //####################################################
+
     volatile uint32_t result;
     // Executes load, store, branch, add instructions
     while (counter < 10) {
@@ -18,9 +23,9 @@ int main() {
     }
     result = (uint32_t)(stepper * counter); // Check multiplication
 
-//####################################################
-// GPIO TESTING
-//####################################################
+    //####################################################
+    // GPIO testing
+    //####################################################
 
     volatile uint32_t* gpio_regs;
     gpio_regs = (uint32_t*) GPIO_ADDR; // First GPIO reg - output register

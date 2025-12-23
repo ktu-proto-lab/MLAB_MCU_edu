@@ -1,6 +1,6 @@
 
 #####################################
-# GLOBALUS MAZGAI
+# Global nets
 #####################################
 # Susiejame maitinimo mazgus (nes jie nera aprasyt Verilog'e)
 connect_global_net VDD -type pg_pin -pin_base_name VDD -inst_base_name *
@@ -13,7 +13,7 @@ connect_global_net VSS -type pg_pin -pin_base_name VSS! -inst_base_name *
 connect_global_net VDD -type pg_pin -pin_base_name VDDARRAY! -inst_base_name *
 
 #####################################
-# Power Ring (Maitinimo ziedas)
+# Power Ring 
 #####################################
 set_db add_rings_target default
 set_db add_rings_extend_over_row 0
@@ -41,6 +41,35 @@ add_rings \
     -use_wire_group 1 \
     -use_wire_group_bits 4 \
     -use_interleaving_wire_group 1
+
+#####################################
+# Block ring around dmem
+#####################################
+set_db add_rings_target default
+set_db add_rings_extend_over_row 0
+set_db add_rings_ignore_rows 0
+set_db add_rings_avoid_short 0
+set_db add_rings_skip_shared_inner_ring none
+set_db add_rings_stacked_via_top_layer TopMetal2
+set_db add_rings_stacked_via_bottom_layer Metal1
+set_db add_rings_via_using_exact_crossover_size 1
+set_db add_rings_orthogonal_only true
+set_db add_rings_skip_via_on_pin {  standardcell }
+set_db add_rings_skip_via_on_wire_shape {  noshape }
+add_rings \
+    -nets {VDD VSS} \
+    -around user_defined \
+    -user_defined_region {2.52 3.5 2.52 371.74 451.68 371.74 451.68 3.5 2.52 3.5} \
+    -type block_rings \
+    -layer {top Metal5 bottom Metal5 left TopMetal1 right TopMetal1} \
+    -width {top 2 bottom 2 left 2 right 2} \
+    -spacing {top 2 bottom 2 left 2 right 2} \
+    -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} \
+    -center 0 \
+    -skip_side {bottom left } \
+    -threshold 0 \
+    -jog_distance 0 \
+    -snap_wire_center_to_grid none
 
 #####################################
 # Stripes
@@ -84,34 +113,6 @@ add_stripes \
     -block_ring_top_layer_limit TopMetal2 \
     -block_ring_bottom_layer_limit Metal1 \
     -use_wire_group 0 \
-    -snap_wire_center_to_grid none
-
-
-# Block ring around dmem
-set_db add_rings_target default
-set_db add_rings_extend_over_row 0
-set_db add_rings_ignore_rows 0
-set_db add_rings_avoid_short 0
-set_db add_rings_skip_shared_inner_ring none
-set_db add_rings_stacked_via_top_layer TopMetal2
-set_db add_rings_stacked_via_bottom_layer Metal1
-set_db add_rings_via_using_exact_crossover_size 1
-set_db add_rings_orthogonal_only true
-set_db add_rings_skip_via_on_pin {  standardcell }
-set_db add_rings_skip_via_on_wire_shape {  noshape }
-add_rings \
-    -nets {VDD VSS} \
-    -around user_defined \
-    -user_defined_region {2.52 3.5 2.52 371.74 451.68 371.74 451.68 3.5 2.52 3.5} \
-    -type block_rings \
-    -layer {top Metal5 bottom Metal5 left TopMetal1 right TopMetal1} \
-    -width {top 2 bottom 2 left 2 right 2} \
-    -spacing {top 2 bottom 2 left 2 right 2} \
-    -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} \
-    -center 0 \
-    -skip_side {bottom left } \
-    -threshold 0 \
-    -jog_distance 0 \
     -snap_wire_center_to_grid none
 
 # Metal5 for DMEM

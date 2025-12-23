@@ -1,18 +1,26 @@
 ##########################
 # Sign-Off optimization and timing
 ##########################
-set_db extract_rc_effort_level signoff
-set_multi_cpu_usage -remote_host 1
-set_db opt_signoff_verbose true
+# set_db extract_rc_effort_level signoff
+# set_multi_cpu_usage -remote_host 1
+# set_db opt_signoff_verbose true
 
 
-opt_signoff -all \
-			-report_prefix signoff_opt \
-			-report_dir Reports/SignOff_OPT
+# opt_signoff -all \
+# 			-report_prefix signoff_opt \
+# 			-report_dir Reports/SignOff_OPT
 
-time_design_signoff -report_dir Reports/SignOff_STA
+# time_design_signoff -report_dir Reports/SignOff_STA
 
-write_db dbs/signoff_opt.enc
+# write_db dbs/signoff_opt.enc
+
+
+
+##########################
+# ADD FILLER CELLS
+##########################
+add_fillers -base_cells sg13g2_decap_8 sg13g2_decap_4 sg13g2_fill_1 sg13g2_fill_2 sg13g2_fill_4 sg13g2_fill_8 -prefix FILLER
+
 #########################
 # CHECKS
 #########################
@@ -32,11 +40,7 @@ check_connectivity -type all \
 check_antenna 	-out_file Reports/ibex_simple_system.antenna.rpt \
 				-error 1000
 
-##########################
-# ADD FILLER CELLS
-##########################
 
-add_fillers -base_cells DECAP25JI DECAP10JI DECAP5JI DECAP3JI FEED25JI FEED10JI FEED5JI FEED3JI FEED2JI FEED1JI -prefix FILLER
 # No DECAPS to test influence on power
 # add_fillers -base_cells FEED25JI FEED10JI FEED5JI FEED3JI FEED2JI FEED1JI -prefix FILLER
 
@@ -48,7 +52,7 @@ write_netlist pnrOutData/pnr_netlist.v
 # Netlist for lvs
 write_netlist pnrOutData/pnr_netlist_LVS.v \
 -flat \
--include_phys_cells {DECAP3JI DECAP5JI DECAP10JI DECAP25JI vddcore gndcore vddpad gndpad filler1u filler2u filler4u filler10u} \
+-include_phys_cells {sg13g2_decap_8 sg13g2_decap_4 sg13g2_fill_1 sg13g2_fill_2 sg13g2_fill_4 sg13g2_fill_8 } \
 
 # WRite SDF for netlist annotation noedge writes single path between comb non-unate timing arcs
 write_sdf pnrOutData/simple_system.sdf -edges noedge -recompute_delay_calc
@@ -71,12 +75,10 @@ write_db dbs/final.enc
 #########################
 # GENERATE GDS		
 #########################
-write_stream pnrOutData/simple_system.gds \
-	-map_file /eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/lef/map/SG13G2_streamout.map \
-	-lib_name DesignLib \
-	-output_macros \
-	-unit 1000 \
-	-mode all
+# write_stream pnrOutData/simple_system.gds \
+# 	-map_file /eda/cad_run/sg13g2/digital/ixc013g2ng_stdcell/lef/map/SG13G2_streamout.map \
+# 	-lib_name DesignLib \
+# 	-output_macros \
+# 	-unit 1000 \
+# 	-mode all
 
-# Report scan chain
-report_scan_chain -out_file pnrOutData/postpnr-DFTchains -verbose
