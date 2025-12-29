@@ -15,8 +15,9 @@ Simple microcontroller based on the [Ibex core](https://github.com/lowRISC/ibex)
 - I2C bootloader
 - Peripherals:
   - I2C master
+  - UART master
   - Programmable timer
-  - 12 GPIOs
+  - 10 GPIOs
 - All peripherals suport interrupts
 
 ---
@@ -24,29 +25,50 @@ Simple microcontroller based on the [Ibex core](https://github.com/lowRISC/ibex)
 ## Peripherals
 |Peripheral|Base Address|
 |----------|------------|
+|PIT|0x20000000|
+|I2C|0x30000000|
+|GPIO|0x40000000|
+|UART|0x50000000|
 |IMEM|0x80000000|
 |DMEM|0x90000000|
-|GPIO|0x40000000|
-|I2C|0x30000000|
-|PIT|0x20000000|
 
 ---
 
+## Directory structure 
+
+### `doc/`
+Contains documentation for peripheral IPs, the boot EEPROM and the SRAM memories.
+### `pnr/`
+Contains scripts for Place and Route, MMMC configuration file.
+### `rtl/`
+SystemVerilog RTL for the MCU, where ibex_simple_system.sv contains the top module.
+### `script/`
+Contains scripts for simulating the design at different stages, scripts for launching synthesis and P&R tools.
+### `sim/`
+Simulations are performed in this directory. Here you will find the xrun logs and waveform restore files for the three stages of simulation (RTL, post synthesis and post P&R).
+### `sw/`
+Directory for the MCU software. This directory contains C code for the MCU and all the files necessary for compilation (linker, startup, make).
+### `syn/`
+Contains script for synthesis and the SDC constraint file.
+### `tb/`
+Contains testbenches for the RTL.
+
+---
 
 ## RTL Simulation
 
-Before simulation, PDK files must be added MANUALY to `rtl/pdk` directory (see [rtl/README.md](rtl/README.md#pdk)) and the processor software has to be compiled (see [sw/README.md](sw/README.md#Compiling)).
+Before simulation the processor software has to be compiled (see [sw/README.md](sw/README.md#Compiling)).
 
 #### Cadence Xcelium
 ##### Lab PC
 Start simulation by executing `xrun_sim_run.sh` script in the terminal:
 ```bash
-./script/xrun_sim_run.sh -gui -t full_peripheral
+./script/xrun_sim_run.sh -gui -t gpio_simple
 ```
 Restore waveform configuration with File -> Source Command Script -> Select `restore.tcl.svcf`.
 
 If any RTL source files changed or processor software is recompiled – reload simulator (Simulation -> Reinvoke Simulator).
-
+<!--
 #### Verilator + gtkWave
 
 ##### Ubuntu (Linux)
@@ -97,4 +119,5 @@ set_property is_global_include true [get_files  <path to repo>/MLAB_riscv_mcu-wi
 7. Program the EEPROM (see [sw/README.md](sw/README.md#Programming)) and plug it into PMOD JA connector.
 
 To save the FPGA configuration to the BASYS3's non-volatile memory (so you don't have to reprogram it after every power cycle), refer to the official [Basys 3 Programming Guide](https://digilent.com/reference/learn/programmable-logic/tutorials/basys-3-programming-guide/start) from Digilent.
+-->
 
