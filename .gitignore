@@ -71,8 +71,8 @@ rtl/pdk/*
 .vscode/
 
 # Ignore all build folders
-sw/*/*/build/*
-!sw/*/*/build/*.list
+sw/*/*/*/build/*
+# !sw/*/*/build/*.list
 
 # Ignore everything in syn except run script and .sdc constraints
 syn/*
