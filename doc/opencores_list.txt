@@ -1,4 +1,0 @@
-GPIO	-	https://github.com/klyone/opencores-ip/tree/communication_controller_general-purpose_i-o_gpio_core
-I2C	-	https://github.com/klyone/opencores-ip/tree/communication_controller_i2c_controller_core
-        http://codeload.github.com/klyone/opencores-ip/zip/refs/heads/communication_controller_i2c_slave
-SPI	-
