@@ -30,19 +30,16 @@ int main() {
     volatile uint32_t* gpio_regs;
     gpio_regs = (uint32_t*) GPIO_ADDR; // First GPIO reg - output register
 
-    // Enable interrupts in Control register (Base + 0x18)
-    *(gpio_regs + 6) = 0x01;
-    // Go to int enable register (Base+0x0C) (+3 because increments in 32bit segments)
-    *(gpio_regs + 3) = 0x08; // Enable interrupt on GPIO 3
+ž    *(gpio_regs + 6) = 0x01;
+ž    *(gpio_regs + 3) = 0x08;
 
     while(1){
         if(gpio_int_status == 0x8){ // IF GPIO3 triggered an interrupt
             // Clear int status
             gpio_int_status = 0;
-            // Turn on gpios incrementally from GPIO4 to GPIO7
             for (int i = 0; i < 4; i++) {
-                *(gpio_regs + 2) = (0x10 << i); // GPIO_OE reg
-                *(gpio_regs + 1) = (0x10 << i); // GPIO_OUT reg
+                *(gpio_regs + 2) = (0x10 << i); 
+                *(gpio_regs + 1) = (0x10 << i); 
             }
         }
     }
