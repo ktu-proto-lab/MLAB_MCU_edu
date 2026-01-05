@@ -30,8 +30,8 @@ int main() {
     volatile uint32_t* gpio_regs;
     gpio_regs = (uint32_t*) GPIO_ADDR; // First GPIO reg - output register
 
-ž    *(gpio_regs + 6) = 0x01;
-ž    *(gpio_regs + 3) = 0x08;
+    *(gpio_regs + 6) = 0x01;
+    *(gpio_regs + 3) = 0x08;
 
     while(1){
         if(gpio_int_status == 0x8){ // IF GPIO3 triggered an interrupt
