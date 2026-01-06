@@ -31,12 +31,13 @@ module UART_RX
   reg [7:0] r_RX_Byte     = 0;
   reg       r_RX_DV       = 0;
   reg [2:0] r_SM_Main     = 0;
+  reg       i_RX_Serial_d = 0; // one cycle delayed input signal
   
   
   // Purpose: Control RX state machine
   always @(posedge i_Clock)
   begin
-      
+    i_RX_Serial_d <= i_RX_Serial;
     case (r_SM_Main)
       IDLE :
         begin
@@ -44,7 +45,7 @@ module UART_RX
           r_Clock_Count <= 0;
           r_Bit_Index   <= 0;
           
-          if (i_RX_Serial == 1'b0)          // Start bit detected
+          if (i_RX_Serial == 1'b0 && i_RX_Serial_d == 1'b1)          // Start bit detected
             r_SM_Main <= RX_START_BIT;
           else
             r_SM_Main <= IDLE;
