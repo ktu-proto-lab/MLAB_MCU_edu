@@ -14,34 +14,8 @@
 GPIO_HandleTypeDef gpio;
 UART_HandleTypeDef huart;
 
-void DELAY_US(uint64_t wait){
-  uint64_t cycle;
-  uint32_t mcycle;
-  uint32_t mcycleh;
-  wait=wait*CPUFreq;
-  __asm__ volatile ("csrr %0, mcycle":"=r"(mcycle));
-  __asm__ volatile ("csrr %0, mcycleh":"=r"(mcycleh));
-  cycle=mcycle | (uint64_t)mcycleh << 32;
-  wait+=cycle;
-  while (cycle < wait){
-    __asm__ volatile ("csrr %0, mcycle":"=r"(mcycle));
-    __asm__ volatile ("csrr %0, mcycleh":"=r"(mcycleh));
-    cycle=mcycle | (uint64_t)mcycleh << 32;
-  }
-}
-
-void DELAY_MS(uint64_t wait){
-  DELAY_US(wait*1000);
-}
 
 uint8_t transmit[13] = "Hello World!\n";
-uint8_t enter1[18]   = "\nEnter 1st number\n";
-uint8_t enter2[18]   = "\nEnter 2nd number\n";
-uint8_t enterop[17]  = "\nEnter operation\n";
-uint8_t entered[8]   = "Entered ";
-uint8_t result[8]    = "\nResult ";
-
-
 uint8_t receive[2];
 
 int main() {
@@ -62,39 +36,47 @@ int main() {
   gpio.regs->AUX |= GPIO_PIN_1; // Set GPIO pin 1 to output auxilary signal (UART TX)
   gpio.regs->OE |= GPIO_PIN_1; // Enable output on GPIO pin 1
 
-  UART_Transmit(&huart, transmit, 13);
+  UART_Transmit(&huart, transmit, 13); // Transmit "Hello World!" message
   
   uint8_t num1, num2;
+  
+  // Jumps into forever loop  
   while (1){
-    UART_Transmit(&huart, enter1, 18);
+    UART_Transmit(&huart, "\nEnter 1st number\n", 18);
     UART_Receive(&huart, receive, 1);
-    UART_Transmit(&huart, entered, 8);
+    UART_Transmit(&huart, "Entered ", 8);
     UART_Transmit(&huart, receive, 1);
+    
+    // Converts a string to an number. For exmaple number '4' in ASCII format is 52 in decimal value. So for procesor to get a 4 in in decimal, we must either substract 48 or use this function
     num1 = atoi(receive);
     
-    UART_Transmit(&huart, enter2, 18);
+    UART_Transmit(&huart, "\nEnter 2nd number\n", 18);
     UART_Receive(&huart, receive, 1);
-    UART_Transmit(&huart, entered, 8);
+    UART_Transmit(&huart, "Entered ", 8);
     UART_Transmit(&huart, receive, 1);
     num2 = atoi(receive);
     
-    UART_Transmit(&huart, enterop, 17);
+    UART_Transmit(&huart, "\nEnter operation\n", 17);
     UART_Receive(&huart, receive, 1);
-    UART_Transmit(&huart, entered, 8);
+    UART_Transmit(&huart, "Entered ", 8);
     UART_Transmit(&huart, receive, 1);
     
-    UART_Transmit(&huart, result, 8);
+    UART_Transmit(&huart, "\nResult ", 8);
     
-    int8_t ans=num1;
+    int8_t ans;
     
-    if (receive[0]=="+"){
-      ans=ans+num2;
+    if (receive[0]=='+'){
+      ans=num1+num2;
     }
-    else if (receive[0]=="-"){
-      ans=ans-num2;;
+    else if (receive[0]=='-'){
+      ans=num1-num2;
     }
     uint8_t toPrint[3];
+    
+    // Just like atoi, itoa functions does the oposite, it converts a decimal number to ASCII.
+    // First argument (ans) is a decimal number, 2nd argument (toPrint) is output in ASCII, and 3rd argument (10) – numerical base. 
     itoa(ans,toPrint,10);
+    
     UART_Transmit(&huart, toPrint, 3);
     
     

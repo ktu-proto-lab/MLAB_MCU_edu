@@ -81,9 +81,6 @@ module simple_system_tb;
     //==================================================
     // GPIO tristate modeling
     //==================================================
-    // DUT drives pads
-    
-
     // DUT reads pads
     assign ext_pad_i  = ext_pad_io;
 
@@ -91,6 +88,7 @@ module simple_system_tb;
     genvar j;
     generate
         for (j = 0; j < GPIO_COUNT; j++) begin : TB_GPIO
+        // DUT drives pads
         assign ext_pad_io[j] = gpio_oe[j] ? gpio_o[j] : 1'bz;
         assign ext_pad_io[j] =
             out_valid[j] ? output_value[j] : 1'bz;
@@ -180,11 +178,16 @@ module simple_system_tb;
         
         #1_000_000;
 
-
-
         send_uart_string("6",1);
         #5_000_000
         send_uart_string("7",1);
+        #5_000_000
+        send_uart_string("-",1);
+        #4_000_000
+        
+        send_uart_string("9",1);
+        #5_000_000
+        send_uart_string("5",1);
         #5_000_000
         send_uart_string("+",1);
         #4_000_000
