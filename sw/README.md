@@ -1,26 +1,25 @@
 ## Directory structure
 
-Software sources and examples for the Ibex core.
+Software for the Ibex core.
 
-- `ibex_repo_sw_example/`: Reference software from the Ibex repository.
-- `ibex_sw/`: Custom software repository for Ibex program generation.
-  - `common/`: 
-    - `common.mk`: Common MakeFile for all programs
+- `ibex/`: Software directory for building executable programs for the Ibex core.
+  - `common/`: Shared files used by all software projects.
+    - `drivers/`: Peripheral driver implementations. Each peripheral has its own subdirectory for the original (earliest) version. 
+    Updated driver revisions are stored in versioned subdirectories such as `v0.1/`, `v0.2/`, etc.
+    For new projects, always use the latest available version. 
+    - `lib/`: Common C libraries.
+    - `common.mk`: Common MakeFile included by all projects.
     - `crt0.S`: Startup assembly code.
     - `link.ld`: Linker script.
-  - `gpio`:
-    - `build/`: Program build folder (Present only after running make)
-      - `gpio.bin`: Compiled program bin file ready for uploading to EEPROM (padded with zeros)
-      - `verilog_hex.v`: Compiled program in HEX file for simulation
-      - `gpio.list`: Compiled assembly listing (human-readable).
-    - `gpio.c`: Main C source file for the program.
-    - `Makefile`: Build file for compiling the software.
-  - `verilog_bin.bin`: (Copied form last compiled program `build/` folder) Compiled program bin file ready for uploading to EEPROM (padded with zeros)
-  - `verilog_hex.v`: (Copied form last compiled program build/ folder) Compiled program in HEX file for simulation
-  - `verilog_hex.v_mem_test`: EEPROM test file (fils full EEPROM of data, for checking bootloader)
-- `programmer/`: Software and firmware required for physical EEPROM programming.
-  - `programmer.py`: Software written in python to load BIN file to EEPROM.
-  - `programmer.cpp`: ESP32 microcontroller firmware for EEPROM programming.
+  - `example/`: Template project for creating new programs.
+    - `build/`: Program build output directory (created by running `make`).
+    - `core/`: Main source and header files, including interrupt handling.
+    - `drivers/`: Project-specific copy of the required drivers from `common/drivers/`.
+  - `test/`: Main projects used in the MCU labs.
+    - `full_peripheral/`: Program that runs a state machine to test all peripherals (for detailed explanation see [test/full_peripheral/readme.md](ibex/test/full_peripheral/readme.md))
+    - `gpio_simple/`: Basic GPIO example project.
+    - `uart_simple/`: basic UART example project.
+  - `other_test/`: Additional projects for testing the MCU. 
 
 ## Toolchain
 
@@ -42,19 +41,24 @@ Activate it and install Ubuntu by following the guide
 ### 😩 
 
 ## Compiling
-When software is modified, just run 
-```bash 
+
+To build a project, navigate to the desired project directory and run `make`.
+
+For example, to compile the `full_peripheral` project:
+```bash
+cd test/full_peripheral
 make
 ```
-in program folder. Necessary files for simulation is copied to `ibex_sw/` folder.
-If you are compiling software on one machine and running simulation on another, just copy `ibex_sw/verilog_hex.v` file and run simulation.
-
+This will create a `build/` directory containing the compiled output.
+When rebuilding a project, it is recommended to clean the previous build first:
 ```bash
 make clean
 ```
-Only removes `ibex_sw/gpio/build/` folder, but `verilog_hex.v` and `verilog_bin.bin` in `ibex_sw/` folder remains untouched.
+This will remove the previous `build/` directory.  
 
-## Programming
+If you compile the software on one machine and run the simulation on another, copy the `build/` directory to the corresponding project directory on the simulation machine. Or at minimum copy the `build/verilog_hex.v` file. `verilog_hex.v` file contains the compiled machine code in a Verilog-readable format and is used to initialize the EEPROM model during simulation.
+
+## Program flashing for FPGA
 
 To run compiled software on physical hardware for example on FPGA you need to upload the binary image into an I2C EEPROM. We use the 24CS512 EEPROM (see [../doc/24CS512.pdf](../doc/24CS512.pdf)). And we use a custom programmer based on the [ESP8266 MCU](https://www.wemos.cc/en/latest/d1/d1_mini.html). 
 
