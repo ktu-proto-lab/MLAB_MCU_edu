@@ -57,7 +57,7 @@ make clean
 This will remove the previous `build/` directory.  
 
 If you compile the software on one machine and run the simulation on another, copy the `build/` directory to the corresponding project directory on the simulation machine. Or at minimum copy the `build/verilog_hex.v` file. `verilog_hex.v` file contains the compiled machine code in a Verilog-readable format and is used to initialize the EEPROM model during simulation.
-
+<!-- 
 ## Program flashing for FPGA
 
 To run compiled software on physical hardware for example on FPGA you need to upload the binary image into an I2C EEPROM. We use the 24CS512 EEPROM (see [../doc/24CS512.pdf](../doc/24CS512.pdf)). And we use a custom programmer based on the [ESP8266 MCU](https://www.wemos.cc/en/latest/d1/d1_mini.html). 
@@ -116,4 +116,4 @@ python3 programmer.py --check --write
 There is also a possibility to save data from EEPROM:
 ```bash
 python3 programmer.py --read --size 65536 --r_addr 0
-```
+``` -->
