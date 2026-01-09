@@ -4,7 +4,7 @@
 //==================================================
 // Configs
 //==================================================
-// Software directory.
+// Software directory.d
 parameter program_folder="test/full_peripheral";
 integer expected_ext_pad_io = 12'b0000_0001_1111;
 
@@ -12,7 +12,7 @@ module simple_system_tb;
 
     // Parameters
     parameter GPIO_COUNT = `GPIO_IOS;
-    parameter CLK_PERIOD = 20;  
+    parameter CLK_PERIOD = 12.5;  
     parameter MEMInitFile = {"../../sw/ibex/",program_folder,"/build/verilog_hex.v"};
 
 `ifdef LOG_OUTPUT

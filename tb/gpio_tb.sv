@@ -5,7 +5,7 @@ parameter program_folder="test/gpio";
 module simple_system_tb;
     // Parameters
     parameter GPIO_COUNT = `GPIO_IOS;
-    parameter CLK_PERIOD = 20;
+    parameter CLK_PERIOD = 12.5;
     parameter MEMInitFile = {"../../sw/ibex/",program_folder,"/build/verilog_hex.v"};
 `ifdef LOG_OUTPUT
     // Output file of the tb info.
