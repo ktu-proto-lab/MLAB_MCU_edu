@@ -1,0 +1,1200 @@
+
+build/uart_simple.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .vectors:
+
+80000000 <_vectors_start>:
+80000000:	0940006f          	j	80000094 <DEFAULT_IRQHandler>
+80000004:	0900006f          	j	80000094 <DEFAULT_IRQHandler>
+80000008:	08c0006f          	j	80000094 <DEFAULT_IRQHandler>
+8000000c:	0880006f          	j	80000094 <DEFAULT_IRQHandler>
+80000010:	0840006f          	j	80000094 <DEFAULT_IRQHandler>
+80000014:	0800006f          	j	80000094 <DEFAULT_IRQHandler>
+80000018:	07c0006f          	j	80000094 <DEFAULT_IRQHandler>
+8000001c:	06c0006f          	j	80000088 <TIMER_IRQHandler>
+80000020:	0740006f          	j	80000094 <DEFAULT_IRQHandler>
+80000024:	0700006f          	j	80000094 <DEFAULT_IRQHandler>
+80000028:	06c0006f          	j	80000094 <DEFAULT_IRQHandler>
+8000002c:	0600006f          	j	8000008c <GPIO_IRQHandler>
+80000030:	0640006f          	j	80000094 <DEFAULT_IRQHandler>
+80000034:	0600006f          	j	80000094 <DEFAULT_IRQHandler>
+80000038:	05c0006f          	j	80000094 <DEFAULT_IRQHandler>
+8000003c:	0580006f          	j	80000094 <DEFAULT_IRQHandler>
+80000040:	0540006f          	j	80000094 <DEFAULT_IRQHandler>
+80000044:	04c0006f          	j	80000090 <I2C_IRQHandler>
+80000048:	04e0006f          	j	80000096 <UART_RX_HALF_FULL_IRQHandler>
+8000004c:	0a00006f          	j	800000ec <UART_TX_HALF_EMPTY_IRQHandler>
+80000050:	04a0006f          	j	8000009a <UART_RX_NOT_EMPTY_IRQHandler>
+80000054:	09c0006f          	j	800000f0 <UART_TX_NOT_FULL_IRQHandler>
+80000058:	03c0006f          	j	80000094 <DEFAULT_IRQHandler>
+8000005c:	0380006f          	j	80000094 <DEFAULT_IRQHandler>
+80000060:	0340006f          	j	80000094 <DEFAULT_IRQHandler>
+80000064:	0300006f          	j	80000094 <DEFAULT_IRQHandler>
+80000068:	02c0006f          	j	80000094 <DEFAULT_IRQHandler>
+8000006c:	0280006f          	j	80000094 <DEFAULT_IRQHandler>
+80000070:	0240006f          	j	80000094 <DEFAULT_IRQHandler>
+80000074:	0200006f          	j	80000094 <DEFAULT_IRQHandler>
+80000078:	01c0006f          	j	80000094 <DEFAULT_IRQHandler>
+8000007c:	0000                	.insn	2, 0x0000
+8000007e:	0000                	.insn	2, 0x0000
+80000080:	2ec0006f          	j	8000036c <reset_handler>
+
+Disassembly of section .text:
+
+80000084 <UART_TxCpltCallback>:
+    // UART_Transmit(&huart, receive, 1);
+  }
+  return 0;
+}
+
+void UART_TxCpltCallback(UART_HandleTypeDef *huart) {}
+80000084:	8082                	ret
+
+80000086 <UART_RxCpltCallback>:
+
+void UART_RxCpltCallback(UART_HandleTypeDef *huart) {}
+80000086:	8082                	ret
+
+80000088 <TIMER_IRQHandler>:
+  timer_irq_handler();
+#endif
+#if TIMER_IRQ_CALLBACK == 1
+  timer_irq_callback();
+#endif
+}
+80000088:	30200073          	mret
+
+8000008c <GPIO_IRQHandler>:
+
+void GPIO_IRQHandler(void) __attribute__((interrupt));
+
+void GPIO_IRQHandler(void) {
+8000008c:	30200073          	mret
+
+80000090 <I2C_IRQHandler>:
+#endif
+}
+
+void I2C_IRQHandler(void) __attribute__((interrupt));
+
+void I2C_IRQHandler(void) {
+80000090:	30200073          	mret
+
+80000094 <DEFAULT_IRQHandler>:
+#if I2C_IRQ_CALLBACK == 1
+  i2c_irq_callback();
+#endif
+}
+
+void DEFAULT_IRQHandler(void) { while (1); }
+80000094:	a001                	j	80000094 <DEFAULT_IRQHandler>
+
+80000096 <UART_RX_HALF_FULL_IRQHandler>:
+
+
+void UART_RX_HALF_FULL_IRQHandler(void) __attribute__((interrupt));
+
+void UART_RX_HALF_FULL_IRQHandler(void) {
+80000096:	30200073          	mret
+
+8000009a <UART_RX_NOT_EMPTY_IRQHandler>:
+#endif
+}
+
+void UART_RX_NOT_EMPTY_IRQHandler(void) __attribute__((interrupt));
+
+void UART_RX_NOT_EMPTY_IRQHandler(void) {
+8000009a:	7139                	addi	sp,sp,-64
+8000009c:	d62a                	sw	a0,44(sp)
+#if UART_IRQ_HANDLER == 1
+    UART_RX_Not_Empty_IRQHandler(&huart);
+8000009e:	90000537          	lui	a0,0x90000
+800000a2:	06c50513          	addi	a0,a0,108 # 9000006c <huart>
+void UART_RX_NOT_EMPTY_IRQHandler(void) {
+800000a6:	de06                	sw	ra,60(sp)
+800000a8:	dc16                	sw	t0,56(sp)
+800000aa:	da1a                	sw	t1,52(sp)
+800000ac:	d81e                	sw	t2,48(sp)
+800000ae:	d42e                	sw	a1,40(sp)
+800000b0:	d232                	sw	a2,36(sp)
+800000b2:	d036                	sw	a3,32(sp)
+800000b4:	ce3a                	sw	a4,28(sp)
+800000b6:	cc3e                	sw	a5,24(sp)
+800000b8:	ca42                	sw	a6,20(sp)
+800000ba:	c846                	sw	a7,16(sp)
+800000bc:	c672                	sw	t3,12(sp)
+800000be:	c476                	sw	t4,8(sp)
+800000c0:	c27a                	sw	t5,4(sp)
+800000c2:	c07e                	sw	t6,0(sp)
+    UART_RX_Not_Empty_IRQHandler(&huart);
+800000c4:	2411                	jal	800002c8 <UART_RX_Not_Empty_IRQHandler>
+#endif
+#if UART_IRQ_CALLBACK == 1
+#endif
+}
+800000c6:	50f2                	lw	ra,60(sp)
+800000c8:	52e2                	lw	t0,56(sp)
+800000ca:	5352                	lw	t1,52(sp)
+800000cc:	53c2                	lw	t2,48(sp)
+800000ce:	5532                	lw	a0,44(sp)
+800000d0:	55a2                	lw	a1,40(sp)
+800000d2:	5612                	lw	a2,36(sp)
+800000d4:	5682                	lw	a3,32(sp)
+800000d6:	4772                	lw	a4,28(sp)
+800000d8:	47e2                	lw	a5,24(sp)
+800000da:	4852                	lw	a6,20(sp)
+800000dc:	48c2                	lw	a7,16(sp)
+800000de:	4e32                	lw	t3,12(sp)
+800000e0:	4ea2                	lw	t4,8(sp)
+800000e2:	4f12                	lw	t5,4(sp)
+800000e4:	4f82                	lw	t6,0(sp)
+800000e6:	6121                	addi	sp,sp,64
+800000e8:	30200073          	mret
+
+800000ec <UART_TX_HALF_EMPTY_IRQHandler>:
+
+void UART_TX_HALF_EMPTY_IRQHandler(void) __attribute__((interrupt));
+
+void UART_TX_HALF_EMPTY_IRQHandler(void) {
+800000ec:	30200073          	mret
+
+800000f0 <UART_TX_NOT_FULL_IRQHandler>:
+#endif
+}
+
+void UART_TX_NOT_FULL_IRQHandler(void) __attribute__((interrupt));
+
+void UART_TX_NOT_FULL_IRQHandler(void) {
+800000f0:	7139                	addi	sp,sp,-64
+800000f2:	d62a                	sw	a0,44(sp)
+#if UART_IRQ_HANDLER == 1
+    UART_TX_Not_Full_IRQHandler(&huart);
+800000f4:	90000537          	lui	a0,0x90000
+800000f8:	06c50513          	addi	a0,a0,108 # 9000006c <huart>
+void UART_TX_NOT_FULL_IRQHandler(void) {
+800000fc:	de06                	sw	ra,60(sp)
+800000fe:	dc16                	sw	t0,56(sp)
+80000100:	da1a                	sw	t1,52(sp)
+80000102:	d81e                	sw	t2,48(sp)
+80000104:	d42e                	sw	a1,40(sp)
+80000106:	d232                	sw	a2,36(sp)
+80000108:	d036                	sw	a3,32(sp)
+8000010a:	ce3a                	sw	a4,28(sp)
+8000010c:	cc3e                	sw	a5,24(sp)
+8000010e:	ca42                	sw	a6,20(sp)
+80000110:	c846                	sw	a7,16(sp)
+80000112:	c672                	sw	t3,12(sp)
+80000114:	c476                	sw	t4,8(sp)
+80000116:	c27a                	sw	t5,4(sp)
+80000118:	c07e                	sw	t6,0(sp)
+    UART_TX_Not_Full_IRQHandler(&huart);
+8000011a:	2409                	jal	8000031c <UART_TX_Not_Full_IRQHandler>
+#endif
+#if UART_IRQ_CALLBACK == 1
+#endif
+}
+8000011c:	50f2                	lw	ra,60(sp)
+8000011e:	52e2                	lw	t0,56(sp)
+80000120:	5352                	lw	t1,52(sp)
+80000122:	53c2                	lw	t2,48(sp)
+80000124:	5532                	lw	a0,44(sp)
+80000126:	55a2                	lw	a1,40(sp)
+80000128:	5612                	lw	a2,36(sp)
+8000012a:	5682                	lw	a3,32(sp)
+8000012c:	4772                	lw	a4,28(sp)
+8000012e:	47e2                	lw	a5,24(sp)
+80000130:	4852                	lw	a6,20(sp)
+80000132:	48c2                	lw	a7,16(sp)
+80000134:	4e32                	lw	t3,12(sp)
+80000136:	4ea2                	lw	t4,8(sp)
+80000138:	4f12                	lw	t5,4(sp)
+8000013a:	4f82                	lw	t6,0(sp)
+8000013c:	6121                	addi	sp,sp,64
+8000013e:	30200073          	mret
+
+80000142 <GPIO_Init>:
+
+#include "gpio.h"
+
+void GPIO_Init(GPIO_HandleTypeDef *gpio) {
+  // Initialize register pointer to GPIO peripheral
+  gpio->regs = (volatile GPIO_reg_map_t *)GPIO_BASE_ADDR;
+80000142:	400007b7          	lui	a5,0x40000
+80000146:	c11c                	sw	a5,0(a0)
+}
+80000148:	8082                	ret
+
+8000014a <GPIO_WritePin>:
+ *            @arg GPIO_PIN_SET: to set the port pin
+ * @retval None
+ */
+void GPIO_WritePin(GPIO_HandleTypeDef *gpio, uint32_t GPIO_Pin, GPIO_PinState PinState) {
+  if (PinState != GPIO_PIN_RESET) {
+    gpio->regs->OUT |= GPIO_Pin;
+8000014a:	411c                	lw	a5,0(a0)
+8000014c:	43d8                	lw	a4,4(a5)
+  if (PinState != GPIO_PIN_RESET) {
+8000014e:	c601                	beqz	a2,80000156 <GPIO_WritePin+0xc>
+    gpio->regs->OUT |= GPIO_Pin;
+80000150:	8f4d                	or	a4,a4,a1
+80000152:	c3d8                	sw	a4,4(a5)
+80000154:	8082                	ret
+  } else {
+    gpio->regs->OUT &= ~GPIO_Pin;
+80000156:	fff5c593          	not	a1,a1
+8000015a:	8df9                	and	a1,a1,a4
+8000015c:	c3cc                	sw	a1,4(a5)
+  }
+}
+8000015e:	8082                	ret
+
+80000160 <GPIO_Toggle>:
+ *         This parameter can be any combination of GPIO_PIN_x where x can be (0..11).
+ * @retval None
+ */
+void GPIO_Toggle(GPIO_HandleTypeDef *gpio, uint32_t GPIO_Pin) {
+  // XOR to toggle
+  gpio->regs->OUT ^= GPIO_Pin;
+80000160:	4118                	lw	a4,0(a0)
+80000162:	435c                	lw	a5,4(a4)
+80000164:	8fad                	xor	a5,a5,a1
+80000166:	c35c                	sw	a5,4(a4)
+}
+80000168:	8082                	ret
+
+8000016a <gpio_irq_handler>:
+
+void gpio_irq_handler(GPIO_HandleTypeDef *gpio) {
+  // Record interrupt in handle and clear INTS register
+  gpio->Interrupt_Status = gpio->regs->INTS;
+8000016a:	4118                	lw	a4,0(a0)
+8000016c:	4f54                	lw	a3,28(a4)
+8000016e:	c154                	sw	a3,4(a0)
+  gpio->regs->INTS = 0;
+80000170:	00072e23          	sw	zero,28(a4)
+  // Callback for User
+  GPIO_EXTI_Callback(gpio);
+80000174:	00000317          	auipc	t1,0x0
+80000178:	00000067          	jr	zero # 0 <_min_stack-0x400>
+
+8000017c <UART_Init>:
+  if (huart == NULL)
+  {
+      return HAL_ERROR;
+  }
+*/
+  if (huart->gState == UART_STATE_RESET)
+8000017c:	555c                	lw	a5,44(a0)
+8000017e:	eb9d                	bnez	a5,800001b4 <UART_Init+0x38>
+  {
+      huart->Instance = (volatile UART_reg_map_t *)UART_BASE_ADDR;  // Initialize UART registers struct
+
+      // SETUP register shouldn't be edited anywhere else except in this function
+      // After editing huart->Init UART_Init(*huart) should always be called
+      huart->Instance->SETUP = ((huart->Init.BaudRate << 0) & UART_SETUP_BAUD_MASK)
+80000180:	415c                	lw	a5,4(a0)
+          | (huart->Init.ParityMode << 24)
+80000182:	4958                	lw	a4,20(a0)
+      huart->Instance = (volatile UART_reg_map_t *)UART_BASE_ADDR;  // Initialize UART registers struct
+80000184:	500006b7          	lui	a3,0x50000
+      huart->Instance->SETUP = ((huart->Init.BaudRate << 0) & UART_SETUP_BAUD_MASK)
+80000188:	07a2                	slli	a5,a5,0x8
+          | (huart->Init.ParityMode << 24)
+8000018a:	0762                	slli	a4,a4,0x18
+      huart->Instance->SETUP = ((huart->Init.BaudRate << 0) & UART_SETUP_BAUD_MASK)
+8000018c:	83a1                	srli	a5,a5,0x8
+          | (huart->Init.ParityMode << 24)
+8000018e:	8fd9                	or	a5,a5,a4
+          | (huart->Init.ParityLock << 25)
+80000190:	4d18                	lw	a4,24(a0)
+      huart->Instance = (volatile UART_reg_map_t *)UART_BASE_ADDR;  // Initialize UART registers struct
+80000192:	c114                	sw	a3,0(a0)
+          | (huart->Init.ParityLock << 25)
+80000194:	0766                	slli	a4,a4,0x19
+80000196:	8fd9                	or	a5,a5,a4
+          | (huart->Init.Parity << 26)
+80000198:	4918                	lw	a4,16(a0)
+8000019a:	076a                	slli	a4,a4,0x1a
+8000019c:	8fd9                	or	a5,a5,a4
+          | (huart->Init.StopBits << 27)
+8000019e:	4558                	lw	a4,12(a0)
+800001a0:	076e                	slli	a4,a4,0x1b
+800001a2:	8fd9                	or	a5,a5,a4
+          | (huart->Init.WordLength << 28);
+800001a4:	4518                	lw	a4,8(a0)
+800001a6:	0772                	slli	a4,a4,0x1c
+800001a8:	8fd9                	or	a5,a5,a4
+      huart->Instance->SETUP = ((huart->Init.BaudRate << 0) & UART_SETUP_BAUD_MASK)
+800001aa:	c29c                	sw	a5,0(a3)
+
+      huart->gState = UART_STATE_READY; // if TxEnable false dont set ready?
+800001ac:	02000793          	li	a5,32
+800001b0:	d55c                	sw	a5,44(a0)
+      huart->RxState = UART_STATE_READY;
+800001b2:	d91c                	sw	a5,48(a0)
+  }
+  else
+  {
+      // return HAL_ERROR
+  }
+}
+800001b4:	8082                	ret
+
+800001b6 <UART_TX_Enable>:
+
+void UART_TX_Enable(UART_HandleTypeDef *huart)
+{
+    if (huart->gState == UART_STATE_READY)
+800001b6:	5558                	lw	a4,44(a0)
+800001b8:	02000793          	li	a5,32
+800001bc:	00f71763          	bne	a4,a5,800001ca <UART_TX_Enable+0x14>
+    {
+        huart->Instance->CONTROL |= UART_TX_EN;
+800001c0:	4118                	lw	a4,0(a0)
+800001c2:	435c                	lw	a5,4(a4)
+800001c4:	0087e793          	ori	a5,a5,8
+800001c8:	c35c                	sw	a5,4(a4)
+    }
+}
+800001ca:	8082                	ret
+
+800001cc <UART_TX_Disable>:
+
+void UART_TX_Disable(UART_HandleTypeDef *huart)
+{
+    if (huart->gState == UART_STATE_READY)
+800001cc:	5558                	lw	a4,44(a0)
+800001ce:	02000793          	li	a5,32
+800001d2:	00f71663          	bne	a4,a5,800001de <UART_TX_Disable+0x12>
+    {
+        huart->Instance->CONTROL &= ~UART_TX_EN;
+800001d6:	4118                	lw	a4,0(a0)
+800001d8:	435c                	lw	a5,4(a4)
+800001da:	9bdd                	andi	a5,a5,-9
+800001dc:	c35c                	sw	a5,4(a4)
+    }
+}
+800001de:	8082                	ret
+
+800001e0 <UART_TX_Reset>:
+
+void UART_TX_Reset(UART_HandleTypeDef *huart)
+{
+    /* State probably doesn't matter and it should be able to
+     * execute whenever it's called                             */
+    huart->Instance->CONTROL |= UART_TX_RST;
+800001e0:	4118                	lw	a4,0(a0)
+800001e2:	435c                	lw	a5,4(a4)
+800001e4:	0207e793          	ori	a5,a5,32
+800001e8:	c35c                	sw	a5,4(a4)
+}
+800001ea:	8082                	ret
+
+800001ec <UART_RX_Enable>:
+
+void UART_RX_Enable(UART_HandleTypeDef *huart)
+{
+    if (huart->RxState == UART_STATE_READY)
+800001ec:	5918                	lw	a4,48(a0)
+800001ee:	02000793          	li	a5,32
+800001f2:	00f71763          	bne	a4,a5,80000200 <UART_RX_Enable+0x14>
+    {
+        huart->Instance->CONTROL |= UART_RX_EN;
+800001f6:	4118                	lw	a4,0(a0)
+800001f8:	435c                	lw	a5,4(a4)
+800001fa:	0017e793          	ori	a5,a5,1
+800001fe:	c35c                	sw	a5,4(a4)
+    }
+}
+80000200:	8082                	ret
+
+80000202 <UART_RX_Disable>:
+
+void UART_RX_Disable(UART_HandleTypeDef *huart)
+{
+    if (huart->RxState == UART_STATE_READY)
+80000202:	5918                	lw	a4,48(a0)
+80000204:	02000793          	li	a5,32
+80000208:	00f71663          	bne	a4,a5,80000214 <UART_RX_Disable+0x12>
+    {
+        huart->Instance->CONTROL &= ~UART_RX_EN;
+8000020c:	4118                	lw	a4,0(a0)
+8000020e:	435c                	lw	a5,4(a4)
+80000210:	9bf9                	andi	a5,a5,-2
+80000212:	c35c                	sw	a5,4(a4)
+    }
+}
+80000214:	8082                	ret
+
+80000216 <UART_RX_Reset>:
+
+void UART_RX_Reset(UART_HandleTypeDef *huart)
+{
+    /* State probably doesn't matter and it should be able to
+     * execute whenever it's called                             */
+    huart->Instance->CONTROL |= UART_RX_RST;
+80000216:	4118                	lw	a4,0(a0)
+80000218:	435c                	lw	a5,4(a4)
+8000021a:	0047e793          	ori	a5,a5,4
+8000021e:	c35c                	sw	a5,4(a4)
+}
+80000220:	8082                	ret
+
+80000222 <UART_Transmit>:
+
+void UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
+{
+    // Check whether UART core is busy (for example interupt driven transmision is
+    // in progress)
+    if (huart->gState != UART_STATE_READY) {
+80000222:	5558                	lw	a4,44(a0)
+80000224:	02000793          	li	a5,32
+80000228:	02f71563          	bne	a4,a5,80000252 <UART_Transmit+0x30>
+        return;
+    }
+    if ((pData == NULL) || (Size == 0U))
+8000022c:	c19d                	beqz	a1,80000252 <UART_Transmit+0x30>
+8000022e:	c215                	beqz	a2,80000252 <UART_Transmit+0x30>
+            huart->Instance->TX_DATA = *pData;
+            pData++;
+            Size--;
+        }
+    }
+    while (huart->Instance->TX_DATA & UART_TX_BUSY); // Wait unitl transmit ends
+80000230:	4118                	lw	a4,0(a0)
+        if (!(huart->Instance->TX_DATA & UART_TX_BUSY))
+80000232:	475c                	lw	a5,12(a4)
+80000234:	2007f793          	andi	a5,a5,512
+80000238:	ffed                	bnez	a5,80000232 <UART_Transmit+0x10>
+            huart->Instance->TX_DATA = *pData;
+8000023a:	0005c783          	lbu	a5,0(a1)
+            Size--;
+8000023e:	167d                	addi	a2,a2,-1
+80000240:	0642                	slli	a2,a2,0x10
+            huart->Instance->TX_DATA = *pData;
+80000242:	c75c                	sw	a5,12(a4)
+            Size--;
+80000244:	8241                	srli	a2,a2,0x10
+            pData++;
+80000246:	0585                	addi	a1,a1,1
+    while (Size > 0)
+80000248:	f66d                	bnez	a2,80000232 <UART_Transmit+0x10>
+    while (huart->Instance->TX_DATA & UART_TX_BUSY); // Wait unitl transmit ends
+8000024a:	475c                	lw	a5,12(a4)
+8000024c:	2007f793          	andi	a5,a5,512
+80000250:	ffed                	bnez	a5,8000024a <UART_Transmit+0x28>
+}
+80000252:	8082                	ret
+
+80000254 <UART_Transmit_IT>:
+
+void UART_Transmit_IT(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
+{
+    /* Check that a Tx process is not already ongoing */
+    if (huart->gState != UART_STATE_READY)
+80000254:	5558                	lw	a4,44(a0)
+80000256:	02000793          	li	a5,32
+8000025a:	02f71163          	bne	a4,a5,8000027c <UART_Transmit_IT+0x28>
+    {
+        // return HAL_BUSY;
+        return;
+    }
+    if ((pData == NULL) || (Size == 0U))
+8000025e:	cd99                	beqz	a1,8000027c <UART_Transmit_IT+0x28>
+80000260:	ce11                	beqz	a2,8000027c <UART_Transmit_IT+0x28>
+    huart->TxXferCount = Size;
+
+    huart->gState = UART_STATE_BUSY_TX;
+
+    // Enable interrupt
+    huart->Instance->CONTROL |= UART_TX_INT_EN;
+80000262:	4118                	lw	a4,0(a0)
+    huart->TxXferCount = Size;
+80000264:	02c51123          	sh	a2,34(a0)
+    huart->gState = UART_STATE_BUSY_TX;
+80000268:	02100793          	li	a5,33
+8000026c:	d55c                	sw	a5,44(a0)
+    huart->Instance->CONTROL |= UART_TX_INT_EN;
+8000026e:	435c                	lw	a5,4(a4)
+    huart->pTxBuffPtr = pData;
+80000270:	cd4c                	sw	a1,28(a0)
+    huart->TxXferSize = Size;
+80000272:	02c51023          	sh	a2,32(a0)
+    huart->Instance->CONTROL |= UART_TX_INT_EN;
+80000276:	0107e793          	ori	a5,a5,16
+8000027a:	c35c                	sw	a5,4(a4)
+
+    // return HAL_OK;
+}
+8000027c:	8082                	ret
+
+8000027e <UART_Receive>:
+
+
+
+void UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
+{
+    while (Size > 0)
+8000027e:	962e                	add	a2,a2,a1
+80000280:	0642                	slli	a2,a2,0x10
+80000282:	8241                	srli	a2,a2,0x10
+80000284:	01059793          	slli	a5,a1,0x10
+80000288:	83c1                	srli	a5,a5,0x10
+8000028a:	00f61363          	bne	a2,a5,80000290 <UART_Receive+0x12>
+        {
+            *pData++ = rx_data;
+            Size--;
+        }
+    }
+}
+8000028e:	8082                	ret
+        uint16_t rx_data = huart->Instance->RX_DATA;
+80000290:	4114                	lw	a3,0(a0)
+80000292:	469c                	lw	a5,8(a3)
+        if (rx_data & UART_RX_EMPTY)
+80000294:	1007f713          	andi	a4,a5,256
+80000298:	df6d                	beqz	a4,80000292 <UART_Receive+0x14>
+            *pData++ = rx_data;
+8000029a:	0585                	addi	a1,a1,1
+8000029c:	fef58fa3          	sb	a5,-1(a1)
+            Size--;
+800002a0:	b7d5                	j	80000284 <UART_Receive+0x6>
+
+800002a2 <UART_Receive_IT>:
+
+void UART_Receive_IT(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t Size)
+{
+    /* Check that a Rx process is not already ongoing */
+    if (huart->RxState == UART_STATE_READY)
+800002a2:	5918                	lw	a4,48(a0)
+800002a4:	02000793          	li	a5,32
+800002a8:	00f71f63          	bne	a4,a5,800002c6 <UART_Receive_IT+0x24>
+        huart->RxXferCount = Size;
+
+        huart->RxState = UART_STATE_BUSY_RX;
+
+        // Enable interrupt
+        huart->Instance->CONTROL |= (1 << 1);
+800002ac:	4118                	lw	a4,0(a0)
+        huart->RxXferCount = Size;
+800002ae:	02c51523          	sh	a2,42(a0)
+        huart->RxState = UART_STATE_BUSY_RX;
+800002b2:	02200793          	li	a5,34
+800002b6:	d91c                	sw	a5,48(a0)
+        huart->Instance->CONTROL |= (1 << 1);
+800002b8:	435c                	lw	a5,4(a4)
+        huart->pRxBuffPtr = pData;
+800002ba:	d14c                	sw	a1,36(a0)
+        huart->RxXferSize = Size;
+800002bc:	02c51423          	sh	a2,40(a0)
+        huart->Instance->CONTROL |= (1 << 1);
+800002c0:	0027e793          	ori	a5,a5,2
+800002c4:	c35c                	sw	a5,4(a4)
+    }
+    else
+    {
+        // return HAL_BUSY;
+    }
+}
+800002c6:	8082                	ret
+
+800002c8 <UART_RX_Not_Empty_IRQHandler>:
+
+void UART_RX_Not_Empty_IRQHandler(UART_HandleTypeDef *huart)
+{
+    if(huart->RxState == UART_STATE_BUSY_RX)
+800002c8:	5918                	lw	a4,48(a0)
+800002ca:	02200793          	li	a5,34
+800002ce:	04f71663          	bne	a4,a5,8000031a <UART_RX_Not_Empty_IRQHandler+0x52>
+    {   
+        *(huart->pRxBuffPtr) = huart->Instance->RX_DATA;
+800002d2:	411c                	lw	a5,0(a0)
+{
+800002d4:	1141                	addi	sp,sp,-16
+800002d6:	c422                	sw	s0,8(sp)
+        *(huart->pRxBuffPtr) = huart->Instance->RX_DATA;
+800002d8:	4798                	lw	a4,8(a5)
+800002da:	515c                	lw	a5,36(a0)
+{
+800002dc:	c606                	sw	ra,12(sp)
+800002de:	842a                	mv	s0,a0
+        *(huart->pRxBuffPtr) = huart->Instance->RX_DATA;
+800002e0:	00e78023          	sb	a4,0(a5) # 40000000 <_stack_bottom+0x1ffff360>
+        
+        if(huart->RxXferCount == 1)
+800002e4:	02a55703          	lhu	a4,42(a0)
+800002e8:	4785                	li	a5,1
+800002ea:	00f71a63          	bne	a4,a5,800002fe <UART_RX_Not_Empty_IRQHandler+0x36>
+        {
+            // disable interrupt
+            huart->Instance->CONTROL &= ~UART_RX_INT_EN;
+800002ee:	4118                	lw	a4,0(a0)
+800002f0:	435c                	lw	a5,4(a4)
+800002f2:	9bf5                	andi	a5,a5,-3
+800002f4:	c35c                	sw	a5,4(a4)
+
+            // enable CpltCallback
+            UART_RxCpltCallback(huart);
+800002f6:	3b41                	jal	80000086 <UART_RxCpltCallback>
+
+            huart->RxState = UART_STATE_READY;
+800002f8:	02000793          	li	a5,32
+800002fc:	d81c                	sw	a5,48(s0)
+        }
+        huart->pRxBuffPtr++;
+800002fe:	505c                	lw	a5,36(s0)
+    }
+    else
+    {
+        // return HAL_BUSY;
+    }
+}
+80000300:	40b2                	lw	ra,12(sp)
+        huart->pRxBuffPtr++;
+80000302:	0785                	addi	a5,a5,1
+80000304:	d05c                	sw	a5,36(s0)
+        huart->RxXferCount--;
+80000306:	02a45783          	lhu	a5,42(s0)
+8000030a:	17fd                	addi	a5,a5,-1
+8000030c:	07c2                	slli	a5,a5,0x10
+8000030e:	83c1                	srli	a5,a5,0x10
+80000310:	02f41523          	sh	a5,42(s0)
+}
+80000314:	4422                	lw	s0,8(sp)
+80000316:	0141                	addi	sp,sp,16
+80000318:	8082                	ret
+8000031a:	8082                	ret
+
+8000031c <UART_TX_Not_Full_IRQHandler>:
+
+void UART_TX_Not_Full_IRQHandler(UART_HandleTypeDef *huart)
+{
+    if(huart->gState == UART_STATE_BUSY_TX)
+8000031c:	5558                	lw	a4,44(a0)
+8000031e:	02100793          	li	a5,33
+80000322:	04f71463          	bne	a4,a5,8000036a <UART_TX_Not_Full_IRQHandler+0x4e>
+    {
+        
+        if(huart->TxXferCount == 0)
+80000326:	02255703          	lhu	a4,34(a0)
+{
+8000032a:	1141                	addi	sp,sp,-16
+8000032c:	c422                	sw	s0,8(sp)
+8000032e:	c606                	sw	ra,12(sp)
+        {
+            /* disable interrupt                                            */
+            huart->Instance->CONTROL &= ~UART_TX_INT_EN;
+80000330:	411c                	lw	a5,0(a0)
+80000332:	842a                	mv	s0,a0
+        if(huart->TxXferCount == 0)
+80000334:	e715                	bnez	a4,80000360 <UART_TX_Not_Full_IRQHandler+0x44>
+            huart->Instance->CONTROL &= ~UART_TX_INT_EN;
+80000336:	43d8                	lw	a4,4(a5)
+80000338:	9b3d                	andi	a4,a4,-17
+8000033a:	c3d8                	sw	a4,4(a5)
+
+
+            huart->gState = UART_STATE_READY; /* There's probably a better way
+8000033c:	02000793          	li	a5,32
+80000340:	d55c                	sw	a5,44(a0)
+                                                 to handle this, refer to
+                                                 STM32_HAL                  */
+            
+            /* enable CpltCallback                                          */
+            UART_TxCpltCallback(huart);
+80000342:	3389                	jal	80000084 <UART_TxCpltCallback>
+        }
+        else{
+            huart->Instance->TX_DATA = *(huart->pTxBuffPtr);
+        }
+        
+        huart->pTxBuffPtr++;
+80000344:	4c5c                	lw	a5,28(s0)
+    }
+    else
+    {
+        // return HAL_BUSY;
+    }
+}
+80000346:	40b2                	lw	ra,12(sp)
+        huart->pTxBuffPtr++;
+80000348:	0785                	addi	a5,a5,1
+8000034a:	cc5c                	sw	a5,28(s0)
+        huart->TxXferCount--;
+8000034c:	02245783          	lhu	a5,34(s0)
+80000350:	17fd                	addi	a5,a5,-1
+80000352:	07c2                	slli	a5,a5,0x10
+80000354:	83c1                	srli	a5,a5,0x10
+80000356:	02f41123          	sh	a5,34(s0)
+}
+8000035a:	4422                	lw	s0,8(sp)
+8000035c:	0141                	addi	sp,sp,16
+8000035e:	8082                	ret
+            huart->Instance->TX_DATA = *(huart->pTxBuffPtr);
+80000360:	4d58                	lw	a4,28(a0)
+80000362:	00074703          	lbu	a4,0(a4)
+80000366:	c7d8                	sw	a4,12(a5)
+80000368:	bff1                	j	80000344 <UART_TX_Not_Full_IRQHandler+0x28>
+8000036a:	8082                	ret
+
+8000036c <reset_handler>:
+8000036c:	00000093          	li	ra,0
+80000370:	8106                	mv	sp,ra
+80000372:	8186                	mv	gp,ra
+80000374:	8206                	mv	tp,ra
+80000376:	8286                	mv	t0,ra
+80000378:	8306                	mv	t1,ra
+8000037a:	8386                	mv	t2,ra
+8000037c:	8406                	mv	s0,ra
+8000037e:	8486                	mv	s1,ra
+80000380:	8506                	mv	a0,ra
+80000382:	8586                	mv	a1,ra
+80000384:	8606                	mv	a2,ra
+80000386:	8686                	mv	a3,ra
+80000388:	8706                	mv	a4,ra
+8000038a:	8786                	mv	a5,ra
+8000038c:	8806                	mv	a6,ra
+8000038e:	8886                	mv	a7,ra
+80000390:	8906                	mv	s2,ra
+80000392:	8986                	mv	s3,ra
+80000394:	8a06                	mv	s4,ra
+80000396:	8a86                	mv	s5,ra
+80000398:	8b06                	mv	s6,ra
+8000039a:	8b86                	mv	s7,ra
+8000039c:	8c06                	mv	s8,ra
+8000039e:	8c86                	mv	s9,ra
+800003a0:	8d06                	mv	s10,ra
+800003a2:	8d86                	mv	s11,ra
+800003a4:	8e06                	mv	t3,ra
+800003a6:	8e86                	mv	t4,ra
+800003a8:	8f06                	mv	t5,ra
+800003aa:	8f86                	mv	t6,ra
+800003ac:	10001117          	auipc	sp,0x10001
+800003b0:	c5410113          	addi	sp,sp,-940 # 90001000 <_stack_start>
+
+800003b4 <_start>:
+800003b4:	42a1                	li	t0,8
+800003b6:	30029073          	csrw	mstatus,t0
+800003ba:	003212b7          	lui	t0,0x321
+800003be:	88028293          	addi	t0,t0,-1920 # 320880 <_stack_len+0x31f880>
+800003c2:	30429073          	csrw	mie,t0
+800003c6:	10000d17          	auipc	s10,0x10000
+800003ca:	c9ad0d13          	addi	s10,s10,-870 # 90000060 <receive>
+800003ce:	10000d97          	auipc	s11,0x10000
+800003d2:	cd2d8d93          	addi	s11,s11,-814 # 900000a0 <_bss_end>
+800003d6:	01bd5763          	bge	s10,s11,800003e4 <main_entry>
+
+800003da <zero_loop>:
+800003da:	000d2023          	sw	zero,0(s10)
+800003de:	0d11                	addi	s10,s10,4
+800003e0:	ffaddde3          	bge	s11,s10,800003da <zero_loop>
+
+800003e4 <main_entry>:
+800003e4:	4501                	li	a0,0
+800003e6:	4581                	li	a1,0
+800003e8:	020000ef          	jal	80000408 <main>
+
+800003ec <sleep_loop>:
+800003ec:	10500073          	wfi
+800003f0:	bff5                	j	800003ec <sleep_loop>
+
+800003f2 <memcpy>:
+800003f2:	832a                	mv	t1,a0
+800003f4:	ca09                	beqz	a2,80000406 <memcpy+0x14>
+800003f6:	00058383          	lb	t2,0(a1)
+800003fa:	00730023          	sb	t2,0(t1) # 80000174 <gpio_irq_handler+0xa>
+800003fe:	167d                	addi	a2,a2,-1
+80000400:	0305                	addi	t1,t1,1
+80000402:	0585                	addi	a1,a1,1
+80000404:	fa6d                	bnez	a2,800003f6 <memcpy+0x4>
+80000406:	8082                	ret
+
+80000408 <main>:
+int main() {
+80000408:	7139                	addi	sp,sp,-64
+8000040a:	da26                	sw	s1,52(sp)
+  GPIO_Init(&gpio);  // Initialize GPIO core
+8000040c:	900004b7          	lui	s1,0x90000
+80000410:	06448513          	addi	a0,s1,100 # 90000064 <gpio>
+int main() {
+80000414:	de06                	sw	ra,60(sp)
+80000416:	dc22                	sw	s0,56(sp)
+80000418:	d452                	sw	s4,40(sp)
+  huart.Init.BaudRate = UART_BAUD_INTERVAL(CPUFreq, UART_BAUDRATE);
+8000041a:	90000437          	lui	s0,0x90000
+int main() {
+8000041e:	d256                	sw	s5,36(sp)
+80000420:	d05a                	sw	s6,32(sp)
+80000422:	ce5e                	sw	s7,28(sp)
+80000424:	d84a                	sw	s2,48(sp)
+80000426:	d64e                	sw	s3,44(sp)
+  GPIO_Init(&gpio);  // Initialize GPIO core
+80000428:	3b29                	jal	80000142 <GPIO_Init>
+  huart.Init.BaudRate = UART_BAUD_INTERVAL(CPUFreq, UART_BAUDRATE);
+8000042a:	06c40793          	addi	a5,s0,108 # 9000006c <huart>
+8000042e:	2b600713          	li	a4,694
+  UART_Init(&huart);  // Initialize UART core
+80000432:	06c40513          	addi	a0,s0,108
+  huart.Init.BaudRate = UART_BAUD_INTERVAL(CPUFreq, UART_BAUDRATE);
+80000436:	c3d8                	sw	a4,4(a5)
+  huart.Init.WordLength = 0;
+80000438:	0007a423          	sw	zero,8(a5)
+  huart.Init.StopBits = 0;
+8000043c:	0007a623          	sw	zero,12(a5)
+  huart.Init.Parity = 0;
+80000440:	0007a823          	sw	zero,16(a5)
+  huart.Init.ParityMode = 0;
+80000444:	0007aa23          	sw	zero,20(a5)
+  huart.Init.ParityLock = 0;
+80000448:	0007ac23          	sw	zero,24(a5)
+  UART_Init(&huart);  // Initialize UART core
+8000044c:	3b05                	jal	8000017c <UART_Init>
+  UART_TX_Enable(&huart);
+8000044e:	06c40513          	addi	a0,s0,108
+80000452:	3395                	jal	800001b6 <UART_TX_Enable>
+  UART_RX_Enable(&huart);
+80000454:	06c40513          	addi	a0,s0,108
+80000458:	3b51                	jal	800001ec <UART_RX_Enable>
+  gpio.regs->AUX |= GPIO_PIN_1; // Set GPIO pin 1 to output auxilary signal (UART TX)
+8000045a:	06448493          	addi	s1,s1,100
+8000045e:	409c                	lw	a5,0(s1)
+  UART_Transmit(&huart, transmit, 13); // Transmit "Hello World!" message
+80000460:	900005b7          	lui	a1,0x90000
+80000464:	4635                	li	a2,13
+  gpio.regs->AUX |= GPIO_PIN_1; // Set GPIO pin 1 to output auxilary signal (UART TX)
+80000466:	4bd8                	lw	a4,20(a5)
+  UART_Transmit(&huart, transmit, 13); // Transmit "Hello World!" message
+80000468:	00458593          	addi	a1,a1,4 # 90000004 <transmit>
+8000046c:	06c40513          	addi	a0,s0,108
+  gpio.regs->AUX |= GPIO_PIN_1; // Set GPIO pin 1 to output auxilary signal (UART TX)
+80000470:	00276713          	ori	a4,a4,2
+80000474:	cbd8                	sw	a4,20(a5)
+  gpio.regs->OE |= GPIO_PIN_1; // Enable output on GPIO pin 1
+80000476:	4798                	lw	a4,8(a5)
+int main() {
+80000478:	4a01                	li	s4,0
+    UART_Transmit(&huart, "\nEnter 1st number\n", 18);
+8000047a:	80000b37          	lui	s6,0x80000
+  gpio.regs->OE |= GPIO_PIN_1; // Enable output on GPIO pin 1
+8000047e:	00276713          	ori	a4,a4,2
+80000482:	c798                	sw	a4,8(a5)
+  UART_Transmit(&huart, transmit, 13); // Transmit "Hello World!" message
+80000484:	3b79                	jal	80000222 <UART_Transmit>
+    UART_Receive(&huart, receive, 1);
+80000486:	900004b7          	lui	s1,0x90000
+    UART_Transmit(&huart, "Entered ", 8);
+8000048a:	80000ab7          	lui	s5,0x80000
+    UART_Transmit(&huart, "\nEnter 2nd number\n", 18);
+8000048e:	80000bb7          	lui	s7,0x80000
+    UART_Transmit(&huart, "\nEnter 1st number\n", 18);
+80000492:	4649                	li	a2,18
+80000494:	7b0b0593          	addi	a1,s6,1968 # 800007b0 <__errno+0xc>
+80000498:	06c40513          	addi	a0,s0,108
+8000049c:	3359                	jal	80000222 <UART_Transmit>
+    UART_Receive(&huart, receive, 1);
+8000049e:	4605                	li	a2,1
+800004a0:	06048593          	addi	a1,s1,96 # 90000060 <receive>
+800004a4:	06c40513          	addi	a0,s0,108
+800004a8:	3bd9                	jal	8000027e <UART_Receive>
+    UART_Transmit(&huart, "Entered ", 8);
+800004aa:	4621                	li	a2,8
+800004ac:	7c8a8593          	addi	a1,s5,1992 # 800007c8 <__errno+0x24>
+800004b0:	06c40513          	addi	a0,s0,108
+800004b4:	33bd                	jal	80000222 <UART_Transmit>
+    UART_Transmit(&huart, receive, 1);
+800004b6:	4605                	li	a2,1
+800004b8:	06048593          	addi	a1,s1,96
+800004bc:	06c40513          	addi	a0,s0,108
+800004c0:	338d                	jal	80000222 <UART_Transmit>
+    num1 = atoi(receive);
+800004c2:	06048513          	addi	a0,s1,96
+800004c6:	2875                	jal	80000582 <atoi>
+    UART_Transmit(&huart, "\nEnter 2nd number\n", 18);
+800004c8:	4649                	li	a2,18
+800004ca:	7d4b8593          	addi	a1,s7,2004 # 800007d4 <__errno+0x30>
+    num1 = atoi(receive);
+800004ce:	0ff57913          	zext.b	s2,a0
+    UART_Transmit(&huart, "\nEnter 2nd number\n", 18);
+800004d2:	06c40513          	addi	a0,s0,108
+800004d6:	33b1                	jal	80000222 <UART_Transmit>
+    UART_Receive(&huart, receive, 1);
+800004d8:	4605                	li	a2,1
+800004da:	06048593          	addi	a1,s1,96
+800004de:	06c40513          	addi	a0,s0,108
+800004e2:	3b71                	jal	8000027e <UART_Receive>
+    UART_Transmit(&huart, "Entered ", 8);
+800004e4:	4621                	li	a2,8
+800004e6:	7c8a8593          	addi	a1,s5,1992
+800004ea:	06c40513          	addi	a0,s0,108
+800004ee:	3b15                	jal	80000222 <UART_Transmit>
+    UART_Transmit(&huart, receive, 1);
+800004f0:	4605                	li	a2,1
+800004f2:	06048593          	addi	a1,s1,96
+800004f6:	06c40513          	addi	a0,s0,108
+800004fa:	3325                	jal	80000222 <UART_Transmit>
+    num2 = atoi(receive);
+800004fc:	06048513          	addi	a0,s1,96
+80000500:	2049                	jal	80000582 <atoi>
+    UART_Transmit(&huart, "\nEnter operation\n", 17);
+80000502:	800005b7          	lui	a1,0x80000
+80000506:	4645                	li	a2,17
+80000508:	7e858593          	addi	a1,a1,2024 # 800007e8 <__errno+0x44>
+    num2 = atoi(receive);
+8000050c:	0ff57993          	zext.b	s3,a0
+    UART_Transmit(&huart, "\nEnter operation\n", 17);
+80000510:	06c40513          	addi	a0,s0,108
+80000514:	3339                	jal	80000222 <UART_Transmit>
+    UART_Receive(&huart, receive, 1);
+80000516:	4605                	li	a2,1
+80000518:	06048593          	addi	a1,s1,96
+8000051c:	06c40513          	addi	a0,s0,108
+80000520:	3bb9                	jal	8000027e <UART_Receive>
+    UART_Transmit(&huart, "Entered ", 8);
+80000522:	4621                	li	a2,8
+80000524:	7c8a8593          	addi	a1,s5,1992
+80000528:	06c40513          	addi	a0,s0,108
+8000052c:	39dd                	jal	80000222 <UART_Transmit>
+    UART_Transmit(&huart, receive, 1);
+8000052e:	4605                	li	a2,1
+80000530:	06048593          	addi	a1,s1,96
+80000534:	06c40513          	addi	a0,s0,108
+80000538:	31ed                	jal	80000222 <UART_Transmit>
+    UART_Transmit(&huart, "\nResult ", 8);
+8000053a:	800005b7          	lui	a1,0x80000
+8000053e:	4621                	li	a2,8
+80000540:	7fc58593          	addi	a1,a1,2044 # 800007fc <__errno+0x58>
+80000544:	06c40513          	addi	a0,s0,108
+80000548:	39e9                	jal	80000222 <UART_Transmit>
+    if (receive[0]=='+'){
+8000054a:	0604c783          	lbu	a5,96(s1)
+8000054e:	02b00713          	li	a4,43
+80000552:	02e79163          	bne	a5,a4,80000574 <main+0x16c>
+      ans=num1+num2;
+80000556:	994e                	add	s2,s2,s3
+      ans=num1-num2;
+80000558:	01891a13          	slli	s4,s2,0x18
+8000055c:	418a5a13          	srai	s4,s4,0x18
+    itoa(ans,toPrint,10);
+80000560:	006c                	addi	a1,sp,12
+80000562:	4629                	li	a2,10
+80000564:	8552                	mv	a0,s4
+80000566:	20a5                	jal	800005ce <itoa>
+    UART_Transmit(&huart, toPrint, 3);
+80000568:	460d                	li	a2,3
+8000056a:	006c                	addi	a1,sp,12
+8000056c:	06c40513          	addi	a0,s0,108
+80000570:	394d                	jal	80000222 <UART_Transmit>
+  while (1){
+80000572:	b705                	j	80000492 <main+0x8a>
+    else if (receive[0]=='-'){
+80000574:	02d00713          	li	a4,45
+80000578:	fee794e3          	bne	a5,a4,80000560 <main+0x158>
+      ans=num1-num2;
+8000057c:	41390933          	sub	s2,s2,s3
+80000580:	bfe1                	j	80000558 <main+0x150>
+
+80000582 <atoi>:
+80000582:	4629                	li	a2,10
+80000584:	4581                	li	a1,0
+80000586:	aab5                	j	80000702 <strtol>
+
+80000588 <__itoa>:
+80000588:	1141                	addi	sp,sp,-16
+8000058a:	c422                	sw	s0,8(sp)
+8000058c:	c606                	sw	ra,12(sp)
+8000058e:	ffe60713          	addi	a4,a2,-2
+80000592:	02200793          	li	a5,34
+80000596:	842e                	mv	s0,a1
+80000598:	00e7fa63          	bgeu	a5,a4,800005ac <__itoa+0x24>
+8000059c:	00058023          	sb	zero,0(a1)
+800005a0:	4401                	li	s0,0
+800005a2:	40b2                	lw	ra,12(sp)
+800005a4:	8522                	mv	a0,s0
+800005a6:	4422                	lw	s0,8(sp)
+800005a8:	0141                	addi	sp,sp,16
+800005aa:	8082                	ret
+800005ac:	47a9                	li	a5,10
+800005ae:	00f61e63          	bne	a2,a5,800005ca <__itoa+0x42>
+800005b2:	00055c63          	bgez	a0,800005ca <__itoa+0x42>
+800005b6:	02d00793          	li	a5,45
+800005ba:	00f58023          	sb	a5,0(a1)
+800005be:	40a00533          	neg	a0,a0
+800005c2:	4585                	li	a1,1
+800005c4:	95a2                	add	a1,a1,s0
+800005c6:	22b1                	jal	80000712 <__utoa>
+800005c8:	bfe9                	j	800005a2 <__itoa+0x1a>
+800005ca:	4581                	li	a1,0
+800005cc:	bfe5                	j	800005c4 <__itoa+0x3c>
+
+800005ce <itoa>:
+800005ce:	bf6d                	j	80000588 <__itoa>
+
+800005d0 <_strtol_l.isra.0>:
+800005d0:	1141                	addi	sp,sp,-16
+800005d2:	c606                	sw	ra,12(sp)
+800005d4:	c422                	sw	s0,8(sp)
+800005d6:	02400793          	li	a5,36
+800005da:	06d7e363          	bltu	a5,a3,80000640 <_strtol_l.isra.0+0x70>
+800005de:	4705                	li	a4,1
+800005e0:	87ae                	mv	a5,a1
+800005e2:	04e68f63          	beq	a3,a4,80000640 <_strtol_l.isra.0+0x70>
+800005e6:	8f2a                	mv	t5,a0
+800005e8:	80001537          	lui	a0,0x80001
+800005ec:	88be                	mv	a7,a5
+800005ee:	0007c703          	lbu	a4,0(a5)
+800005f2:	83150813          	addi	a6,a0,-1999 # 80000831 <_ctype_+0x1>
+800005f6:	0785                	addi	a5,a5,1
+800005f8:	983a                	add	a6,a6,a4
+800005fa:	00084803          	lbu	a6,0(a6)
+800005fe:	00887813          	andi	a6,a6,8
+80000602:	fe0815e3          	bnez	a6,800005ec <_strtol_l.isra.0+0x1c>
+80000606:	02d00513          	li	a0,45
+8000060a:	04a71363          	bne	a4,a0,80000650 <_strtol_l.isra.0+0x80>
+8000060e:	0007c703          	lbu	a4,0(a5)
+80000612:	4f85                	li	t6,1
+80000614:	00288793          	addi	a5,a7,2
+80000618:	fef6f513          	andi	a0,a3,-17
+8000061c:	e939                	bnez	a0,80000672 <_strtol_l.isra.0+0xa2>
+8000061e:	03000513          	li	a0,48
+80000622:	04a71163          	bne	a4,a0,80000664 <_strtol_l.isra.0+0x94>
+80000626:	0007c803          	lbu	a6,0(a5)
+8000062a:	05800513          	li	a0,88
+8000062e:	0df87813          	andi	a6,a6,223
+80000632:	02a81963          	bne	a6,a0,80000664 <_strtol_l.isra.0+0x94>
+80000636:	0017c703          	lbu	a4,1(a5)
+8000063a:	0789                	addi	a5,a5,2
+8000063c:	46c1                	li	a3,16
+8000063e:	a815                	j	80000672 <_strtol_l.isra.0+0xa2>
+80000640:	2295                	jal	800007a4 <__errno>
+80000642:	47d9                	li	a5,22
+80000644:	c11c                	sw	a5,0(a0)
+80000646:	4501                	li	a0,0
+80000648:	40b2                	lw	ra,12(sp)
+8000064a:	4422                	lw	s0,8(sp)
+8000064c:	0141                	addi	sp,sp,16
+8000064e:	8082                	ret
+80000650:	02b00513          	li	a0,43
+80000654:	4f81                	li	t6,0
+80000656:	fca711e3          	bne	a4,a0,80000618 <_strtol_l.isra.0+0x48>
+8000065a:	0007c703          	lbu	a4,0(a5)
+8000065e:	00288793          	addi	a5,a7,2
+80000662:	bf5d                	j	80000618 <_strtol_l.isra.0+0x48>
+80000664:	fee1                	bnez	a3,8000063c <_strtol_l.isra.0+0x6c>
+80000666:	03000513          	li	a0,48
+8000066a:	46a9                	li	a3,10
+8000066c:	00a71363          	bne	a4,a0,80000672 <_strtol_l.isra.0+0xa2>
+80000670:	46a1                	li	a3,8
+80000672:	800008b7          	lui	a7,0x80000
+80000676:	18fd                	addi	a7,a7,-1 # 7fffffff <_stack_bottom+0x5ffff35f>
+80000678:	98fe                	add	a7,a7,t6
+8000067a:	02d8f2b3          	remu	t0,a7,a3
+8000067e:	4301                	li	t1,0
+80000680:	4501                	li	a0,0
+80000682:	43a5                	li	t2,9
+80000684:	4ee5                	li	t4,25
+80000686:	547d                	li	s0,-1
+80000688:	02d8de33          	divu	t3,a7,a3
+8000068c:	fd070813          	addi	a6,a4,-48
+80000690:	0303e663          	bltu	t2,a6,800006bc <_strtol_l.isra.0+0xec>
+80000694:	8742                	mv	a4,a6
+80000696:	04d75163          	bge	a4,a3,800006d8 <_strtol_l.isra.0+0x108>
+8000069a:	00830d63          	beq	t1,s0,800006b4 <_strtol_l.isra.0+0xe4>
+8000069e:	537d                	li	t1,-1
+800006a0:	00ae6a63          	bltu	t3,a0,800006b4 <_strtol_l.isra.0+0xe4>
+800006a4:	00ae1463          	bne	t3,a0,800006ac <_strtol_l.isra.0+0xdc>
+800006a8:	00e2c663          	blt	t0,a4,800006b4 <_strtol_l.isra.0+0xe4>
+800006ac:	4305                	li	t1,1
+800006ae:	02a68533          	mul	a0,a3,a0
+800006b2:	953a                	add	a0,a0,a4
+800006b4:	0785                	addi	a5,a5,1
+800006b6:	fff7c703          	lbu	a4,-1(a5)
+800006ba:	bfc9                	j	8000068c <_strtol_l.isra.0+0xbc>
+800006bc:	fbf70813          	addi	a6,a4,-65
+800006c0:	010ee563          	bltu	t4,a6,800006ca <_strtol_l.isra.0+0xfa>
+800006c4:	fc970713          	addi	a4,a4,-55
+800006c8:	b7f9                	j	80000696 <_strtol_l.isra.0+0xc6>
+800006ca:	f9f70813          	addi	a6,a4,-97
+800006ce:	010ee563          	bltu	t4,a6,800006d8 <_strtol_l.isra.0+0x108>
+800006d2:	fa970713          	addi	a4,a4,-87
+800006d6:	b7c1                	j	80000696 <_strtol_l.isra.0+0xc6>
+800006d8:	577d                	li	a4,-1
+800006da:	00e31b63          	bne	t1,a4,800006f0 <_strtol_l.isra.0+0x120>
+800006de:	02200713          	li	a4,34
+800006e2:	00ef2023          	sw	a4,0(t5)
+800006e6:	8546                	mv	a0,a7
+800006e8:	d225                	beqz	a2,80000648 <_strtol_l.isra.0+0x78>
+800006ea:	fff78593          	addi	a1,a5,-1
+800006ee:	a801                	j	800006fe <_strtol_l.isra.0+0x12e>
+800006f0:	000f8463          	beqz	t6,800006f8 <_strtol_l.isra.0+0x128>
+800006f4:	40a00533          	neg	a0,a0
+800006f8:	da21                	beqz	a2,80000648 <_strtol_l.isra.0+0x78>
+800006fa:	fe0318e3          	bnez	t1,800006ea <_strtol_l.isra.0+0x11a>
+800006fe:	c20c                	sw	a1,0(a2)
+80000700:	b7a1                	j	80000648 <_strtol_l.isra.0+0x78>
+
+80000702 <strtol>:
+80000702:	900007b7          	lui	a5,0x90000
+80000706:	86b2                	mv	a3,a2
+80000708:	862e                	mv	a2,a1
+8000070a:	85aa                	mv	a1,a0
+8000070c:	0007a503          	lw	a0,0(a5) # 90000000 <_impure_ptr>
+80000710:	b5c1                	j	800005d0 <_strtol_l.isra.0>
+
+80000712 <__utoa>:
+80000712:	7139                	addi	sp,sp,-64
+80000714:	dc22                	sw	s0,56(sp)
+80000716:	842e                	mv	s0,a1
+80000718:	800015b7          	lui	a1,0x80001
+8000071c:	da26                	sw	s1,52(sp)
+8000071e:	d84a                	sw	s2,48(sp)
+80000720:	84b2                	mv	s1,a2
+80000722:	892a                	mv	s2,a0
+80000724:	02500613          	li	a2,37
+80000728:	80858593          	addi	a1,a1,-2040 # 80000808 <__errno+0x64>
+8000072c:	0028                	addi	a0,sp,8
+8000072e:	de06                	sw	ra,60(sp)
+80000730:	31c9                	jal	800003f2 <memcpy>
+80000732:	ffe48693          	addi	a3,s1,-2
+80000736:	02200793          	li	a5,34
+8000073a:	4701                	li	a4,0
+8000073c:	00d7fc63          	bgeu	a5,a3,80000754 <__utoa+0x42>
+80000740:	00040023          	sb	zero,0(s0)
+80000744:	4401                	li	s0,0
+80000746:	50f2                	lw	ra,60(sp)
+80000748:	8522                	mv	a0,s0
+8000074a:	5462                	lw	s0,56(sp)
+8000074c:	54d2                	lw	s1,52(sp)
+8000074e:	5942                	lw	s2,48(sp)
+80000750:	6121                	addi	sp,sp,64
+80000752:	8082                	ret
+80000754:	029977b3          	remu	a5,s2,s1
+80000758:	86ba                	mv	a3,a4
+8000075a:	0705                	addi	a4,a4,1
+8000075c:	00e40633          	add	a2,s0,a4
+80000760:	03078793          	addi	a5,a5,48
+80000764:	978a                	add	a5,a5,sp
+80000766:	fd87c783          	lbu	a5,-40(a5)
+8000076a:	fef60fa3          	sb	a5,-1(a2)
+8000076e:	87ca                	mv	a5,s2
+80000770:	02995933          	divu	s2,s2,s1
+80000774:	fe97f0e3          	bgeu	a5,s1,80000754 <__utoa+0x42>
+80000778:	00060023          	sb	zero,0(a2)
+8000077c:	00d40733          	add	a4,s0,a3
+80000780:	4781                	li	a5,0
+80000782:	40f68633          	sub	a2,a3,a5
+80000786:	fcc7d0e3          	bge	a5,a2,80000746 <__utoa+0x34>
+8000078a:	00074503          	lbu	a0,0(a4)
+8000078e:	00f40633          	add	a2,s0,a5
+80000792:	00064583          	lbu	a1,0(a2)
+80000796:	00a60023          	sb	a0,0(a2)
+8000079a:	0785                	addi	a5,a5,1
+8000079c:	00b70023          	sb	a1,0(a4)
+800007a0:	177d                	addi	a4,a4,-1
+800007a2:	b7c5                	j	80000782 <__utoa+0x70>
+
+800007a4 <__errno>:
+800007a4:	900007b7          	lui	a5,0x90000
+800007a8:	0007a503          	lw	a0,0(a5) # 90000000 <_impure_ptr>
+800007ac:	8082                	ret
+	...
