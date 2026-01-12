@@ -30,6 +30,22 @@ Install the tools by running the following command in the terminal:
 sudo apt-get install -y make gcc-riscv64-unknown-elf
 ```
 
+#### Rocky Linux (Linux)
+
+Install the toolchain by running the following command in the terminal (needs sudo access):
+```bash
+sudo dnf install gcc-riscv64-linux-gnu
+```
+
+To check if the toolchain is succesfully installed:
+```bash
+command -v riscv64-linux-gnu-gcc
+```
+
+Output should look similar like this:
+```bash
+/bin/riscv64-linux-gnu-gcc
+
 #### Windows
 
 The same commands that are used for Ubuntu can be used under Windows

@@ -1,7 +1,21 @@
 #########################
 # --- RISC-V COMPILER ---
 #########################
-RISCVGNU ?= riscv64-unknown-elf
+
+# Default, for Ubuntu-based distros
+HAS_UNKNOWN_ELF := $(shell command -v riscv64-unknown-elf-gcc 2> /dev/null)
+
+# Rocky Linux
+HAS_LINUX_GNU   := $(shell command -v riscv64-linux-gnu-gcc 2> /dev/null)
+
+ifneq ($(HAS_UNKNOWN_ELF),)
+    RISCVGNU ?= riscv64-unknown-elf
+else ifneq ($(HAS_LINUX_GNU),)
+    RISCVGNU ?= riscv64-linux-gnu
+else
+	$(error No RISC-V compiler found! Please install 'riscv64-unknown-elf-gcc' (Ubuntu based distros) or 'gcc-riscv64-linux-gnu' (Rocky Linux) or use different)
+endif
+
 RISCVPATH ?= # e.g. /opt/riscv/bin/
 
 #########################
