@@ -144,7 +144,7 @@ module simple_system_tb;
 
         // Wait for state machine to complete
         #100_000;
-
+	$display("[   INFO]: GPIO pin values %012b", ext_pad_io);
         $finish();
     end
 
