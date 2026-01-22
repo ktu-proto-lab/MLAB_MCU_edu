@@ -1,4 +1,4 @@
-PROGRAM = gpio_example
+PROGRAM = gpio_display
 
 COMMON_DIR := $(abspath ../../common)
 
