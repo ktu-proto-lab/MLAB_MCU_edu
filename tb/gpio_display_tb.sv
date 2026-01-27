@@ -116,6 +116,9 @@ module simple_system_tb;
         #(CLK_PERIOD / 2) clk_sys = ~clk_sys;
     end
 
+    // Configure time format for displaying later
+    initial
+        $timeformat(-6, 3, " us", 3);
     //==================================================
     // Seven segment display
     //==================================================
@@ -123,6 +126,8 @@ module simple_system_tb;
     always @(ext_pad_io) begin
         // $display("%011b", ext_pad_io); // GPIO value
         $display("###############");
+        $display("Simulation time - %t", $time);
+
         $write("┌──────────────┐\n");
         if (ext_pad_io[0]) begin
             $write("│ ████████████ │\n");
