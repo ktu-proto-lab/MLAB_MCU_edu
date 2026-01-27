@@ -6,39 +6,41 @@
 #include <stdint.h>
 #include "int.h"
 
-volatile uint32_t counter = 1;      // Checks data initialization in dmem
-volatile uint16_t stepper = 255;    // Checks half-word instructions
-
-volatile uint32_t  gpio_int_status = 0; // Holds interrupt status
-
 void display_number(uint32_t value);
 
 void display_number_timed(uint32_t value, uint32_t duration_us);
 
+volatile uint32_t* gpio_regs = (uint32_t*) GPIO_ADDR; // First GPIO reg - output register
+
 int main() {
-    //####################################################
-    // GPIO testing
-    //####################################################
+    // To test the display function write a loop that counts from 0 to 9
 
-    volatile uint32_t* gpio_regs;
-    gpio_regs = (uint32_t*) GPIO_ADDR; // First GPIO reg - output register
+    return 0;
+}
 
-    // All segments test one by one
-    
-
-    // All segments on
-    
-
-    // Counts from 0 to 9
+void display_number(uint32_t value){
+    // Implement the segment display driver HERE
     
 }
 
-void gpio_handler(void){
-    volatile uint32_t* reg;
+void display_number_timed(uint32_t value, uint32_t duration_us){
+    /*
+     * Convert the desired delay (duration_us, in microseconds)
+     * into the equivalent number of CPU cycles.
+     */
+    // uint64_t cycles = ;
 
-    reg = (uint32_t*) (GPIO_ADDR + 0x1C); // Interrupt status register
-    gpio_int_status = *reg;               // Record interrupt status
-    *reg = 0x0;                           // Clear interrupt status
+    /*
+     * UNCOMMENT the following for loop to use as a blocking delay function
+     */
+
+    // for(volatile int i=0; i<cycles; i++){
+    //     __asm__ volatile ("nop");
+    // }
+}
+
+// Ignore the following function. We're not using interrupts in this task
+void gpio_handler(void){
 }
 
 
