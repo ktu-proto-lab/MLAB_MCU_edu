@@ -64,8 +64,9 @@ verilator_sim/
 *.o
 
 # Process Design Kit files (various local-only IP files)
-rtl/pdk/*
-!rtl/pdk/.gitkeep
+# EDIT: in this edu repo the pdk's are open-sourced
+# rtl/pdk/*
+# !rtl/pdk/.gitkeep
 
 # Ignore Visual Studio Code local files
 .vscode/

@@ -2,8 +2,8 @@
 ../../rtl/include/prim_ram_1p_pkg.sv
 ../../rtl/include/prim_secded_pkg.sv
 
-/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/verilog/RM_IHPSG13_1P_1024x32_c2_bm_bist.v
-/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/verilog/RM_IHPSG13_1P_core_behavioral_bm_bist.v
+../../rtl/pdk/RM_IHPSG13_1P_1024x32_c2_bm_bist.v
+../../rtl/pdk/RM_IHPSG13_1P_core_behavioral_bm_bist.v
 
 // ../../rtl/pdk/ixc013g2_iocell.v
 
