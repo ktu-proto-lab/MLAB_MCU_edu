@@ -1,5 +1,15 @@
-# Innovus will use global built-in wireload RC models
-# Not really acceptable for tape-out
+############# MMMC Hierarchy ########################################################################################
+#                                                                                                                   #
+#   Setup Analysis View |                   |--> Constraint Corner --> SDC File                                     #
+#                       |--> Analysis View  |                                                                       #
+#    Hold Analysis View |                   |                 |--> Timing Condition --> Library Set --> LIB File    #
+#                                           |--> Delay Corner |                                                     #
+#                                                             |--> RC Corner --> QRCTech File (missing)             #
+#####################################################################################################################
+
+# IHP-Open PDK doesn't provide cap table or QRCTech file therefore no RC corner specified. 
+# Therefore innovus will use global built-in wireload RC models
+# This isn't acceptable for tape-out
 
 create_library_set -name lib_max -timing { \
 /eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_slow_1p08V_125C.lib \
