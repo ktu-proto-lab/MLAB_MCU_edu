@@ -69,7 +69,11 @@ module bootloader_top (
 
     always_ff @(posedge clk or negedge wb.rst) begin
         if(!wb.rst) begin
+`ifdef BOOT_SKIP
+            state       <= BOOT_FINISH;
+`else
             state       <= WRITE_SLAVE_ADDR_W_BIT;
+`endif
             mem_index   <= '0;      // Keep track which memory index to know when to switch writing from IMEM to DMEM
             rst_core_n  <=  0;      // Put core in reset TODO: Check if halt can be used instead
             data_word   <= 32'd0;   // Set Zeros to register upon reset

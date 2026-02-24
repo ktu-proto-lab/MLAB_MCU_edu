@@ -103,6 +103,7 @@ $(BUILD_DIR)$(PROGRAM).elf: $(OBJS) $(BUILD_DIR)novectors.o
 
 # Rule to generate the final .bin file and all other simulation files from the .elf file.
 $(BUILD_DIR)$(PROGRAM).bin: $(BUILD_DIR)$(PROGRAM).elf
+	# Main pricniple: create instructions and data memories as *.bin files, pad *.bin file to full memory size, split instructions memory into two files, and then convert everything into hex format.
 	# Generate instructions memory binary file.
 	$(RISCVPATH)$(RISCVGNU)-objcopy $< -O binary -j .vectors -j .text -j .nops -j .rodata $(BUILD_DIR)$(PROGRAM)_instr.bin
 	# Generate data memory binary file.
@@ -111,18 +112,18 @@ $(BUILD_DIR)$(PROGRAM).bin: $(BUILD_DIR)$(PROGRAM).elf
 	dd if=/dev/null of=$(BUILD_DIR)$(PROGRAM)_instr.bin bs=1 count=1 seek=8192
 	dd if=/dev/null of=$(BUILD_DIR)$(PROGRAM)_data.bin bs=1 count=1 seek=4096
 	# Combine the padded instruction and data binaries into the final .bin file.
-	cat $(BUILD_DIR)$(PROGRAM)_instr.bin $(BUILD_DIR)$(PROGRAM)_data.bin > $@
-	# Generate Verilog hex file.
-	$(RISCVPATH)$(RISCVGNU)-objcopy $< -O verilog --verilog-data-width 1 -j .vectors -j .text -j .nops -j .rodata -j .bss -j .stack -j .data $(BUILD_DIR)verilog_hex.v
-	sed -i '/^@9/s/^\(@9[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]\)0/\12/' $(BUILD_DIR)verilog_hex.v
-	sed -i '/^@/s/^@....\(.*\)/@\1/' $(BUILD_DIR)verilog_hex.v
+	cat $(BUILD_DIR)$(PROGRAM)_instr.bin $(BUILD_DIR)$(PROGRAM)_data.bin > $@ 			# Combined instruction and data memories (for eeprom)
 	# Generate separate instruction and data memory images for memory initialization.
-	$(RISCVPATH)$(RISCVGNU)-objcopy $< -O verilog --verilog-data-width 4 -j .vectors -j .text -j .nops -j .rodata --reverse-bytes=4 $(BUILD_DIR)instr_hex_temp.mem
-	$(RISCVPATH)$(RISCVGNU)-objcopy $< -O verilog --verilog-data-width 4 -j .data --reverse-bytes=4 $(BUILD_DIR)data_hex.mem
-	sed -i 's/@[0-9a-fA-F]\([0-9a-fA-F]*\)/@0\1/' $(BUILD_DIR)instr_hex_temp.mem
-	sed -i 's/@[0-9a-fA-F]\([0-9a-fA-F]*\)/@0\1/' $(BUILD_DIR)data_hex.mem
-	sed '0,/^@/!{/^@/d}' $(BUILD_DIR)instr_hex_temp.mem > $(BUILD_DIR)instr_hex.mem
-	# Copy generated files to the parent `ibex_sw` directory for use by a simulator.
+	# Split instructions into two bins
+	dd if=$(BUILD_DIR)$(PROGRAM)_instr.bin of=$(BUILD_DIR)$(PROGRAM)_instr_1.bin bs=1 count=4096	# 1st half of instruction memory (0-4095)
+	dd if=$(BUILD_DIR)$(PROGRAM)_instr.bin of=$(BUILD_DIR)$(PROGRAM)_instr_2.bin bs=1 skip=4096	# 2nd half of instruction memory (4096-8192)
+	# Generate Verilog hex file (convert bin file to hex).
+	$(RISCVPATH)$(RISCVGNU)-objcopy -I binary -O verilog --verilog-data-width=4 --reverse-bytes=4 $(BUILD_DIR)$(PROGRAM)_instr.bin $(BUILD_DIR)instr_hex.mem	# Whole instruction memory
+	$(RISCVPATH)$(RISCVGNU)-objcopy -I binary -O verilog --verilog-data-width=4 --reverse-bytes=4 $(BUILD_DIR)$(PROGRAM)_instr_1.bin $(BUILD_DIR)instr_hex_1.mem	# 1st half of instruction memory (0-4095)
+	$(RISCVPATH)$(RISCVGNU)-objcopy -I binary -O verilog --verilog-data-width=4 --reverse-bytes=4 $(BUILD_DIR)$(PROGRAM)_instr_2.bin $(BUILD_DIR)instr_hex_2.mem	# 2nd half of instruction memory (4096-8192)
+	$(RISCVPATH)$(RISCVGNU)-objcopy -I binary -O verilog --verilog-data-width=4 --reverse-bytes=4 $(BUILD_DIR)$(PROGRAM)_data.bin $(BUILD_DIR)data_hex.mem		# Data memory
+	$(RISCVPATH)$(RISCVGNU)-objcopy -I binary -O verilog --verilog-data-width=1 $@ $(BUILD_DIR)verilog_hex.v							# Combined instruction and data memories (for eeprom)
+	# Copy generated files to the parent `ibex` directory for use by a simulator (Still required for programmer).
 	cp $(BUILD_DIR)verilog_hex.v $(COMMON_DIR)/..
 	cp $(BUILD_DIR)$(PROGRAM).bin $(COMMON_DIR)/../verilog_bin.bin
 	# Report final program size.

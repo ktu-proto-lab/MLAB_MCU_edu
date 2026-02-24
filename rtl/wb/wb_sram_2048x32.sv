@@ -13,7 +13,8 @@ module wb_sram_2048x32
     wb_if.slave wb
 );
 
-  parameter MEMInitFile = "";
+  parameter MEMInitFile_1 = "";
+  parameter MEMInitFile_2 = "";
 
   localparam size = 'h1000;                             // 1024x32 = 4096 bytes
   localparam addr_width = $clog2(size) - 2;             // This will be 10 bits
@@ -75,7 +76,7 @@ module wb_sram_2048x32
 
   /* SRAM instances */
   RM_IHPSG13_1P_1024x32_c2_bm_bist  #(
-    // .MEMInitFile(MEMInitFile)
+    .MEMInitFile(MEMInitFile_1)
   ) sram1 (
         .A_CLK        (wb.clk),
         .A_MEN        (sram1_me),
@@ -97,7 +98,7 @@ module wb_sram_2048x32
     );
 
   RM_IHPSG13_1P_1024x32_c2_bm_bist  #(
-    // .MEMInitFile(MEMInitFile)
+    .MEMInitFile(MEMInitFile_2)
   ) sram2 (
         .A_CLK        (wb.clk),
         .A_MEN        (sram2_me),

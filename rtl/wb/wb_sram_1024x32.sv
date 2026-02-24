@@ -60,7 +60,7 @@ module wb_sram_1024x32
 
   /* SRAM instance */
   RM_IHPSG13_1P_1024x32_c2_bm_bist  #(
-    // .MEMInitFile(MEMInitFile)
+    .MEMInitFile(MEMInitFile)
 	) sram (
         .A_CLK        (wb.clk),
         .A_MEN        (sram_me),

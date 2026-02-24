@@ -37,6 +37,7 @@ module RM_IHPSG13_1P_1024x32_c2_bm_bist (
     A_BIST_DIN,
     A_BIST_BM
 );
+    parameter  MEMInitFile = "";
 
     input A_CLK;
     input A_MEN;
@@ -62,7 +63,8 @@ module RM_IHPSG13_1P_1024x32_c2_bm_bist (
 
     SRAM_1P_behavioral_bm_bist #(
 	.P_DATA_WIDTH(32),
-	.P_ADDR_WIDTH(10)
+	.P_ADDR_WIDTH(10),
+	.MEMInitFile(MEMInitFile)
 	) i_SRAM_1P_behavioral_bm_bist (
                     .A_CLK(A_CLK),
                     .A_MEN(A_MEN),

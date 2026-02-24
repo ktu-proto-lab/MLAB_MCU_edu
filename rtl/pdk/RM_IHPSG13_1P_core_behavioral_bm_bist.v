@@ -35,7 +35,7 @@ module SRAM_1P_behavioral_bm_bist (A_ADDR,
                                 A_BIST_REN,
                                 A_BIST_CLK
                                 );
-
+parameter  MEMInitFile = "";
 parameter  P_DATA_WIDTH=24;
 parameter  P_ADDR_WIDTH=14;
 
@@ -64,7 +64,9 @@ input wire                      A_BIST_CLK;
 reg [P_DATA_WIDTH-1:0]    memory [0:2**(P_ADDR_WIDTH)-1]; // memory
 reg [P_DATA_WIDTH-1:0]    dr_r;
 
-
+initial begin
+    $readmemh(MEMInitFile, memory);
+end
 
 wire  [P_ADDR_WIDTH-1:0]	ADDR_MUX;
 wire  [P_DATA_WIDTH-1:0] 	DIN_MUX;

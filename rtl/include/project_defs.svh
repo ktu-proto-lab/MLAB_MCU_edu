@@ -37,6 +37,9 @@
 
 `define UART_NO_FIFO
 
+// Uncomment the following to disable bootloader and use MEMInit (ONLY FOR SIMULATION)
+`define BOOT_SKIP
+
 // Uncomment the following to enable bootloader writeback to eeprom after initial boot
 // `define BOOT_WRITEBACK
 

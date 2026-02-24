@@ -2,7 +2,10 @@
 
 module ibex_simple_system #(
 
-    parameter bit ICache        = 1'b0    // 0:prefetch buffer, 1:instruction cache
+    parameter bit ICache        = 1'b0,    // 0:prefetch buffer, 1:instruction cache
+    parameter IMEM_1_InitFile = "",
+    parameter IMEM_2_InitFile = "",
+    parameter DMEM_InitFile = ""
   )(
   input   logic   clk_sys,
   input   logic   rst_async_n,
@@ -23,6 +26,7 @@ module ibex_simple_system #(
   // input   logic   scan_in,
   // output  logic   scan_out
 );
+
 
   //==================================================
   // Signals
@@ -166,13 +170,18 @@ module ibex_simple_system #(
 
   // Instruction and Data memories TODO switch to PDK SRAM when we get it
   wb_sram_2048x32 #(
-    // .MEMInitFile("./sw/ibex_sw/instr_hex.mem")
+`ifdef BOOT_SKIP
+    .MEMInitFile_1(IMEM_1_InitFile),
+    .MEMInitFile_2(IMEM_2_InitFile)
+`endif
     ) imem (
     .wb(wbs[0])
   );
 
   wb_sram_1024x32 #(
-    // .MEMInitFile("./sw/ibex_sw/data_hex.mem")
+`ifdef BOOT_SKIP
+    .MEMInitFile(DMEM_InitFile)
+`endif
   ) dmem (
     .wb(wbs[1])
   );
