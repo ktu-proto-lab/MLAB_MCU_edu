@@ -63,5 +63,6 @@ typedef struct {
 #define GPIO_PIN_11 ((uint32_t)0x0800) /* Pin 11 selected    */
 
 void gpio_handler();
+volatile GPIO_reg_map_t *const GPIO_init();
 
 #endif  // TIMER_H
