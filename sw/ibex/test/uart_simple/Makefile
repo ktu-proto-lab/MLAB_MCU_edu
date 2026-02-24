@@ -1,4 +1,4 @@
-PROGRAM = uart_example
+PROGRAM = uart_simple
 
 COMMON_DIR := $(abspath ../../common)
 

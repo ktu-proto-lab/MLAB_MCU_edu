@@ -5,40 +5,40 @@ build/full_peripheral.elf:     file format elf32-littleriscv
 Disassembly of section .vectors:
 
 80000000 <_vectors_start>:
-80000000:	1d40006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000004:	1d00006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000008:	1cc0006f          	j	800001d4 <DEFAULT_IRQHandler>
-8000000c:	1c80006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000010:	1c40006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000014:	1c00006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000018:	1bc0006f          	j	800001d4 <DEFAULT_IRQHandler>
-8000001c:	1180006f          	j	80000134 <TIMER_IRQHandler>
-80000020:	1b40006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000024:	1b00006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000028:	1ac0006f          	j	800001d4 <DEFAULT_IRQHandler>
-8000002c:	0740006f          	j	800000a0 <GPIO_IRQHandler>
-80000030:	1a40006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000034:	1a00006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000038:	19c0006f          	j	800001d4 <DEFAULT_IRQHandler>
-8000003c:	1980006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000040:	1940006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000044:	0ec0006f          	j	80000130 <I2C_IRQHandler>
-80000048:	1900006f          	j	800001d8 <UART_RX_HALF_FULL_IRQHandler>
-8000004c:	1900006f          	j	800001dc <UART_TX_HALF_EMPTY_IRQHandler>
-80000050:	1900006f          	j	800001e0 <UART_RX_NOT_EMPTY_IRQHandler>
-80000054:	1900006f          	j	800001e4 <UART_TX_NOT_FULL_IRQHandler>
-80000058:	17c0006f          	j	800001d4 <DEFAULT_IRQHandler>
-8000005c:	1780006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000060:	1740006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000064:	1700006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000068:	16c0006f          	j	800001d4 <DEFAULT_IRQHandler>
-8000006c:	1680006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000070:	1640006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000074:	1600006f          	j	800001d4 <DEFAULT_IRQHandler>
-80000078:	15c0006f          	j	800001d4 <DEFAULT_IRQHandler>
-8000007c:	0000                	.insn	2, 0x
-8000007e:	0000                	.insn	2, 0x
-80000080:	6900006f          	j	80000710 <reset_handler>
+80000000:	13e0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000004:	13a0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000008:	1360006f          	j	8000013e <DEFAULT_IRQHandler>
+8000000c:	1320006f          	j	8000013e <DEFAULT_IRQHandler>
+80000010:	12e0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000014:	12a0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000018:	1260006f          	j	8000013e <DEFAULT_IRQHandler>
+8000001c:	0cc0006f          	j	800000e8 <TIMER_IRQHandler>
+80000020:	11e0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000024:	11a0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000028:	1160006f          	j	8000013e <DEFAULT_IRQHandler>
+8000002c:	0700006f          	j	8000009c <GPIO_IRQHandler>
+80000030:	10e0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000034:	10a0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000038:	1060006f          	j	8000013e <DEFAULT_IRQHandler>
+8000003c:	1020006f          	j	8000013e <DEFAULT_IRQHandler>
+80000040:	0fe0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000044:	0a20006f          	j	800000e6 <I2C_IRQHandler>
+80000048:	0f80006f          	j	80000140 <UART_RX_HALF_FULL_IRQHandler>
+8000004c:	0f60006f          	j	80000142 <UART_TX_HALF_EMPTY_IRQHandler>
+80000050:	0f40006f          	j	80000144 <UART_RX_NOT_EMPTY_IRQHandler>
+80000054:	0f20006f          	j	80000146 <UART_TX_NOT_FULL_IRQHandler>
+80000058:	0e60006f          	j	8000013e <DEFAULT_IRQHandler>
+8000005c:	0e20006f          	j	8000013e <DEFAULT_IRQHandler>
+80000060:	0de0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000064:	0da0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000068:	0d60006f          	j	8000013e <DEFAULT_IRQHandler>
+8000006c:	0d20006f          	j	8000013e <DEFAULT_IRQHandler>
+80000070:	0ce0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000074:	0ca0006f          	j	8000013e <DEFAULT_IRQHandler>
+80000078:	0c60006f          	j	8000013e <DEFAULT_IRQHandler>
+8000007c:	0000                	.insn	2, 0x0000
+8000007e:	0000                	.insn	2, 0x0000
+80000080:	41c0006f          	j	8000049c <reset_handler>
 
 Disassembly of section .text:
 
@@ -51,1068 +51,1057 @@ void gpio_handler() {
   g_GPIO_int_status = GPIO->INTS;
 80000084:	900007b7          	lui	a5,0x90000
 80000088:	0007a783          	lw	a5,0(a5) # 90000000 <GPIO>
-8000008c:	01c7a703          	lw	a4,28(a5)
+8000008c:	90000737          	lui	a4,0x90000
+80000090:	4fd4                	lw	a3,28(a5)
   GPIO->INTS = 0;
-80000090:	0007ae23          	sw	zero,28(a5)
+80000092:	0007ae23          	sw	zero,28(a5)
   g_GPIO_int_status = GPIO->INTS;
-80000094:	900007b7          	lui	a5,0x90000
-80000098:	00e7a423          	sw	a4,8(a5) # 90000008 <g_GPIO_int_status>
-8000009c:	00008067          	ret
+80000096:	00d72423          	sw	a3,8(a4) # 90000008 <g_GPIO_int_status>
+8000009a:	8082                	ret
 
-800000a0 <GPIO_IRQHandler>:
+8000009c <GPIO_IRQHandler>:
 
 #include "gpio.h"
 #include "main.h"
 #include "timer.h"
 
 void GPIO_IRQHandler(void) { gpio_handler(); }
-800000a0:	fc010113          	addi	sp,sp,-64
-800000a4:	02112e23          	sw	ra,60(sp)
-800000a8:	02512c23          	sw	t0,56(sp)
-800000ac:	02612a23          	sw	t1,52(sp)
-800000b0:	02712823          	sw	t2,48(sp)
-800000b4:	02a12623          	sw	a0,44(sp)
-800000b8:	02b12423          	sw	a1,40(sp)
-800000bc:	02c12223          	sw	a2,36(sp)
-800000c0:	02d12023          	sw	a3,32(sp)
-800000c4:	00e12e23          	sw	a4,28(sp)
-800000c8:	00f12c23          	sw	a5,24(sp)
-800000cc:	01012a23          	sw	a6,20(sp)
-800000d0:	01112823          	sw	a7,16(sp)
-800000d4:	01c12623          	sw	t3,12(sp)
-800000d8:	01d12423          	sw	t4,8(sp)
-800000dc:	01e12223          	sw	t5,4(sp)
-800000e0:	01f12023          	sw	t6,0(sp)
-800000e4:	fa1ff0ef          	jal	80000084 <gpio_handler>
-800000e8:	03c12083          	lw	ra,60(sp)
-800000ec:	03812283          	lw	t0,56(sp)
-800000f0:	03412303          	lw	t1,52(sp)
-800000f4:	03012383          	lw	t2,48(sp)
-800000f8:	02c12503          	lw	a0,44(sp)
-800000fc:	02812583          	lw	a1,40(sp)
-80000100:	02412603          	lw	a2,36(sp)
-80000104:	02012683          	lw	a3,32(sp)
-80000108:	01c12703          	lw	a4,28(sp)
-8000010c:	01812783          	lw	a5,24(sp)
-80000110:	01412803          	lw	a6,20(sp)
-80000114:	01012883          	lw	a7,16(sp)
-80000118:	00c12e03          	lw	t3,12(sp)
-8000011c:	00812e83          	lw	t4,8(sp)
-80000120:	00412f03          	lw	t5,4(sp)
-80000124:	00012f83          	lw	t6,0(sp)
-80000128:	04010113          	addi	sp,sp,64
-8000012c:	30200073          	mret
+8000009c:	7139                	addi	sp,sp,-64
+8000009e:	de06                	sw	ra,60(sp)
+800000a0:	dc16                	sw	t0,56(sp)
+800000a2:	da1a                	sw	t1,52(sp)
+800000a4:	d81e                	sw	t2,48(sp)
+800000a6:	d62a                	sw	a0,44(sp)
+800000a8:	d42e                	sw	a1,40(sp)
+800000aa:	d232                	sw	a2,36(sp)
+800000ac:	d036                	sw	a3,32(sp)
+800000ae:	ce3a                	sw	a4,28(sp)
+800000b0:	cc3e                	sw	a5,24(sp)
+800000b2:	ca42                	sw	a6,20(sp)
+800000b4:	c846                	sw	a7,16(sp)
+800000b6:	c672                	sw	t3,12(sp)
+800000b8:	c476                	sw	t4,8(sp)
+800000ba:	c27a                	sw	t5,4(sp)
+800000bc:	c07e                	sw	t6,0(sp)
+800000be:	37d9                	jal	80000084 <gpio_handler>
+800000c0:	50f2                	lw	ra,60(sp)
+800000c2:	52e2                	lw	t0,56(sp)
+800000c4:	5352                	lw	t1,52(sp)
+800000c6:	53c2                	lw	t2,48(sp)
+800000c8:	5532                	lw	a0,44(sp)
+800000ca:	55a2                	lw	a1,40(sp)
+800000cc:	5612                	lw	a2,36(sp)
+800000ce:	5682                	lw	a3,32(sp)
+800000d0:	4772                	lw	a4,28(sp)
+800000d2:	47e2                	lw	a5,24(sp)
+800000d4:	4852                	lw	a6,20(sp)
+800000d6:	48c2                	lw	a7,16(sp)
+800000d8:	4e32                	lw	t3,12(sp)
+800000da:	4ea2                	lw	t4,8(sp)
+800000dc:	4f12                	lw	t5,4(sp)
+800000de:	4f82                	lw	t6,0(sp)
+800000e0:	6121                	addi	sp,sp,64
+800000e2:	30200073          	mret
 
-80000130 <I2C_IRQHandler>:
+800000e6 <I2C_IRQHandler>:
 
 void I2C_IRQHandler(void) { while (1); }
-80000130:	0000006f          	j	80000130 <I2C_IRQHandler>
+800000e6:	a001                	j	800000e6 <I2C_IRQHandler>
 
-80000134 <TIMER_IRQHandler>:
+800000e8 <TIMER_IRQHandler>:
 
 void TIMER_IRQHandler(void) {
-80000134:	fc010113          	addi	sp,sp,-64
-80000138:	00e12e23          	sw	a4,28(sp)
-8000013c:	00f12c23          	sw	a5,24(sp)
-80000140:	02112e23          	sw	ra,60(sp)
-80000144:	02512c23          	sw	t0,56(sp)
-80000148:	02612a23          	sw	t1,52(sp)
-8000014c:	02712823          	sw	t2,48(sp)
-80000150:	02b12423          	sw	a1,40(sp)
-80000154:	02c12223          	sw	a2,36(sp)
-80000158:	02d12023          	sw	a3,32(sp)
-8000015c:	01012a23          	sw	a6,20(sp)
-80000160:	01112823          	sw	a7,16(sp)
-80000164:	01c12623          	sw	t3,12(sp)
-80000168:	01d12423          	sw	t4,8(sp)
-8000016c:	01e12223          	sw	t5,4(sp)
-80000170:	01f12023          	sw	t6,0(sp)
-80000174:	02a12623          	sw	a0,44(sp)
+800000e8:	7139                	addi	sp,sp,-64
+800000ea:	ce3a                	sw	a4,28(sp)
+800000ec:	cc3e                	sw	a5,24(sp)
+800000ee:	de06                	sw	ra,60(sp)
+800000f0:	dc16                	sw	t0,56(sp)
+800000f2:	da1a                	sw	t1,52(sp)
+800000f4:	d81e                	sw	t2,48(sp)
+800000f6:	d42e                	sw	a1,40(sp)
+800000f8:	d232                	sw	a2,36(sp)
+800000fa:	d036                	sw	a3,32(sp)
+800000fc:	ca42                	sw	a6,20(sp)
+800000fe:	c846                	sw	a7,16(sp)
+80000100:	c672                	sw	t3,12(sp)
+80000102:	c476                	sw	t4,8(sp)
+80000104:	c27a                	sw	t5,4(sp)
+80000106:	c07e                	sw	t6,0(sp)
+80000108:	d62a                	sw	a0,44(sp)
   volatile timer_reg_map_t *const timer = timer_init();
-80000178:	078000ef          	jal	800001f0 <timer_init>
+8000010a:	2091                	jal	8000014e <timer_init>
   timer_ack_intrq(timer);
-8000017c:	090000ef          	jal	8000020c <timer_ack_intrq>
+8000010c:	28a1                	jal	80000164 <timer_ack_intrq>
   g_TIMER_int_status = 1;
-80000180:	900007b7          	lui	a5,0x90000
-80000184:	00100713          	li	a4,1
-80000188:	00e79223          	sh	a4,4(a5) # 90000004 <g_TIMER_int_status>
+8000010e:	900007b7          	lui	a5,0x90000
+80000112:	4705                	li	a4,1
+80000114:	00e79223          	sh	a4,4(a5) # 90000004 <g_TIMER_int_status>
 }
-8000018c:	03c12083          	lw	ra,60(sp)
-80000190:	03812283          	lw	t0,56(sp)
-80000194:	03412303          	lw	t1,52(sp)
-80000198:	03012383          	lw	t2,48(sp)
-8000019c:	02c12503          	lw	a0,44(sp)
-800001a0:	02812583          	lw	a1,40(sp)
-800001a4:	02412603          	lw	a2,36(sp)
-800001a8:	02012683          	lw	a3,32(sp)
-800001ac:	01c12703          	lw	a4,28(sp)
-800001b0:	01812783          	lw	a5,24(sp)
-800001b4:	01412803          	lw	a6,20(sp)
-800001b8:	01012883          	lw	a7,16(sp)
-800001bc:	00c12e03          	lw	t3,12(sp)
-800001c0:	00812e83          	lw	t4,8(sp)
-800001c4:	00412f03          	lw	t5,4(sp)
-800001c8:	00012f83          	lw	t6,0(sp)
-800001cc:	04010113          	addi	sp,sp,64
-800001d0:	30200073          	mret
+80000118:	50f2                	lw	ra,60(sp)
+8000011a:	52e2                	lw	t0,56(sp)
+8000011c:	5352                	lw	t1,52(sp)
+8000011e:	53c2                	lw	t2,48(sp)
+80000120:	5532                	lw	a0,44(sp)
+80000122:	55a2                	lw	a1,40(sp)
+80000124:	5612                	lw	a2,36(sp)
+80000126:	5682                	lw	a3,32(sp)
+80000128:	4772                	lw	a4,28(sp)
+8000012a:	47e2                	lw	a5,24(sp)
+8000012c:	4852                	lw	a6,20(sp)
+8000012e:	48c2                	lw	a7,16(sp)
+80000130:	4e32                	lw	t3,12(sp)
+80000132:	4ea2                	lw	t4,8(sp)
+80000134:	4f12                	lw	t5,4(sp)
+80000136:	4f82                	lw	t6,0(sp)
+80000138:	6121                	addi	sp,sp,64
+8000013a:	30200073          	mret
 
-800001d4 <DEFAULT_IRQHandler>:
+8000013e <DEFAULT_IRQHandler>:
 
 void DEFAULT_IRQHandler(void) { while (1); }
-800001d4:	0000006f          	j	800001d4 <DEFAULT_IRQHandler>
+8000013e:	a001                	j	8000013e <DEFAULT_IRQHandler>
 
-800001d8 <UART_RX_HALF_FULL_IRQHandler>:
+80000140 <UART_RX_HALF_FULL_IRQHandler>:
 
 __attribute__((interrupt)) void UART_RX_HALF_FULL_IRQHandler() { while(1); }
-800001d8:	0000006f          	j	800001d8 <UART_RX_HALF_FULL_IRQHandler>
+80000140:	a001                	j	80000140 <UART_RX_HALF_FULL_IRQHandler>
 
-800001dc <UART_TX_HALF_EMPTY_IRQHandler>:
+80000142 <UART_TX_HALF_EMPTY_IRQHandler>:
 
 __attribute__((interrupt)) void UART_TX_HALF_EMPTY_IRQHandler() { while(1); }
-800001dc:	0000006f          	j	800001dc <UART_TX_HALF_EMPTY_IRQHandler>
+80000142:	a001                	j	80000142 <UART_TX_HALF_EMPTY_IRQHandler>
 
-800001e0 <UART_RX_NOT_EMPTY_IRQHandler>:
+80000144 <UART_RX_NOT_EMPTY_IRQHandler>:
 
 __attribute__((interrupt)) void UART_RX_NOT_EMPTY_IRQHandler() { while(1); }
-800001e0:	0000006f          	j	800001e0 <UART_RX_NOT_EMPTY_IRQHandler>
+80000144:	a001                	j	80000144 <UART_RX_NOT_EMPTY_IRQHandler>
 
-800001e4 <UART_TX_NOT_FULL_IRQHandler>:
+80000146 <UART_TX_NOT_FULL_IRQHandler>:
 
-800001e4:	0000006f          	j	800001e4 <UART_TX_NOT_FULL_IRQHandler>
+80000146:	a001                	j	80000146 <UART_TX_NOT_FULL_IRQHandler>
 
-800001e8 <GPIO_init>:
+80000148 <GPIO_init>:
 #include "gpio.h"
 
 volatile GPIO_reg_map_t *const GPIO_init() {
   return (volatile GPIO_reg_map_t *const)GPIO_BASE_ADDR;
-800001e8:	40000537          	lui	a0,0x40000
-800001ec:	00008067          	ret
+80000148:	40000537          	lui	a0,0x40000
+8000014c:	8082                	ret
 
-800001f0 <timer_init>:
+8000014e <timer_init>:
 volatile timer_reg_map_t *timer_init() {
   // Initialize clean Timer.
   volatile timer_reg_map_t *const t =
       (volatile timer_reg_map_t *)TIMER_BASE_ADDR;
   // Clear all previous states of the Timer's Control register.
   timer_ctrl_reg_shadow = 0;
-800001f0:	900007b7          	lui	a5,0x90000
-800001f4:	0007a623          	sw	zero,12(a5) # 9000000c <timer_ctrl_reg_shadow>
+8000014e:	900007b7          	lui	a5,0x90000
+80000152:	0007a623          	sw	zero,12(a5) # 9000000c <timer_ctrl_reg_shadow>
   t->CTRL = timer_ctrl_reg_shadow;
-800001f8:	200007b7          	lui	a5,0x20000
-800001fc:	0007a023          	sw	zero,0(a5) # 20000000 <_stack_len+0x1ffff000>
+80000156:	20000537          	lui	a0,0x20000
+8000015a:	00052023          	sw	zero,0(a0) # 20000000 <_stack_len+0x1ffff000>
   t->MOD = 0x0;
-80000200:	0007a223          	sw	zero,4(a5)
+8000015e:	00052223          	sw	zero,4(a0)
 
   return t;
 }
-80000204:	20000537          	lui	a0,0x20000
-80000208:	00008067          	ret
+80000162:	8082                	ret
 
-8000020c <timer_ack_intrq>:
+80000164 <timer_ack_intrq>:
 
 void timer_ack_intrq(volatile timer_reg_map_t *const t) {
   // Direct write to a flag bit.
   t->CTRL = TIMER_CTRL_FLAG;
-8000020c:	00400793          	li	a5,4
-80000210:	00f52023          	sw	a5,0(a0) # 20000000 <_stack_len+0x1ffff000>
+80000164:	4791                	li	a5,4
+80000166:	c11c                	sw	a5,0(a0)
 }
-80000214:	00008067          	ret
+80000168:	8082                	ret
 
-80000218 <timer_clear_ctrl>:
+8000016a <timer_clear_ctrl>:
 
 void timer_clear_ctrl(volatile timer_reg_map_t *const t) {
   timer_ctrl_reg_shadow = 0;
-80000218:	900007b7          	lui	a5,0x90000
-8000021c:	0007a623          	sw	zero,12(a5) # 9000000c <timer_ctrl_reg_shadow>
+8000016a:	900007b7          	lui	a5,0x90000
+8000016e:	0007a623          	sw	zero,12(a5) # 9000000c <timer_ctrl_reg_shadow>
   t->CTRL = timer_ctrl_reg_shadow;
-80000220:	00052023          	sw	zero,0(a0)
+80000172:	00052023          	sw	zero,0(a0)
 }
-80000224:	00008067          	ret
+80000176:	8082                	ret
 
-80000228 <timer_set>:
+80000178 <timer_set>:
 
 void timer_set(volatile timer_reg_map_t *const t, const uint16_t mod,
                const uint8_t pre_scl) {
   // Clear the prescaler value and set to the new
   timer_ctrl_reg_shadow &= ~TIMER_CTRL_PRE_SCALR_MSK;
-80000228:	90000837          	lui	a6,0x90000
-8000022c:	00c82783          	lw	a5,12(a6) # 9000000c <timer_ctrl_reg_shadow>
-80000230:	fffff6b7          	lui	a3,0xfffff
+80000178:	900006b7          	lui	a3,0x90000
+8000017c:	00c6a783          	lw	a5,12(a3) # 9000000c <timer_ctrl_reg_shadow>
+80000180:	777d                	lui	a4,0xfffff
+80000182:	0ff70713          	addi	a4,a4,255 # fffff0ff <_stack_start+0x6fffe0ff>
+80000186:	8ff9                	and	a5,a5,a4
   timer_ctrl_reg_shadow |= TIMER_CTRL_PRE_SCALR(pre_scl);
-80000234:	00001737          	lui	a4,0x1
-  timer_ctrl_reg_shadow &= ~TIMER_CTRL_PRE_SCALR_MSK;
-80000238:	0ff68693          	addi	a3,a3,255 # fffff0ff <_stack_start+0x6fffe0ff>
-  timer_ctrl_reg_shadow |= TIMER_CTRL_PRE_SCALR(pre_scl);
-8000023c:	00861613          	slli	a2,a2,0x8
-80000240:	f0070713          	addi	a4,a4,-256 # f00 <_min_stack+0xb00>
-  timer_ctrl_reg_shadow &= ~TIMER_CTRL_PRE_SCALR_MSK;
-80000244:	00d7f7b3          	and	a5,a5,a3
-  timer_ctrl_reg_shadow |= TIMER_CTRL_PRE_SCALR(pre_scl);
-80000248:	00e67633          	and	a2,a2,a4
-8000024c:	00c7e7b3          	or	a5,a5,a2
+80000188:	6705                	lui	a4,0x1
+8000018a:	0622                	slli	a2,a2,0x8
+8000018c:	f0070713          	addi	a4,a4,-256 # f00 <_min_stack+0xb00>
+80000190:	8e79                	and	a2,a2,a4
+80000192:	8fd1                	or	a5,a5,a2
 
   // Set Timer registers
   t->MOD = (uint32_t)mod;
-80000250:	00b52223          	sw	a1,4(a0)
+80000194:	c14c                	sw	a1,4(a0)
   timer_ctrl_reg_shadow |= TIMER_CTRL_PRE_SCALR(pre_scl);
-80000254:	00f82623          	sw	a5,12(a6)
+80000196:	00f6a623          	sw	a5,12(a3)
   t->CTRL = timer_ctrl_reg_shadow;
-80000258:	00f52023          	sw	a5,0(a0)
+8000019a:	c11c                	sw	a5,0(a0)
 }
-8000025c:	00008067          	ret
+8000019c:	8082                	ret
 
-80000260 <timer_en>:
+8000019e <timer_en>:
 
 void timer_en(volatile timer_reg_map_t *const t) {
   timer_ctrl_reg_shadow |= (TIMER_CTRL_CNT_EN | TIMER_CTRL_ENA_INT);
-80000260:	90000737          	lui	a4,0x90000
-80000264:	00c72783          	lw	a5,12(a4) # 9000000c <timer_ctrl_reg_shadow>
-80000268:	0037e793          	ori	a5,a5,3
-8000026c:	00f72623          	sw	a5,12(a4)
+8000019e:	90000737          	lui	a4,0x90000
+800001a2:	00c72783          	lw	a5,12(a4) # 9000000c <timer_ctrl_reg_shadow>
+800001a6:	0037e793          	ori	a5,a5,3
+800001aa:	00f72623          	sw	a5,12(a4)
   t->CTRL = timer_ctrl_reg_shadow;
-80000270:	00f52023          	sw	a5,0(a0)
-80000274:	00008067          	ret
+800001ae:	c11c                	sw	a5,0(a0)
+800001b0:	8082                	ret
 
-80000278 <OC_I2C_Init>:
+800001b2 <OC_I2C_Init>:
 #include "i2c_master.h"
 
 void OC_I2C_Init(I2C_HandleTypeDef *i2c, uint32_t BaseAddress, uint16_t Speed,
                  uint8_t CPUFreq) {
   uint16_t prescale =
       OC_I2C_PRESCALE(CPUFreq, Speed);  // Calculate I2C prescaler based on core
-80000278:	0c800793          	li	a5,200
-8000027c:	02f686b3          	mul	a3,a3,a5
+800001b2:	0c800793          	li	a5,200
+800001b6:	02f686b3          	mul	a3,a3,a5
                                         // frequency and desired i2c speed
 
   i2c->regs = (volatile OC_I2C_reg_map_t *)
-80000280:	00b52023          	sw	a1,0(a0)
+800001ba:	c10c                	sw	a1,0(a0)
       OC_I2C_PRESCALE(CPUFreq, Speed);  // Calculate I2C prescaler based on core
-80000284:	02c6c733          	div	a4,a3,a2
+800001bc:	02c6c7b3          	div	a5,a3,a2
   uint16_t prescale =
-80000288:	fff70713          	addi	a4,a4,-1
-8000028c:	01071713          	slli	a4,a4,0x10
-80000290:	01075713          	srli	a4,a4,0x10
+800001c0:	17fd                	addi	a5,a5,-1
+800001c2:	07c2                	slli	a5,a5,0x10
+800001c4:	83c1                	srli	a5,a5,0x10
       BaseAddress;  // Initialize I2C registers struct
 
   OC_I2C_WAIT_BUSY(i2c);  // Wait until any pending I2C transfers ends
-80000294:	0105a783          	lw	a5,16(a1)
-80000298:	0407f793          	andi	a5,a5,64
-8000029c:	fe079ce3          	bnez	a5,80000294 <OC_I2C_Init+0x1c>
+800001c6:	4998                	lw	a4,16(a1)
+800001c8:	04077713          	andi	a4,a4,64
+800001cc:	ff6d                	bnez	a4,800001c6 <OC_I2C_Init+0x14>
   OC_I2C_DISABLE(i2c);    // Disable I2C core
-800002a0:	0005a423          	sw	zero,8(a1)
+800001ce:	0005a423          	sw	zero,8(a1)
   if (OC_ISSET(i2c->regs->CSR,
-800002a4:	0105a783          	lw	a5,16(a1)
-800002a8:	0017f793          	andi	a5,a5,1
-800002ac:	00078863          	beqz	a5,800002bc <OC_I2C_Init+0x44>
+800001d2:	4998                	lw	a4,16(a1)
+800001d4:	8b05                	andi	a4,a4,1
+800001d6:	c709                	beqz	a4,800001e0 <OC_I2C_Init+0x2e>
                OC_I2C_IF)) {  // Clear any interupt status if any
     i2c->regs->CSR |= OC_I2C_IACK;
-800002b0:	0105a783          	lw	a5,16(a1)
-800002b4:	0017e793          	ori	a5,a5,1
-800002b8:	00f5a823          	sw	a5,16(a1)
+800001d8:	4998                	lw	a4,16(a1)
+800001da:	00176713          	ori	a4,a4,1
+800001de:	c998                	sw	a4,16(a1)
   }
 
   i2c->regs->PRER_LO = prescale;         // Set prescale lo-byte
-800002bc:	00e5a023          	sw	a4,0(a1)
+800001e0:	c19c                	sw	a5,0(a1)
   i2c->regs->PRER_HI = (prescale << 8);  // Set prescale hi-byte
-800002c0:	00871713          	slli	a4,a4,0x8
-800002c4:	00e5a223          	sw	a4,4(a1)
+800001e2:	07a2                	slli	a5,a5,0x8
+800001e4:	c1dc                	sw	a5,4(a1)
 
   OC_I2C_ENABLE(i2c);  // Enable I2C core
-800002c8:	08000793          	li	a5,128
-800002cc:	00f5a423          	sw	a5,8(a1)
+800001e6:	08000793          	li	a5,128
+800001ea:	c59c                	sw	a5,8(a1)
 
   i2c->State = OC_I2C_STATE_READY;
-800002d0:	02052223          	sw	zero,36(a0)
+800001ec:	02052223          	sw	zero,36(a0)
 
   return;
 }
-800002d4:	00008067          	ret
+800001f0:	8082                	ret
 
-800002d8 <OC_I2C_Master_Send_Byte>:
+800001f2 <OC_I2C_Master_Send_Byte>:
 
 uint8_t OC_I2C_Master_Send_Byte(I2C_HandleTypeDef *i2c, uint8_t byte,
                                 uint8_t flags) {
   // Suggestion: Can add retries if slave fails to ack
 
   i2c->regs->TRXR = byte;  // Write to Transmit register
-800002d8:	00052783          	lw	a5,0(a0)
-800002dc:	00b7a623          	sw	a1,12(a5)
+800001f2:	411c                	lw	a5,0(a0)
+800001f4:	c7cc                	sw	a1,12(a5)
   i2c->regs->CSR = flags;  // Write to Control register
-800002e0:	00c7a823          	sw	a2,16(a5)
+800001f6:	cb90                	sw	a2,16(a5)
 
   // OC_I2C_WAIT_TIP(i2c);
   __asm__ volatile("nop");  // Do nothing for one instruction (transfer in
-800002e4:	00000013          	nop
+800001f8:	0001                	nop
                             // progress (TIP) bit sets too late)
   OC_I2C_WAIT_TIP(i2c);     // Wait for transfer in progress to negate
-800002e8:	00052703          	lw	a4,0(a0)
-800002ec:	01072783          	lw	a5,16(a4)
-800002f0:	0027f793          	andi	a5,a5,2
-800002f4:	fe079ce3          	bnez	a5,800002ec <OC_I2C_Master_Send_Byte+0x14>
+800001fa:	4118                	lw	a4,0(a0)
+800001fc:	4b1c                	lw	a5,16(a4)
+800001fe:	8b89                	andi	a5,a5,2
+80000200:	fff5                	bnez	a5,800001fc <OC_I2C_Master_Send_Byte+0xa>
 
   return OC_I2C_ACK_RECEIVED(i2c) ? 0 : -1;  // Return ACK
-800002f8:	01072503          	lw	a0,16(a4)
-800002fc:	01851513          	slli	a0,a0,0x18
-80000300:	41f55513          	srai	a0,a0,0x1f
+80000202:	4b08                	lw	a0,16(a4)
+80000204:	0562                	slli	a0,a0,0x18
+80000206:	857d                	srai	a0,a0,0x1f
 }
-80000304:	0ff57513          	zext.b	a0,a0
-80000308:	00008067          	ret
+80000208:	0ff57513          	zext.b	a0,a0
+8000020c:	8082                	ret
 
-8000030c <OC_I2C_Master_Read_Byte>:
+8000020e <OC_I2C_Master_Read_Byte>:
 
 uint8_t OC_I2C_Master_Read_Byte(I2C_HandleTypeDef *i2c, uint8_t flags) {
   // Suggestion: Can add retries if slave fails to ack
 
   i2c->regs->CSR = flags;  // Write to Control register
-8000030c:	00052783          	lw	a5,0(a0)
-80000310:	00b7a823          	sw	a1,16(a5)
+8000020e:	411c                	lw	a5,0(a0)
+80000210:	cb8c                	sw	a1,16(a5)
 
   __asm__ volatile("nop");  // Do nothing for one instruction (transfer in
-80000314:	00000013          	nop
+80000212:	0001                	nop
                             // progres (TIP) sets too late)
   OC_I2C_WAIT_TIP(i2c);
-80000318:	00052703          	lw	a4,0(a0)
-8000031c:	01072783          	lw	a5,16(a4)
-80000320:	0027f793          	andi	a5,a5,2
-80000324:	fe079ce3          	bnez	a5,8000031c <OC_I2C_Master_Read_Byte+0x10>
+80000214:	4118                	lw	a4,0(a0)
+80000216:	4b1c                	lw	a5,16(a4)
+80000218:	8b89                	andi	a5,a5,2
+8000021a:	fff5                	bnez	a5,80000216 <OC_I2C_Master_Read_Byte+0x8>
 
   return (uint8_t)(i2c->regs->TRXR);  // Return received data
-80000328:	00c72503          	lw	a0,12(a4)
+8000021c:	4748                	lw	a0,12(a4)
 }
-8000032c:	0ff57513          	zext.b	a0,a0
-80000330:	00008067          	ret
+8000021e:	0ff57513          	zext.b	a0,a0
+80000222:	8082                	ret
 
-80000334 <OC_I2C_Master_Transmit>:
+80000224 <OC_I2C_Master_Transmit>:
 
 void OC_I2C_Master_Transmit(I2C_HandleTypeDef *i2c, uint8_t DevAddress,
                             uint8_t *Data, uint16_t Size) {
   // Check whether I2C core is busy (for example interupt driven transmision is
   // in progress)
   if (i2c->State != OC_I2C_STATE_READY) {
-80000334:	02452783          	lw	a5,36(a0)
-80000338:	08079663          	bnez	a5,800003c4 <OC_I2C_Master_Transmit+0x90>
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-8000033c:	00052703          	lw	a4,0(a0)
-80000340:	0fe5f593          	andi	a1,a1,254
-  i2c->regs->CSR = flags;  // Write to Control register
-80000344:	09000813          	li	a6,144
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-80000348:	00b72623          	sw	a1,12(a4)
-  i2c->regs->CSR = flags;  // Write to Control register
-8000034c:	01072823          	sw	a6,16(a4)
-  __asm__ volatile("nop");  // Do nothing for one instruction (transfer in
-80000350:	00000013          	nop
-  OC_I2C_WAIT_TIP(i2c);     // Wait for transfer in progress to negate
-80000354:	00052703          	lw	a4,0(a0)
-80000358:	01072783          	lw	a5,16(a4)
-8000035c:	0027f793          	andi	a5,a5,2
-80000360:	fe079ce3          	bnez	a5,80000358 <OC_I2C_Master_Transmit+0x24>
-  return OC_I2C_ACK_RECEIVED(i2c) ? 0 : -1;  // Return ACK
-80000364:	01072783          	lw	a5,16(a4)
-80000368:	0807f793          	andi	a5,a5,128
-8000036c:	fc079ee3          	bnez	a5,80000348 <OC_I2C_Master_Transmit+0x14>
+80000224:	515c                	lw	a5,36(a0)
+80000226:	efa1                	bnez	a5,8000027e <OC_I2C_Master_Transmit+0x5a>
+                            uint8_t *Data, uint16_t Size) {
+80000228:	1101                	addi	sp,sp,-32
+8000022a:	cc22                	sw	s0,24(sp)
+8000022c:	ca26                	sw	s1,20(sp)
+8000022e:	c84a                	sw	s2,16(sp)
+80000230:	c64e                	sw	s3,12(sp)
+80000232:	ce06                	sw	ra,28(sp)
+80000234:	84aa                	mv	s1,a0
+80000236:	8932                	mv	s2,a2
+80000238:	8436                	mv	s0,a3
+    return;
+  }
+
   // Send I2C slave address until slaves acknowledges it
   while (
       OC_I2C_Master_Send_Byte(i2c, DevAddress & 0xFE, OC_I2C_STA | OC_I2C_WR));
+8000023a:	0fe5f993          	andi	s3,a1,254
+8000023e:	09000613          	li	a2,144
+80000242:	85ce                	mv	a1,s3
+80000244:	8526                	mv	a0,s1
+80000246:	3775                	jal	800001f2 <OC_I2C_Master_Send_Byte>
+80000248:	f97d                	bnez	a0,8000023e <OC_I2C_Master_Transmit+0x1a>
+8000024a:	4985                	li	s3,1
 
   // Send data to the I2C slave
   while (Size > 0) {
-80000370:	04068663          	beqz	a3,800003bc <OC_I2C_Master_Transmit+0x88>
-    uint8_t flags = OC_I2C_WR;  // Always set write data flag
-    if (Size == 1) {
-80000374:	00100813          	li	a6,1
-80000378:	05000793          	li	a5,80
-8000037c:	01068463          	beq	a3,a6,80000384 <OC_I2C_Master_Transmit+0x50>
-80000380:	01000793          	li	a5,16
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-80000384:	00064583          	lbu	a1,0(a2)
-80000388:	00b72623          	sw	a1,12(a4)
-  i2c->regs->CSR = flags;  // Write to Control register
-8000038c:	00f72823          	sw	a5,16(a4)
-  __asm__ volatile("nop");  // Do nothing for one instruction (transfer in
-80000390:	00000013          	nop
-  OC_I2C_WAIT_TIP(i2c);     // Wait for transfer in progress to negate
-80000394:	00052703          	lw	a4,0(a0)
-80000398:	01072783          	lw	a5,16(a4)
-8000039c:	0027f793          	andi	a5,a5,2
-800003a0:	fe079ce3          	bnez	a5,80000398 <OC_I2C_Master_Transmit+0x64>
-      flags |= OC_I2C_STO;
+8000024c:	e819                	bnez	s0,80000262 <OC_I2C_Master_Transmit+0x3e>
     }  // If last byte is being transfered, set STOP condition
     OC_I2C_Master_Send_Byte(i2c, *Data, flags);  // Send data, and set flags
     Data++;
     Size--;
-800003a4:	fff68693          	addi	a3,a3,-1
-800003a8:	01069693          	slli	a3,a3,0x10
-  return OC_I2C_ACK_RECEIVED(i2c) ? 0 : -1;  // Return ACK
-800003ac:	01072783          	lw	a5,16(a4)
-    Size--;
-800003b0:	0106d693          	srli	a3,a3,0x10
-    Data++;
-800003b4:	00160613          	addi	a2,a2,1
-  while (Size > 0) {
-800003b8:	fc0690e3          	bnez	a3,80000378 <OC_I2C_Master_Transmit+0x44>
   }
   i2c->regs->CSR =
-800003bc:	00100793          	li	a5,1
-800003c0:	00f72823          	sw	a5,16(a4)
+8000024e:	409c                	lw	a5,0(s1)
       OC_I2C_IACK;  // Clear pending interrupt (Interrupt acknowledge)
 }
-800003c4:	00008067          	ret
+80000250:	40f2                	lw	ra,28(sp)
+80000252:	4462                	lw	s0,24(sp)
+  i2c->regs->CSR =
+80000254:	0137a823          	sw	s3,16(a5)
+}
+80000258:	44d2                	lw	s1,20(sp)
+8000025a:	4942                	lw	s2,16(sp)
+8000025c:	49b2                	lw	s3,12(sp)
+8000025e:	6105                	addi	sp,sp,32
+80000260:	8082                	ret
+      flags |= OC_I2C_STO;
+80000262:	05000613          	li	a2,80
+    if (Size == 1) {
+80000266:	01340363          	beq	s0,s3,8000026c <OC_I2C_Master_Transmit+0x48>
+    uint8_t flags = OC_I2C_WR;  // Always set write data flag
+8000026a:	4641                	li	a2,16
+    OC_I2C_Master_Send_Byte(i2c, *Data, flags);  // Send data, and set flags
+8000026c:	00094583          	lbu	a1,0(s2)
+    Size--;
+80000270:	147d                	addi	s0,s0,-1
+    OC_I2C_Master_Send_Byte(i2c, *Data, flags);  // Send data, and set flags
+80000272:	8526                	mv	a0,s1
+    Size--;
+80000274:	0442                	slli	s0,s0,0x10
+    OC_I2C_Master_Send_Byte(i2c, *Data, flags);  // Send data, and set flags
+80000276:	3fb5                	jal	800001f2 <OC_I2C_Master_Send_Byte>
+    Data++;
+80000278:	0905                	addi	s2,s2,1
+    Size--;
+8000027a:	8041                	srli	s0,s0,0x10
+8000027c:	bfc1                	j	8000024c <OC_I2C_Master_Transmit+0x28>
+8000027e:	8082                	ret
 
-800003c8 <OC_I2C_Master_Receive>:
+80000280 <OC_I2C_Master_Receive>:
 
 void OC_I2C_Master_Receive(I2C_HandleTypeDef *i2c, uint8_t DevAddress,
                            uint8_t *Data, uint16_t Size) {
   // Check whether I2C core is busy (for example interupt driven transmision is
   // in progress)
   if (i2c->State != OC_I2C_STATE_READY) {
-800003c8:	02452783          	lw	a5,36(a0)
-800003cc:	08079a63          	bnez	a5,80000460 <OC_I2C_Master_Receive+0x98>
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-800003d0:	00052703          	lw	a4,0(a0)
-800003d4:	0015e593          	ori	a1,a1,1
-  i2c->regs->CSR = flags;  // Write to Control register
-800003d8:	09000813          	li	a6,144
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-800003dc:	00b72623          	sw	a1,12(a4)
-  i2c->regs->CSR = flags;  // Write to Control register
-800003e0:	01072823          	sw	a6,16(a4)
-  __asm__ volatile("nop");  // Do nothing for one instruction (transfer in
-800003e4:	00000013          	nop
-  OC_I2C_WAIT_TIP(i2c);     // Wait for transfer in progress to negate
-800003e8:	00052703          	lw	a4,0(a0)
-800003ec:	01072783          	lw	a5,16(a4)
-800003f0:	0027f793          	andi	a5,a5,2
-800003f4:	fe079ce3          	bnez	a5,800003ec <OC_I2C_Master_Receive+0x24>
-  return OC_I2C_ACK_RECEIVED(i2c) ? 0 : -1;  // Return ACK
-800003f8:	01072783          	lw	a5,16(a4)
-800003fc:	0807f793          	andi	a5,a5,128
-80000400:	fc079ee3          	bnez	a5,800003dc <OC_I2C_Master_Receive+0x14>
+80000280:	515c                	lw	a5,36(a0)
+80000282:	e3a5                	bnez	a5,800002e2 <OC_I2C_Master_Receive+0x62>
+                           uint8_t *Data, uint16_t Size) {
+80000284:	1101                	addi	sp,sp,-32
+80000286:	cc22                	sw	s0,24(sp)
+80000288:	ca26                	sw	s1,20(sp)
+8000028a:	c84a                	sw	s2,16(sp)
+8000028c:	c64e                	sw	s3,12(sp)
+8000028e:	ce06                	sw	ra,28(sp)
+80000290:	84aa                	mv	s1,a0
+80000292:	8932                	mv	s2,a2
+80000294:	8436                	mv	s0,a3
+    return;
+  }
+
   // Send I2C slave address until slaves acknowledges it
   while (
       OC_I2C_Master_Send_Byte(i2c, DevAddress | 0x01, OC_I2C_STA | OC_I2C_WR));
+80000296:	0015e993          	ori	s3,a1,1
+8000029a:	09000613          	li	a2,144
+8000029e:	85ce                	mv	a1,s3
+800002a0:	8526                	mv	a0,s1
+800002a2:	3f81                	jal	800001f2 <OC_I2C_Master_Send_Byte>
+800002a4:	f97d                	bnez	a0,8000029a <OC_I2C_Master_Receive+0x1a>
+800002a6:	4985                	li	s3,1
 
   // Receive data from the I2C slave
   while (Size > 0) {
-80000404:	04068663          	beqz	a3,80000450 <OC_I2C_Master_Receive+0x88>
-    uint8_t flags = OC_I2C_RD;  // Always set read data flag
-    if (Size == 1) {
-80000408:	00100593          	li	a1,1
-8000040c:	02800793          	li	a5,40
-80000410:	00b68463          	beq	a3,a1,80000418 <OC_I2C_Master_Receive+0x50>
-80000414:	02000793          	li	a5,32
-  i2c->regs->CSR = flags;  // Write to Control register
-80000418:	00f72823          	sw	a5,16(a4)
-  __asm__ volatile("nop");  // Do nothing for one instruction (transfer in
-8000041c:	00000013          	nop
-  OC_I2C_WAIT_TIP(i2c);
-80000420:	00052703          	lw	a4,0(a0)
-80000424:	01072783          	lw	a5,16(a4)
-80000428:	0027f793          	andi	a5,a5,2
-8000042c:	fe079ce3          	bnez	a5,80000424 <OC_I2C_Master_Receive+0x5c>
-  return (uint8_t)(i2c->regs->TRXR);  // Return received data
-80000430:	00c72783          	lw	a5,12(a4)
-      flags |= OC_I2C_ACK;
+800002a8:	ec11                	bnez	s0,800002c4 <OC_I2C_Master_Receive+0x44>
     }  // If last byte is being received, set ACK bit
     *Data = OC_I2C_Master_Read_Byte(i2c, flags);  // Set flags and read data
     Data++;
     Size--;
-80000434:	fff68693          	addi	a3,a3,-1
-80000438:	01069693          	slli	a3,a3,0x10
-  return (uint8_t)(i2c->regs->TRXR);  // Return received data
-8000043c:	00f60023          	sb	a5,0(a2)
-    Size--;
-80000440:	0106d693          	srli	a3,a3,0x10
   }
   i2c->regs->CSR = OC_I2C_STO;  // Generate stop condition
-80000444:	00052703          	lw	a4,0(a0)
-    Data++;
-80000448:	00160613          	addi	a2,a2,1
-  while (Size > 0) {
-8000044c:	fc0690e3          	bnez	a3,8000040c <OC_I2C_Master_Receive+0x44>
-  i2c->regs->CSR = OC_I2C_STO;  // Generate stop condition
-80000450:	04000793          	li	a5,64
-80000454:	00f72823          	sw	a5,16(a4)
+800002aa:	409c                	lw	a5,0(s1)
   i2c->regs->CSR =
-80000458:	00100793          	li	a5,1
-8000045c:	00f72823          	sw	a5,16(a4)
       OC_I2C_IACK;  // Clear pending interrupt (Interrupt acknowledge)
 }
-80000460:	00008067          	ret
+800002ac:	40f2                	lw	ra,28(sp)
+800002ae:	4462                	lw	s0,24(sp)
+  i2c->regs->CSR = OC_I2C_STO;  // Generate stop condition
+800002b0:	04000713          	li	a4,64
+800002b4:	cb98                	sw	a4,16(a5)
+  i2c->regs->CSR =
+800002b6:	0137a823          	sw	s3,16(a5)
+}
+800002ba:	44d2                	lw	s1,20(sp)
+800002bc:	4942                	lw	s2,16(sp)
+800002be:	49b2                	lw	s3,12(sp)
+800002c0:	6105                	addi	sp,sp,32
+800002c2:	8082                	ret
+      flags |= OC_I2C_ACK;
+800002c4:	02800593          	li	a1,40
+    if (Size == 1) {
+800002c8:	01340463          	beq	s0,s3,800002d0 <OC_I2C_Master_Receive+0x50>
+    uint8_t flags = OC_I2C_RD;  // Always set read data flag
+800002cc:	02000593          	li	a1,32
+    *Data = OC_I2C_Master_Read_Byte(i2c, flags);  // Set flags and read data
+800002d0:	8526                	mv	a0,s1
+    Size--;
+800002d2:	147d                	addi	s0,s0,-1
+    *Data = OC_I2C_Master_Read_Byte(i2c, flags);  // Set flags and read data
+800002d4:	3f2d                	jal	8000020e <OC_I2C_Master_Read_Byte>
+    Size--;
+800002d6:	0442                	slli	s0,s0,0x10
+    *Data = OC_I2C_Master_Read_Byte(i2c, flags);  // Set flags and read data
+800002d8:	00a90023          	sb	a0,0(s2)
+    Size--;
+800002dc:	8041                	srli	s0,s0,0x10
+    Data++;
+800002de:	0905                	addi	s2,s2,1
+    Size--;
+800002e0:	b7e1                	j	800002a8 <OC_I2C_Master_Receive+0x28>
+800002e2:	8082                	ret
 
-80000464 <OC_I2C_Master_Send_Byte_IT>:
+800002e4 <OC_I2C_Master_Send_Byte_IT>:
 
 void OC_I2C_Master_Send_Byte_IT(I2C_HandleTypeDef *i2c, uint8_t byte,
                                 uint8_t flags) {
   // Suggestion: Can add retries if slave fails to ack
 
   i2c->regs->TRXR = byte;  // Write to Transmit register
-80000464:	00052783          	lw	a5,0(a0)
-80000468:	00b7a623          	sw	a1,12(a5)
+800002e4:	411c                	lw	a5,0(a0)
+800002e6:	c7cc                	sw	a1,12(a5)
   i2c->regs->CSR = flags;  // Write to Control register
-8000046c:	00c7a823          	sw	a2,16(a5)
+800002e8:	cb90                	sw	a2,16(a5)
 }
-80000470:	00008067          	ret
+800002ea:	8082                	ret
 
-80000474 <OC_I2C_Master_Read_Byte_IT>:
+800002ec <OC_I2C_Master_Read_Byte_IT>:
 
 void OC_I2C_Master_Read_Byte_IT(I2C_HandleTypeDef *i2c, uint8_t flags) {
   // Suggestion: Can add retries if slave fails to ack
   i2c->regs->CSR = flags;
-80000474:	00052783          	lw	a5,0(a0)
-80000478:	00b7a823          	sw	a1,16(a5)
+800002ec:	411c                	lw	a5,0(a0)
+800002ee:	cb8c                	sw	a1,16(a5)
 }
-8000047c:	00008067          	ret
+800002f0:	8082                	ret
 
-80000480 <OC_I2C_Master_Transmit_IT_Sequence>:
+800002f2 <OC_I2C_Master_Transmit_IT_Sequence>:
 
 void OC_I2C_Master_Transmit_IT_Sequence(I2C_HandleTypeDef *i2c) {
   if (i2c->Interupt_Transmit.State == OC_I2C_STATE_TX_IT_ADDRESS) {
-80000480:	00452783          	lw	a5,4(a0)
-80000484:	00100713          	li	a4,1
-80000488:	04e78463          	beq	a5,a4,800004d0 <OC_I2C_Master_Transmit_IT_Sequence+0x50>
+800002f2:	415c                	lw	a5,4(a0)
+800002f4:	4705                	li	a4,1
+800002f6:	04e79463          	bne	a5,a4,8000033e <OC_I2C_Master_Transmit_IT_Sequence+0x4c>
+    // Check if ACK of slave address is received
     // Proceed to data transmision
     // Repeat address transmision
     i2c->Interupt_Transmit.State = OC_I2C_ACK_RECEIVED(i2c) ?
+800002fa:	411c                	lw	a5,0(a0)
+800002fc:	4b9c                	lw	a5,16(a5)
               OC_I2C_STATE_TX_IT_DATA : OC_I2C_STATE_TX_IT_READY;
+800002fe:	839d                	srli	a5,a5,0x7
+80000300:	8ff9                	and	a5,a5,a4
+80000302:	8fb9                	xor	a5,a5,a4
+80000304:	0786                	slli	a5,a5,0x1
+    i2c->Interupt_Transmit.State = OC_I2C_ACK_RECEIVED(i2c) ?
+80000306:	c15c                	sw	a5,4(a0)
   }
   if (i2c->Interupt_Transmit.State == OC_I2C_STATE_TX_IT_DATA) {
-8000048c:	00200713          	li	a4,2
-80000490:	00e78a63          	beq	a5,a4,800004a4 <OC_I2C_Master_Transmit_IT_Sequence+0x24>
+80000308:	cfb9                	beqz	a5,80000366 <OC_I2C_Master_Transmit_IT_Sequence+0x74>
+    // Check if ACK from slave is received
+    if (OC_I2C_ACK_RECEIVED(i2c)) {
+8000030a:	4114                	lw	a3,0(a0)
+8000030c:	4a9c                	lw	a5,16(a3)
+8000030e:	0807f793          	andi	a5,a5,128
+80000312:	ef85                	bnez	a5,8000034a <OC_I2C_Master_Transmit_IT_Sequence+0x58>
+      uint8_t flags = OC_I2C_WR;  // Always set write data flag
+      // If last byte is being sent, set stop condition
+      if (i2c->Interupt_Transmit.Size == 1) {
+80000314:	01055783          	lhu	a5,16(a0)
+80000318:	4705                	li	a4,1
+      uint8_t flags = OC_I2C_WR;  // Always set write data flag
+8000031a:	4641                	li	a2,16
+      if (i2c->Interupt_Transmit.Size == 1) {
+8000031c:	00e79663          	bne	a5,a4,80000328 <OC_I2C_Master_Transmit_IT_Sequence+0x36>
+        flags |= OC_I2C_STO;
+        i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_END;
+80000320:	470d                	li	a4,3
+80000322:	c158                	sw	a4,4(a0)
+        flags |= OC_I2C_STO;
+80000324:	05000613          	li	a2,80
+      }
+
+      OC_I2C_Master_Send_Byte_IT(i2c, *(i2c->Interupt_Transmit.Data),
+80000328:	4558                	lw	a4,12(a0)
+                                 flags);  // Send data, and set flags
+      i2c->Interupt_Transmit.Data++;
+      i2c->Interupt_Transmit.Size--;
+8000032a:	17fd                	addi	a5,a5,-1
+  i2c->regs->TRXR = byte;  // Write to Transmit register
+8000032c:	00074583          	lbu	a1,0(a4)
+      i2c->Interupt_Transmit.Data++;
+80000330:	0705                	addi	a4,a4,1
+  i2c->regs->TRXR = byte;  // Write to Transmit register
+80000332:	c6cc                	sw	a1,12(a3)
+  i2c->regs->CSR = flags;  // Write to Control register
+80000334:	ca90                	sw	a2,16(a3)
+      i2c->Interupt_Transmit.Data++;
+80000336:	c558                	sw	a4,12(a0)
+      i2c->Interupt_Transmit.Size--;
+80000338:	00f51823          	sh	a5,16(a0)
       return;
+8000033c:	8082                	ret
+  if (i2c->Interupt_Transmit.State == OC_I2C_STATE_TX_IT_DATA) {
+8000033e:	4709                	li	a4,2
+80000340:	fce785e3          	beq	a5,a4,8000030a <OC_I2C_Master_Transmit_IT_Sequence+0x18>
     } else {
       i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_END;
     }
   }
   if (i2c->Interupt_Transmit.State == OC_I2C_STATE_TX_IT_END) {
-80000494:	00300713          	li	a4,3
-80000498:	0ce78263          	beq	a5,a4,8000055c <OC_I2C_Master_Transmit_IT_Sequence+0xdc>
+80000344:	470d                	li	a4,3
+80000346:	00e79f63          	bne	a5,a4,80000364 <OC_I2C_Master_Transmit_IT_Sequence+0x72>
+    i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_READY;
     i2c->State = OC_I2C_STATE_READY;
     OC_I2C_DISABLE_INT(i2c);
+8000034a:	4118                	lw	a4,0(a0)
+    i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_READY;
+8000034c:	00052223          	sw	zero,4(a0)
+    i2c->State = OC_I2C_STATE_READY;
+80000350:	02052223          	sw	zero,36(a0)
+    OC_I2C_DISABLE_INT(i2c);
+80000354:	471c                	lw	a5,8(a4)
+80000356:	fbf7f793          	andi	a5,a5,-65
+8000035a:	c71c                	sw	a5,8(a4)
     OC_I2C_MasterTxCpltCallback(i2c);
+8000035c:	00000317          	auipc	t1,0x0
+80000360:	00000067          	jr	zero # 0 <_min_stack-0x400>
     return;
   }
   if (i2c->Interupt_Transmit.State == OC_I2C_STATE_TX_IT_READY) {
-8000049c:	06078c63          	beqz	a5,80000514 <OC_I2C_Master_Transmit_IT_Sequence+0x94>
+80000364:	ef81                	bnez	a5,8000037c <OC_I2C_Master_Transmit_IT_Sequence+0x8a>
+    OC_I2C_Master_Send_Byte_IT(
+80000366:	00854783          	lbu	a5,8(a0)
+  i2c->regs->TRXR = byte;  // Write to Transmit register
+8000036a:	4118                	lw	a4,0(a0)
+8000036c:	0fe7f793          	andi	a5,a5,254
+80000370:	c75c                	sw	a5,12(a4)
+  i2c->regs->CSR = flags;  // Write to Control register
+80000372:	09000793          	li	a5,144
+80000376:	cb1c                	sw	a5,16(a4)
+        i2c, i2c->Interupt_Transmit.Address & 0xFE,
         OC_I2C_STA | OC_I2C_WR);  // Send I2C slave address
 
     i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_ADDRESS;
+80000378:	4785                	li	a5,1
+8000037a:	c15c                	sw	a5,4(a0)
     return;
   }
 }
-800004a0:	00008067          	ret
-    i2c->Interupt_Transmit.State = OC_I2C_ACK_RECEIVED(i2c) ?
-800004a4:	00052683          	lw	a3,0(a0)
-    if (OC_I2C_ACK_RECEIVED(i2c)) {
-800004a8:	0106a783          	lw	a5,16(a3)
-800004ac:	0807f793          	andi	a5,a5,128
-800004b0:	06078663          	beqz	a5,8000051c <OC_I2C_Master_Transmit_IT_Sequence+0x9c>
-    OC_I2C_DISABLE_INT(i2c);
-800004b4:	0086a783          	lw	a5,8(a3)
-    i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_READY;
-800004b8:	00052223          	sw	zero,4(a0)
-    i2c->State = OC_I2C_STATE_READY;
-800004bc:	02052223          	sw	zero,36(a0)
-    OC_I2C_DISABLE_INT(i2c);
-800004c0:	fbf7f793          	andi	a5,a5,-65
-800004c4:	00f6a423          	sw	a5,8(a3)
-    OC_I2C_MasterTxCpltCallback(i2c);
-800004c8:	00000317          	auipc	t1,0x0
-800004cc:	00000067          	jr	zero # 0 <_min_stack-0x400>
-    i2c->Interupt_Transmit.State = OC_I2C_ACK_RECEIVED(i2c) ?
-800004d0:	00052703          	lw	a4,0(a0)
-800004d4:	01072783          	lw	a5,16(a4)
-800004d8:	00070693          	mv	a3,a4
-              OC_I2C_STATE_TX_IT_DATA : OC_I2C_STATE_TX_IT_READY;
-800004dc:	0077d793          	srli	a5,a5,0x7
-800004e0:	0017c793          	xori	a5,a5,1
-800004e4:	0017f793          	andi	a5,a5,1
-800004e8:	00179793          	slli	a5,a5,0x1
-    i2c->Interupt_Transmit.State = OC_I2C_ACK_RECEIVED(i2c) ?
-800004ec:	00f52223          	sw	a5,4(a0)
-  if (i2c->Interupt_Transmit.State == OC_I2C_STATE_TX_IT_DATA) {
-800004f0:	fa079ce3          	bnez	a5,800004a8 <OC_I2C_Master_Transmit_IT_Sequence+0x28>
-    OC_I2C_Master_Send_Byte_IT(
-800004f4:	00854783          	lbu	a5,8(a0)
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-800004f8:	0fe7f793          	andi	a5,a5,254
-800004fc:	00f72623          	sw	a5,12(a4)
-  i2c->regs->CSR = flags;  // Write to Control register
-80000500:	09000793          	li	a5,144
-80000504:	00f72823          	sw	a5,16(a4)
-    i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_ADDRESS;
-80000508:	00100793          	li	a5,1
-8000050c:	00f52223          	sw	a5,4(a0)
-}
-80000510:	00008067          	ret
-80000514:	00052703          	lw	a4,0(a0)
-80000518:	fddff06f          	j	800004f4 <OC_I2C_Master_Transmit_IT_Sequence+0x74>
-      if (i2c->Interupt_Transmit.Size == 1) {
-8000051c:	01055783          	lhu	a5,16(a0)
-80000520:	00100713          	li	a4,1
-80000524:	01000613          	li	a2,16
-80000528:	00e79863          	bne	a5,a4,80000538 <OC_I2C_Master_Transmit_IT_Sequence+0xb8>
-        i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_END;
-8000052c:	00300713          	li	a4,3
-80000530:	00e52223          	sw	a4,4(a0)
-80000534:	05000613          	li	a2,80
-      OC_I2C_Master_Send_Byte_IT(i2c, *(i2c->Interupt_Transmit.Data),
-80000538:	00c52703          	lw	a4,12(a0)
-      i2c->Interupt_Transmit.Size--;
-8000053c:	fff78793          	addi	a5,a5,-1
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-80000540:	00074583          	lbu	a1,0(a4)
-      i2c->Interupt_Transmit.Data++;
-80000544:	00170713          	addi	a4,a4,1
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-80000548:	00b6a623          	sw	a1,12(a3)
-  i2c->regs->CSR = flags;  // Write to Control register
-8000054c:	00c6a823          	sw	a2,16(a3)
-      i2c->Interupt_Transmit.Data++;
-80000550:	00e52623          	sw	a4,12(a0)
-      i2c->Interupt_Transmit.Size--;
-80000554:	00f51823          	sh	a5,16(a0)
-      return;
-80000558:	00008067          	ret
-    i2c->Interupt_Transmit.State = OC_I2C_ACK_RECEIVED(i2c) ?
-8000055c:	00052683          	lw	a3,0(a0)
-80000560:	f55ff06f          	j	800004b4 <OC_I2C_Master_Transmit_IT_Sequence+0x34>
+8000037c:	8082                	ret
 
-80000564 <OC_I2C_Master_Receive_IT_Sequence>:
+8000037e <OC_I2C_Master_Receive_IT_Sequence>:
 
 void OC_I2C_Master_Receive_IT_Sequence(I2C_HandleTypeDef *i2c) {
   if (i2c->Interupt_Receive.State == OC_I2C_STATE_RX_IT_ADDRESS) {
-80000564:	01452783          	lw	a5,20(a0)
-80000568:	00100713          	li	a4,1
-8000056c:	06e78c63          	beq	a5,a4,800005e4 <OC_I2C_Master_Receive_IT_Sequence+0x80>
+8000037e:	495c                	lw	a5,20(a0)
+80000380:	4705                	li	a4,1
+80000382:	02e79e63          	bne	a5,a4,800003be <OC_I2C_Master_Receive_IT_Sequence+0x40>
     // Check if ACK of slave address is received?
     //    Proceed to data transmision : Repeat address transmision
     i2c->Interupt_Receive.State = OC_I2C_ACK_RECEIVED(i2c) ?
+80000386:	411c                	lw	a5,0(a0)
+80000388:	4b9c                	lw	a5,16(a5)
               OC_I2C_STATE_RX_IT_DATA : OC_I2C_STATE_RX_IT_READY;
-  }
-  if (i2c->Interupt_Receive.State == OC_I2C_STATE_RX_IT_GET_DATA) {
-80000570:	00300713          	li	a4,3
-80000574:	04e79c63          	bne	a5,a4,800005cc <OC_I2C_Master_Receive_IT_Sequence+0x68>
-    // Check if ACK from slave is received
-    if (OC_I2C_ACK_RECEIVED(i2c)) {
-80000578:	00052703          	lw	a4,0(a0)
-8000057c:	01072783          	lw	a5,16(a4)
-80000580:	0807f793          	andi	a5,a5,128
-80000584:	0a079263          	bnez	a5,80000628 <OC_I2C_Master_Receive_IT_Sequence+0xc4>
+8000038a:	839d                	srli	a5,a5,0x7
+8000038c:	8ff9                	and	a5,a5,a4
+8000038e:	8fb9                	xor	a5,a5,a4
+80000390:	0786                	slli	a5,a5,0x1
       *(i2c->Interupt_Receive.Data) = (uint8_t)(i2c->regs->TRXR);
-80000588:	01c52783          	lw	a5,28(a0)
-8000058c:	00c72703          	lw	a4,12(a4)
-80000590:	00e78023          	sb	a4,0(a5)
       i2c->Interupt_Receive.Data++;
-80000594:	01c52783          	lw	a5,28(a0)
-80000598:	00052703          	lw	a4,0(a0)
-8000059c:	00178793          	addi	a5,a5,1
-800005a0:	00f52e23          	sw	a5,28(a0)
+      i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_DATA;
+    }
+    else {
+      i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_END;
+80000392:	c95c                	sw	a5,20(a0)
     }
   }
   if (i2c->Interupt_Receive.State == OC_I2C_STATE_RX_IT_DATA) {
+80000394:	495c                	lw	a5,20(a0)
+80000396:	4709                	li	a4,2
+80000398:	04e79663          	bne	a5,a4,800003e4 <OC_I2C_Master_Receive_IT_Sequence+0x66>
     // Always set read data flag
     // If last byte is being read, set stop condition
     uint8_t flags = (i2c->Interupt_Receive.Size == 1) ?
-800005a4:	02055783          	lhu	a5,32(a0)
-800005a8:	00100613          	li	a2,1
-800005ac:	02000693          	li	a3,32
-800005b0:	0ac78663          	beq	a5,a2,8000065c <OC_I2C_Master_Receive_IT_Sequence+0xf8>
+8000039c:	02055783          	lhu	a5,32(a0)
+800003a0:	4685                	li	a3,1
+800003a2:	02000713          	li	a4,32
+800003a6:	00d79463          	bne	a5,a3,800003ae <OC_I2C_Master_Receive_IT_Sequence+0x30>
+800003aa:	02800713          	li	a4,40
   i2c->regs->CSR = flags;
-800005b4:	00d72823          	sw	a3,16(a4)
+800003ae:	4114                	lw	a3,0(a0)
                                   (OC_I2C_RD | OC_I2C_ACK) : OC_I2C_RD ;
 
     OC_I2C_Master_Read_Byte_IT(i2c, flags);  // Read data, and set flags
     i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_GET_DATA;
     i2c->Interupt_Receive.Size--;
-800005b8:	fff78793          	addi	a5,a5,-1
+800003b0:	17fd                	addi	a5,a5,-1
+  i2c->regs->CSR = flags;
+800003b2:	ca98                	sw	a4,16(a3)
     i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_GET_DATA;
-800005bc:	00300713          	li	a4,3
-800005c0:	00e52a23          	sw	a4,20(a0)
+800003b4:	470d                	li	a4,3
+800003b6:	c958                	sw	a4,20(a0)
     i2c->Interupt_Receive.Size--;
-800005c4:	02f51023          	sh	a5,32(a0)
+800003b8:	02f51023          	sh	a5,32(a0)
     return;
-800005c8:	00008067          	ret
-  if (i2c->Interupt_Receive.State == OC_I2C_STATE_RX_IT_DATA) {
-800005cc:	00200713          	li	a4,2
-800005d0:	08e78a63          	beq	a5,a4,80000664 <OC_I2C_Master_Receive_IT_Sequence+0x100>
+800003bc:	8082                	ret
+  if (i2c->Interupt_Receive.State == OC_I2C_STATE_RX_IT_GET_DATA) {
+800003be:	470d                	li	a4,3
+800003c0:	fce79ae3          	bne	a5,a4,80000394 <OC_I2C_Master_Receive_IT_Sequence+0x16>
+    if (OC_I2C_ACK_RECEIVED(i2c)) {
+800003c4:	4118                	lw	a4,0(a0)
+800003c6:	4b1c                	lw	a5,16(a4)
+800003c8:	0807f793          	andi	a5,a5,128
+800003cc:	eb91                	bnez	a5,800003e0 <OC_I2C_Master_Receive_IT_Sequence+0x62>
+      *(i2c->Interupt_Receive.Data) = (uint8_t)(i2c->regs->TRXR);
+800003ce:	4d5c                	lw	a5,28(a0)
+800003d0:	4758                	lw	a4,12(a4)
+800003d2:	00e78023          	sb	a4,0(a5)
+      i2c->Interupt_Receive.Data++;
+800003d6:	4d5c                	lw	a5,28(a0)
+800003d8:	0785                	addi	a5,a5,1
+800003da:	cd5c                	sw	a5,28(a0)
+      i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_DATA;
+800003dc:	4789                	li	a5,2
+800003de:	bf55                	j	80000392 <OC_I2C_Master_Receive_IT_Sequence+0x14>
+      i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_END;
+800003e0:	4791                	li	a5,4
+800003e2:	bf45                	j	80000392 <OC_I2C_Master_Receive_IT_Sequence+0x14>
   }
   if (i2c->Interupt_Receive.State == OC_I2C_STATE_RX_IT_END) {
-800005d4:	00400713          	li	a4,4
-800005d8:	04e78663          	beq	a5,a4,80000624 <OC_I2C_Master_Receive_IT_Sequence+0xc0>
+800003e4:	4711                	li	a4,4
+800003e6:	02e79763          	bne	a5,a4,80000414 <OC_I2C_Master_Receive_IT_Sequence+0x96>
+    *(i2c->Interupt_Receive.Data) = (uint8_t)(i2c->regs->TRXR);
+800003ea:	411c                	lw	a5,0(a0)
+800003ec:	47d8                	lw	a4,12(a5)
+800003ee:	4d5c                	lw	a5,28(a0)
+800003f0:	00e78023          	sb	a4,0(a5)
+    i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_READY;
+    i2c->State = OC_I2C_STATE_READY;  // Return to i2c ready state
     OC_I2C_DISABLE_INT(i2c);          // Disable i2c core interupt
+800003f4:	411c                	lw	a5,0(a0)
+    i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_READY;
+800003f6:	00052a23          	sw	zero,20(a0)
+    i2c->State = OC_I2C_STATE_READY;  // Return to i2c ready state
+800003fa:	02052223          	sw	zero,36(a0)
+    OC_I2C_DISABLE_INT(i2c);          // Disable i2c core interupt
+800003fe:	4798                	lw	a4,8(a5)
+80000400:	fbf77713          	andi	a4,a4,-65
+80000404:	c798                	sw	a4,8(a5)
     i2c->regs->CSR = OC_I2C_STO;      // Generate stop condition
+80000406:	04000713          	li	a4,64
+8000040a:	cb98                	sw	a4,16(a5)
     OC_I2C_MasterRxCpltCallback(i2c); // Receive complete callback to user
+8000040c:	00000317          	auipc	t1,0x0
+80000410:	00000067          	jr	zero # 0 <_min_stack-0x400>
     return;
   }
   if (i2c->Interupt_Receive.State == OC_I2C_STATE_RX_IT_READY) {
-800005dc:	08078863          	beqz	a5,8000066c <OC_I2C_Master_Receive_IT_Sequence+0x108>
+80000414:	ef81                	bnez	a5,8000042c <OC_I2C_Master_Receive_IT_Sequence+0xae>
+    OC_I2C_Master_Send_Byte_IT(
+80000416:	01854783          	lbu	a5,24(a0)
+  i2c->regs->TRXR = byte;  // Write to Transmit register
+8000041a:	4118                	lw	a4,0(a0)
+8000041c:	0017e793          	ori	a5,a5,1
+80000420:	c75c                	sw	a5,12(a4)
+  i2c->regs->CSR = flags;  // Write to Control register
+80000422:	09000793          	li	a5,144
+80000426:	cb1c                	sw	a5,16(a4)
+        i2c, i2c->Interupt_Receive.Address | 0x01,
         OC_I2C_STA | OC_I2C_WR);  // Send I2C slave address
 
     i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_ADDRESS;
+80000428:	4785                	li	a5,1
+8000042a:	c95c                	sw	a5,20(a0)
     return;
   }
 }
-800005e0:	00008067          	ret
-    i2c->Interupt_Receive.State = OC_I2C_ACK_RECEIVED(i2c) ?
-800005e4:	00052703          	lw	a4,0(a0)
-800005e8:	01072783          	lw	a5,16(a4)
-              OC_I2C_STATE_RX_IT_DATA : OC_I2C_STATE_RX_IT_READY;
-800005ec:	0077d793          	srli	a5,a5,0x7
-800005f0:	0017c793          	xori	a5,a5,1
-800005f4:	0017f793          	andi	a5,a5,1
-800005f8:	00179793          	slli	a5,a5,0x1
-    i2c->Interupt_Receive.State = OC_I2C_ACK_RECEIVED(i2c) ?
-800005fc:	00f52a23          	sw	a5,20(a0)
-  if (i2c->Interupt_Receive.State == OC_I2C_STATE_RX_IT_DATA) {
-80000600:	fa0792e3          	bnez	a5,800005a4 <OC_I2C_Master_Receive_IT_Sequence+0x40>
-    OC_I2C_Master_Send_Byte_IT(
-80000604:	01854783          	lbu	a5,24(a0)
-  i2c->regs->TRXR = byte;  // Write to Transmit register
-80000608:	0017e793          	ori	a5,a5,1
-8000060c:	00f72623          	sw	a5,12(a4)
-  i2c->regs->CSR = flags;  // Write to Control register
-80000610:	09000793          	li	a5,144
-80000614:	00f72823          	sw	a5,16(a4)
-    i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_ADDRESS;
-80000618:	00100793          	li	a5,1
-8000061c:	00f52a23          	sw	a5,20(a0)
-}
-80000620:	00008067          	ret
-    i2c->Interupt_Receive.State = OC_I2C_ACK_RECEIVED(i2c) ?
-80000624:	00052703          	lw	a4,0(a0)
-    *(i2c->Interupt_Receive.Data) = (uint8_t)(i2c->regs->TRXR);
-80000628:	00c72703          	lw	a4,12(a4)
-8000062c:	01c52783          	lw	a5,28(a0)
-80000630:	00e78023          	sb	a4,0(a5)
-    OC_I2C_DISABLE_INT(i2c);          // Disable i2c core interupt
-80000634:	00052783          	lw	a5,0(a0)
-    i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_READY;
-80000638:	00052a23          	sw	zero,20(a0)
-    i2c->State = OC_I2C_STATE_READY;  // Return to i2c ready state
-8000063c:	02052223          	sw	zero,36(a0)
-    OC_I2C_DISABLE_INT(i2c);          // Disable i2c core interupt
-80000640:	0087a703          	lw	a4,8(a5)
-80000644:	fbf77713          	andi	a4,a4,-65
-80000648:	00e7a423          	sw	a4,8(a5)
-    i2c->regs->CSR = OC_I2C_STO;      // Generate stop condition
-8000064c:	04000713          	li	a4,64
-80000650:	00e7a823          	sw	a4,16(a5)
-    OC_I2C_MasterRxCpltCallback(i2c); // Receive complete callback to user
-80000654:	00000317          	auipc	t1,0x0
-80000658:	00000067          	jr	zero # 0 <_min_stack-0x400>
-    uint8_t flags = (i2c->Interupt_Receive.Size == 1) ?
-8000065c:	02800693          	li	a3,40
-80000660:	f55ff06f          	j	800005b4 <OC_I2C_Master_Receive_IT_Sequence+0x50>
-80000664:	00052703          	lw	a4,0(a0)
-80000668:	f3dff06f          	j	800005a4 <OC_I2C_Master_Receive_IT_Sequence+0x40>
-8000066c:	00052703          	lw	a4,0(a0)
-80000670:	f95ff06f          	j	80000604 <OC_I2C_Master_Receive_IT_Sequence+0xa0>
+8000042c:	8082                	ret
 
-80000674 <OC_I2C_Master_Transmit_IT>:
+8000042e <OC_I2C_Master_Transmit_IT>:
 
 void OC_I2C_Master_Transmit_IT(I2C_HandleTypeDef *i2c, uint8_t DevAddress,
                                uint8_t *Data, uint16_t Size) {
   // Check whether I2C core is busy
   if (i2c->State != OC_I2C_STATE_READY) {
-80000674:	02452703          	lw	a4,36(a0)
-80000678:	00070463          	beqz	a4,80000680 <OC_I2C_Master_Transmit_IT+0xc>
-  i2c->Interupt_Transmit.Address = DevAddress;  // Save i2c slave address
-  i2c->Interupt_Transmit.Data = Data;  // Save data to be transmited pointer
-  i2c->Interupt_Transmit.Size = Size;  // Save size of data to be transmited
-
-  OC_I2C_Master_Transmit_IT_Sequence(i2c);
-}
-8000067c:	00008067          	ret
-  OC_I2C_ENABLE_INT(i2c);                // Enable I2C core interupt
-80000680:	00052803          	lw	a6,0(a0)
+8000042e:	5158                	lw	a4,36(a0)
+80000430:	e31d                	bnez	a4,80000456 <OC_I2C_Master_Transmit_IT+0x28>
+    return;
+  }
   i2c->State = OC_I2C_STATE_BUSY_TX_IT;  // Set I2C state to busy transmiting
-80000684:	00200713          	li	a4,2
-80000688:	02e52223          	sw	a4,36(a0)
+                                         // using interupt
   OC_I2C_ENABLE_INT(i2c);                // Enable I2C core interupt
-8000068c:	00882703          	lw	a4,8(a6)
-80000690:	04076713          	ori	a4,a4,64
-80000694:	00e82423          	sw	a4,8(a6)
-  i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_READY;
-80000698:	00052223          	sw	zero,4(a0)
-  i2c->Interupt_Transmit.Address = DevAddress;  // Save i2c slave address
-8000069c:	00b50423          	sb	a1,8(a0)
-  i2c->Interupt_Transmit.Data = Data;  // Save data to be transmited pointer
-800006a0:	00c52623          	sw	a2,12(a0)
-  i2c->Interupt_Transmit.Size = Size;  // Save size of data to be transmited
-800006a4:	00d51823          	sh	a3,16(a0)
-  OC_I2C_Master_Transmit_IT_Sequence(i2c);
-800006a8:	dd9ff06f          	j	80000480 <OC_I2C_Master_Transmit_IT_Sequence>
+80000432:	00052803          	lw	a6,0(a0)
+  i2c->State = OC_I2C_STATE_BUSY_TX_IT;  // Set I2C state to busy transmiting
+80000436:	4709                	li	a4,2
+80000438:	d158                	sw	a4,36(a0)
+  OC_I2C_ENABLE_INT(i2c);                // Enable I2C core interupt
+8000043a:	00882703          	lw	a4,8(a6)
+8000043e:	04076713          	ori	a4,a4,64
+80000442:	00e82423          	sw	a4,8(a6)
 
-800006ac <OC_I2C_Master_Receive_IT>:
+  i2c->Interupt_Transmit.State = OC_I2C_STATE_TX_IT_READY;
+80000446:	00052223          	sw	zero,4(a0)
+  i2c->Interupt_Transmit.Address = DevAddress;  // Save i2c slave address
+8000044a:	00b50423          	sb	a1,8(a0)
+  i2c->Interupt_Transmit.Data = Data;  // Save data to be transmited pointer
+8000044e:	c550                	sw	a2,12(a0)
+  i2c->Interupt_Transmit.Size = Size;  // Save size of data to be transmited
+80000450:	00d51823          	sh	a3,16(a0)
+
+  OC_I2C_Master_Transmit_IT_Sequence(i2c);
+80000454:	bd79                	j	800002f2 <OC_I2C_Master_Transmit_IT_Sequence>
+}
+80000456:	8082                	ret
+
+80000458 <OC_I2C_Master_Receive_IT>:
 void OC_I2C_Master_Receive_IT(I2C_HandleTypeDef *i2c, uint8_t DevAddress,
                               uint8_t *Data, uint16_t Size) {
   // Check whether I2C core is busy
   if (i2c->State != OC_I2C_STATE_READY) {
-800006ac:	02452703          	lw	a4,36(a0)
-800006b0:	00070463          	beqz	a4,800006b8 <OC_I2C_Master_Receive_IT+0xc>
-  i2c->Interupt_Receive.Address = DevAddress;  // Save i2c slave address
-  i2c->Interupt_Receive.Data = Data;           // Save received data pointer
-  i2c->Interupt_Receive.Size = Size;  // Save size of data to be received
-
-  OC_I2C_Master_Receive_IT_Sequence(i2c);
-}
-800006b4:	00008067          	ret
-  OC_I2C_ENABLE_INT(i2c);                // Enable I2C core interupt
-800006b8:	00052803          	lw	a6,0(a0)
+80000458:	5158                	lw	a4,36(a0)
+8000045a:	e31d                	bnez	a4,80000480 <OC_I2C_Master_Receive_IT+0x28>
+    return;
+  }
   i2c->State = OC_I2C_STATE_BUSY_RX_IT;  // Set I2C state to busy transmiting
-800006bc:	00300713          	li	a4,3
-800006c0:	02e52223          	sw	a4,36(a0)
+                                         // using interupt
   OC_I2C_ENABLE_INT(i2c);                // Enable I2C core interupt
-800006c4:	00882703          	lw	a4,8(a6)
-800006c8:	04076713          	ori	a4,a4,64
-800006cc:	00e82423          	sw	a4,8(a6)
-  i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_READY;
-800006d0:	00052a23          	sw	zero,20(a0)
-  i2c->Interupt_Receive.Address = DevAddress;  // Save i2c slave address
-800006d4:	00b50c23          	sb	a1,24(a0)
-  i2c->Interupt_Receive.Data = Data;           // Save received data pointer
-800006d8:	00c52e23          	sw	a2,28(a0)
-  i2c->Interupt_Receive.Size = Size;  // Save size of data to be received
-800006dc:	02d51023          	sh	a3,32(a0)
-  OC_I2C_Master_Receive_IT_Sequence(i2c);
-800006e0:	e85ff06f          	j	80000564 <OC_I2C_Master_Receive_IT_Sequence>
+8000045c:	00052803          	lw	a6,0(a0)
+  i2c->State = OC_I2C_STATE_BUSY_RX_IT;  // Set I2C state to busy transmiting
+80000460:	470d                	li	a4,3
+80000462:	d158                	sw	a4,36(a0)
+  OC_I2C_ENABLE_INT(i2c);                // Enable I2C core interupt
+80000464:	00882703          	lw	a4,8(a6)
+80000468:	04076713          	ori	a4,a4,64
+8000046c:	00e82423          	sw	a4,8(a6)
 
-800006e4 <OC_I2C_IRQHandler>:
+  i2c->Interupt_Receive.State = OC_I2C_STATE_RX_IT_READY;
+80000470:	00052a23          	sw	zero,20(a0)
+  i2c->Interupt_Receive.Address = DevAddress;  // Save i2c slave address
+80000474:	00b50c23          	sb	a1,24(a0)
+  i2c->Interupt_Receive.Data = Data;           // Save received data pointer
+80000478:	cd50                	sw	a2,28(a0)
+  i2c->Interupt_Receive.Size = Size;  // Save size of data to be received
+8000047a:	02d51023          	sh	a3,32(a0)
+
+  OC_I2C_Master_Receive_IT_Sequence(i2c);
+8000047e:	b701                	j	8000037e <OC_I2C_Master_Receive_IT_Sequence>
+}
+80000480:	8082                	ret
+
+80000482 <OC_I2C_IRQHandler>:
 
 void OC_I2C_IRQHandler(I2C_HandleTypeDef *i2c) {
   i2c->regs->CSR =
-800006e4:	00052703          	lw	a4,0(a0)
+80000482:	4118                	lw	a4,0(a0)
       OC_I2C_IACK;  // Clear pending interrupt (Interrupt acknowledge)
   // Check if the interrupt was during non-blocking transmit or receive
   if (i2c->State == OC_I2C_STATE_BUSY_TX_IT) {
-800006e8:	02452783          	lw	a5,36(a0)
+80000484:	515c                	lw	a5,36(a0)
   i2c->regs->CSR =
-800006ec:	00100693          	li	a3,1
-800006f0:	00d72823          	sw	a3,16(a4)
+80000486:	4685                	li	a3,1
+80000488:	cb14                	sw	a3,16(a4)
   if (i2c->State == OC_I2C_STATE_BUSY_TX_IT) {
-800006f4:	00200713          	li	a4,2
-800006f8:	00e78863          	beq	a5,a4,80000708 <OC_I2C_IRQHandler+0x24>
+8000048a:	4709                	li	a4,2
+8000048c:	00e79363          	bne	a5,a4,80000492 <OC_I2C_IRQHandler+0x10>
     OC_I2C_Master_Transmit_IT_Sequence(i2c);
+80000490:	b58d                	j	800002f2 <OC_I2C_Master_Transmit_IT_Sequence>
   } else if (i2c->State == OC_I2C_STATE_BUSY_RX_IT) {
-800006fc:	00300713          	li	a4,3
-80000700:	00e78663          	beq	a5,a4,8000070c <OC_I2C_IRQHandler+0x28>
+80000492:	470d                	li	a4,3
+80000494:	00e79363          	bne	a5,a4,8000049a <OC_I2C_IRQHandler+0x18>
     OC_I2C_Master_Receive_IT_Sequence(i2c);
+80000498:	b5dd                	j	8000037e <OC_I2C_Master_Receive_IT_Sequence>
   }
 }
-80000704:	00008067          	ret
-    OC_I2C_Master_Transmit_IT_Sequence(i2c);
-80000708:	d79ff06f          	j	80000480 <OC_I2C_Master_Transmit_IT_Sequence>
-    OC_I2C_Master_Receive_IT_Sequence(i2c);
-8000070c:	e59ff06f          	j	80000564 <OC_I2C_Master_Receive_IT_Sequence>
+8000049a:	8082                	ret
 
-80000710 <reset_handler>:
-80000710:	00000093          	li	ra,0
-80000714:	00008113          	mv	sp,ra
-80000718:	00008193          	mv	gp,ra
-8000071c:	00008213          	mv	tp,ra
-80000720:	00008293          	mv	t0,ra
-80000724:	00008313          	mv	t1,ra
-80000728:	00008393          	mv	t2,ra
-8000072c:	00008413          	mv	s0,ra
-80000730:	00008493          	mv	s1,ra
-80000734:	00008513          	mv	a0,ra
-80000738:	00008593          	mv	a1,ra
-8000073c:	00008613          	mv	a2,ra
-80000740:	00008693          	mv	a3,ra
-80000744:	00008713          	mv	a4,ra
-80000748:	00008793          	mv	a5,ra
-8000074c:	00008813          	mv	a6,ra
-80000750:	00008893          	mv	a7,ra
-80000754:	00008913          	mv	s2,ra
-80000758:	00008993          	mv	s3,ra
-8000075c:	00008a13          	mv	s4,ra
-80000760:	00008a93          	mv	s5,ra
-80000764:	00008b13          	mv	s6,ra
-80000768:	00008b93          	mv	s7,ra
-8000076c:	00008c13          	mv	s8,ra
-80000770:	00008c93          	mv	s9,ra
-80000774:	00008d13          	mv	s10,ra
-80000778:	00008d93          	mv	s11,ra
-8000077c:	00008e13          	mv	t3,ra
-80000780:	00008e93          	mv	t4,ra
-80000784:	00008f13          	mv	t5,ra
-80000788:	00008f93          	mv	t6,ra
-8000078c:	10001117          	auipc	sp,0x10001
-80000790:	87410113          	addi	sp,sp,-1932 # 90001000 <_stack_start>
+8000049c <reset_handler>:
+8000049c:	00000093          	li	ra,0
+800004a0:	8106                	mv	sp,ra
+800004a2:	8186                	mv	gp,ra
+800004a4:	8206                	mv	tp,ra
+800004a6:	8286                	mv	t0,ra
+800004a8:	8306                	mv	t1,ra
+800004aa:	8386                	mv	t2,ra
+800004ac:	8406                	mv	s0,ra
+800004ae:	8486                	mv	s1,ra
+800004b0:	8506                	mv	a0,ra
+800004b2:	8586                	mv	a1,ra
+800004b4:	8606                	mv	a2,ra
+800004b6:	8686                	mv	a3,ra
+800004b8:	8706                	mv	a4,ra
+800004ba:	8786                	mv	a5,ra
+800004bc:	8806                	mv	a6,ra
+800004be:	8886                	mv	a7,ra
+800004c0:	8906                	mv	s2,ra
+800004c2:	8986                	mv	s3,ra
+800004c4:	8a06                	mv	s4,ra
+800004c6:	8a86                	mv	s5,ra
+800004c8:	8b06                	mv	s6,ra
+800004ca:	8b86                	mv	s7,ra
+800004cc:	8c06                	mv	s8,ra
+800004ce:	8c86                	mv	s9,ra
+800004d0:	8d06                	mv	s10,ra
+800004d2:	8d86                	mv	s11,ra
+800004d4:	8e06                	mv	t3,ra
+800004d6:	8e86                	mv	t4,ra
+800004d8:	8f06                	mv	t5,ra
+800004da:	8f86                	mv	t6,ra
+800004dc:	10001117          	auipc	sp,0x10001
+800004e0:	b2410113          	addi	sp,sp,-1244 # 90001000 <_stack_start>
 
-80000794 <_start>:
-80000794:	00800293          	li	t0,8
-80000798:	30029073          	csrw	mstatus,t0
-8000079c:	000212b7          	lui	t0,0x21
-800007a0:	88028293          	addi	t0,t0,-1920 # 20880 <_stack_len+0x1f880>
-800007a4:	30429073          	csrw	mie,t0
-800007a8:	10000d17          	auipc	s10,0x10000
-800007ac:	858d0d13          	addi	s10,s10,-1960 # 90000000 <GPIO>
-800007b0:	10000d97          	auipc	s11,0x10000
-800007b4:	860d8d93          	addi	s11,s11,-1952 # 90000010 <_bss_end>
-800007b8:	01bd5863          	bge	s10,s11,800007c8 <main_entry>
+800004e4 <_start>:
+800004e4:	42a1                	li	t0,8
+800004e6:	30029073          	csrw	mstatus,t0
+800004ea:	003212b7          	lui	t0,0x321
+800004ee:	88028293          	addi	t0,t0,-1920 # 320880 <_stack_len+0x31f880>
+800004f2:	30429073          	csrw	mie,t0
+800004f6:	10000d17          	auipc	s10,0x10000
+800004fa:	b0ad0d13          	addi	s10,s10,-1270 # 90000000 <GPIO>
+800004fe:	10000d97          	auipc	s11,0x10000
+80000502:	b12d8d93          	addi	s11,s11,-1262 # 90000010 <_bss_end>
+80000506:	01bd5763          	bge	s10,s11,80000514 <main_entry>
 
-800007bc <zero_loop>:
-800007bc:	000d2023          	sw	zero,0(s10)
-800007c0:	004d0d13          	addi	s10,s10,4
-800007c4:	ffaddce3          	bge	s11,s10,800007bc <zero_loop>
+8000050a <zero_loop>:
+8000050a:	000d2023          	sw	zero,0(s10)
+8000050e:	0d11                	addi	s10,s10,4
+80000510:	ffaddde3          	bge	s11,s10,8000050a <zero_loop>
 
-800007c8 <main_entry>:
-800007c8:	00000513          	li	a0,0
-800007cc:	00000593          	li	a1,0
-800007d0:	00c000ef          	jal	800007dc <main>
+80000514 <main_entry>:
+80000514:	4501                	li	a0,0
+80000516:	4581                	li	a1,0
+80000518:	00a000ef          	jal	80000522 <main>
 
-800007d4 <sleep_loop>:
-800007d4:	10500073          	wfi
-800007d8:	ffdff06f          	j	800007d4 <sleep_loop>
+8000051c <sleep_loop>:
+8000051c:	10500073          	wfi
+80000520:	bff5                	j	8000051c <sleep_loop>
 
-800007dc <main>:
+80000522 <main>:
 int main() {
-800007dc:	fc010113          	addi	sp,sp,-64
-800007e0:	02112e23          	sw	ra,60(sp)
-800007e4:	02812c23          	sw	s0,56(sp)
-800007e8:	02912a23          	sw	s1,52(sp)
+80000522:	7139                	addi	sp,sp,-64
+80000524:	de06                	sw	ra,60(sp)
+80000526:	dc22                	sw	s0,56(sp)
+80000528:	da26                	sw	s1,52(sp)
   GPIO = GPIO_init();
-800007ec:	90000437          	lui	s0,0x90000
-800007f0:	9f9ff0ef          	jal	800001e8 <GPIO_init>
-800007f4:	00a42023          	sw	a0,0(s0) # 90000000 <GPIO>
+8000052a:	90000437          	lui	s0,0x90000
+8000052e:	3929                	jal	80000148 <GPIO_init>
+80000530:	00a42023          	sw	a0,0(s0) # 90000000 <GPIO>
   volatile timer_reg_map_t *const TIMER = timer_init();
-800007f8:	9f9ff0ef          	jal	800001f0 <timer_init>
+80000534:	3929                	jal	8000014e <timer_init>
   OC_I2C_Init(&I2C, I2C_BASE_ADDR, I2C_SPEED_KHZ, CPU_FREQ_MHZ);
-800007fc:	05000693          	li	a3,80
+80000536:	05000693          	li	a3,80
   volatile timer_reg_map_t *const TIMER = timer_init();
-80000800:	00050493          	mv	s1,a0
+8000053a:	84aa                	mv	s1,a0
   OC_I2C_Init(&I2C, I2C_BASE_ADDR, I2C_SPEED_KHZ, CPU_FREQ_MHZ);
-80000804:	19000613          	li	a2,400
-80000808:	300005b7          	lui	a1,0x30000
-8000080c:	00810513          	addi	a0,sp,8
-80000810:	a69ff0ef          	jal	80000278 <OC_I2C_Init>
-        GPIO->INTE = GPIO_PIN_8;
-80000814:	00042783          	lw	a5,0(s0)
+8000053c:	19000613          	li	a2,400
+80000540:	300005b7          	lui	a1,0x30000
+80000544:	0028                	addi	a0,sp,8
+80000546:	31b5                	jal	800001b2 <OC_I2C_Init>
   const uint8_t TEST_WRITE_DATA[4] = {0x80, 0x00, 0xBC, 0xBD};
-80000818:	bdbc0737          	lui	a4,0xbdbc0
-8000081c:	08070713          	addi	a4,a4,128 # bdbc0080 <_stack_start+0x2dbbf080>
+80000548:	bdbc07b7          	lui	a5,0xbdbc0
+8000054c:	08078793          	addi	a5,a5,128 # bdbc0080 <_stack_start+0x2dbbf080>
+80000550:	c23e                	sw	a5,4(sp)
         GPIO->INTE = GPIO_PIN_8;
-80000820:	10000693          	li	a3,256
-80000824:	00d7a623          	sw	a3,12(a5)
-  const uint8_t TEST_WRITE_DATA[4] = {0x80, 0x00, 0xBC, 0xBD};
-80000828:	00e12223          	sw	a4,4(sp)
-        GPIO->CTRL = GPIO_CTRL_ENABLE_INT;
-8000082c:	00100713          	li	a4,1
-80000830:	00e7ac23          	sw	a4,24(a5)
-        break;
-80000834:	900006b7          	lui	a3,0x90000
+80000552:	00042783          	lw	a5,0(s0)
+80000556:	10000713          	li	a4,256
         if ((g_GPIO_int_status & GPIO_PIN_8)) {
-80000838:	0086a703          	lw	a4,8(a3) # 90000008 <g_GPIO_int_status>
-8000083c:	10077713          	andi	a4,a4,256
-80000840:	fe070ce3          	beqz	a4,80000838 <main+0x5c>
+8000055a:	900006b7          	lui	a3,0x90000
+        GPIO->INTE = GPIO_PIN_8;
+8000055e:	c7d8                	sw	a4,12(a5)
+        GPIO->CTRL = GPIO_CTRL_ENABLE_INT;
+80000560:	4705                	li	a4,1
+80000562:	cf98                	sw	a4,24(a5)
+        if ((g_GPIO_int_status & GPIO_PIN_8)) {
+80000564:	0086a703          	lw	a4,8(a3) # 90000008 <g_GPIO_int_status>
+80000568:	10077713          	andi	a4,a4,256
+8000056c:	df65                	beqz	a4,80000564 <main+0x42>
           GPIO->CTRL = 0;
-80000844:	0007ac23          	sw	zero,24(a5)
+8000056e:	0007ac23          	sw	zero,24(a5)
         GPIO->OE = GPIO_PIN_0;
-80000848:	00100713          	li	a4,1
-8000084c:	00e7a423          	sw	a4,8(a5)
+80000572:	4705                	li	a4,1
+80000574:	c798                	sw	a4,8(a5)
         GPIO->OUT = GPIO_PIN_0;
-80000850:	00e7a223          	sw	a4,4(a5)
+80000576:	c3d8                	sw	a4,4(a5)
         timer_set(TIMER, (uint16_t)0x400, (uint16_t)0x0);
-80000854:	00000613          	li	a2,0
-80000858:	40000593          	li	a1,1024
-8000085c:	00048513          	mv	a0,s1
+80000578:	4601                	li	a2,0
+8000057a:	40000593          	li	a1,1024
+8000057e:	8526                	mv	a0,s1
           g_GPIO_int_status = 0;
-80000860:	0006a423          	sw	zero,8(a3)
+80000580:	0006a423          	sw	zero,8(a3)
         timer_set(TIMER, (uint16_t)0x400, (uint16_t)0x0);
-80000864:	9c5ff0ef          	jal	80000228 <timer_set>
+80000584:	3ed5                	jal	80000178 <timer_set>
         timer_en(TIMER);
-80000868:	00048513          	mv	a0,s1
-8000086c:	9f5ff0ef          	jal	80000260 <timer_en>
-        break;
-80000870:	900007b7          	lui	a5,0x90000
+80000586:	8526                	mv	a0,s1
+80000588:	3919                	jal	8000019e <timer_en>
         if (g_TIMER_int_status) {
-80000874:	0047d703          	lhu	a4,4(a5) # 90000004 <g_TIMER_int_status>
-80000878:	fe070ee3          	beqz	a4,80000874 <main+0x98>
+8000058a:	900007b7          	lui	a5,0x90000
+8000058e:	0047d703          	lhu	a4,4(a5) # 90000004 <g_TIMER_int_status>
+80000592:	df75                	beqz	a4,8000058e <main+0x6c>
           timer_clear_ctrl(TIMER);
-8000087c:	00048513          	mv	a0,s1
+80000594:	8526                	mv	a0,s1
           g_TIMER_int_status = 0;
-80000880:	00079223          	sh	zero,4(a5)
+80000596:	00079223          	sh	zero,4(a5)
           timer_clear_ctrl(TIMER);
-80000884:	995ff0ef          	jal	80000218 <timer_clear_ctrl>
+8000059a:	3ec1                	jal	8000016a <timer_clear_ctrl>
         GPIO->OE |= GPIO_PIN_1;
-80000888:	00042783          	lw	a5,0(s0)
+8000059c:	00042783          	lw	a5,0(s0)
         OC_I2C_Master_Transmit(&I2C, I2C_DEV_ADDR, TEST_WRITE_DATA, sizeof(TEST_WRITE_DATA));
-8000088c:	00400693          	li	a3,4
-80000890:	00410613          	addi	a2,sp,4
+800005a0:	4691                	li	a3,4
+800005a2:	00d10633          	add	a2,sp,a3
         GPIO->OE |= GPIO_PIN_1;
-80000894:	0087a703          	lw	a4,8(a5)
+800005a6:	4798                	lw	a4,8(a5)
         OC_I2C_Master_Transmit(&I2C, I2C_DEV_ADDR, TEST_WRITE_DATA, sizeof(TEST_WRITE_DATA));
-80000898:	0a000593          	li	a1,160
-8000089c:	00810513          	addi	a0,sp,8
+800005a8:	0a000593          	li	a1,160
+800005ac:	0028                	addi	a0,sp,8
         GPIO->OE |= GPIO_PIN_1;
-800008a0:	00276713          	ori	a4,a4,2
-800008a4:	00e7a423          	sw	a4,8(a5)
+800005ae:	00276713          	ori	a4,a4,2
+800005b2:	c798                	sw	a4,8(a5)
         GPIO->OUT |= GPIO_PIN_1;
-800008a8:	0047a703          	lw	a4,4(a5)
-800008ac:	00276713          	ori	a4,a4,2
-800008b0:	00e7a223          	sw	a4,4(a5)
+800005b4:	43d8                	lw	a4,4(a5)
+800005b6:	00276713          	ori	a4,a4,2
+800005ba:	c3d8                	sw	a4,4(a5)
         OC_I2C_Master_Transmit(&I2C, I2C_DEV_ADDR, TEST_WRITE_DATA, sizeof(TEST_WRITE_DATA));
-800008b4:	a81ff0ef          	jal	80000334 <OC_I2C_Master_Transmit>
+800005bc:	31a5                	jal	80000224 <OC_I2C_Master_Transmit>
         OC_I2C_Master_Transmit(&I2C, I2C_DEV_ADDR, TEST_WRITE_DATA, sizeof(uint16_t));
-800008b8:	00200693          	li	a3,2
-800008bc:	00410613          	addi	a2,sp,4
-800008c0:	0a000593          	li	a1,160
-800008c4:	00810513          	addi	a0,sp,8
-800008c8:	a6dff0ef          	jal	80000334 <OC_I2C_Master_Transmit>
+800005be:	4689                	li	a3,2
+800005c0:	0050                	addi	a2,sp,4
+800005c2:	0a000593          	li	a1,160
+800005c6:	0028                	addi	a0,sp,8
+800005c8:	39b1                	jal	80000224 <OC_I2C_Master_Transmit>
         GPIO->OE |= GPIO_PIN_2;
-800008cc:	00042783          	lw	a5,0(s0)
+800005ca:	00042783          	lw	a5,0(s0)
         OC_I2C_Master_Receive(&I2C, I2C_DEV_ADDR, TEST_READ_DATA, sizeof(uint16_t));
-800008d0:	00200693          	li	a3,2
-800008d4:	00010613          	mv	a2,sp
+800005ce:	4689                	li	a3,2
+800005d0:	860a                	mv	a2,sp
         GPIO->OE |= GPIO_PIN_2;
-800008d8:	0087a703          	lw	a4,8(a5)
+800005d2:	4798                	lw	a4,8(a5)
         OC_I2C_Master_Receive(&I2C, I2C_DEV_ADDR, TEST_READ_DATA, sizeof(uint16_t));
-800008dc:	0a000593          	li	a1,160
-800008e0:	00810513          	addi	a0,sp,8
+800005d4:	0a000593          	li	a1,160
+800005d8:	0028                	addi	a0,sp,8
         GPIO->OE |= GPIO_PIN_2;
-800008e4:	00476713          	ori	a4,a4,4
-800008e8:	00e7a423          	sw	a4,8(a5)
+800005da:	00476713          	ori	a4,a4,4
+800005de:	c798                	sw	a4,8(a5)
         GPIO->OUT |= GPIO_PIN_2;
-800008ec:	0047a703          	lw	a4,4(a5)
-800008f0:	00476713          	ori	a4,a4,4
-800008f4:	00e7a223          	sw	a4,4(a5)
+800005e0:	43d8                	lw	a4,4(a5)
+800005e2:	00476713          	ori	a4,a4,4
+800005e6:	c3d8                	sw	a4,4(a5)
         OC_I2C_Master_Receive(&I2C, I2C_DEV_ADDR, TEST_READ_DATA, sizeof(uint16_t));
-800008f8:	ad1ff0ef          	jal	800003c8 <OC_I2C_Master_Receive>
+800005e8:	3961                	jal	80000280 <OC_I2C_Master_Receive>
         GPIO->OE |= GPIO_PIN_3;
-800008fc:	00042783          	lw	a5,0(s0)
+800005ea:	00042783          	lw	a5,0(s0)
           if (WRITE_BYTE != READ_BYTE) {
-80000900:	00614603          	lbu	a2,6(sp)
-80000904:	00014683          	lbu	a3,0(sp)
+800005ee:	00614683          	lbu	a3,6(sp)
         GPIO->OE |= GPIO_PIN_3;
-80000908:	0087a703          	lw	a4,8(a5)
-8000090c:	00876713          	ori	a4,a4,8
-80000910:	00e7a423          	sw	a4,8(a5)
+800005f2:	4798                	lw	a4,8(a5)
+800005f4:	00876713          	ori	a4,a4,8
+800005f8:	c798                	sw	a4,8(a5)
         GPIO->OUT |= GPIO_PIN_3;
-80000914:	0047a703          	lw	a4,4(a5)
-80000918:	00876713          	ori	a4,a4,8
-8000091c:	00e7a223          	sw	a4,4(a5)
+800005fa:	43d8                	lw	a4,4(a5)
+800005fc:	00876713          	ori	a4,a4,8
+80000600:	c3d8                	sw	a4,4(a5)
           if (WRITE_BYTE != READ_BYTE) {
-80000920:	02d61663          	bne	a2,a3,8000094c <main+0x170>
-80000924:	00714683          	lbu	a3,7(sp)
-80000928:	00114703          	lbu	a4,1(sp)
-8000092c:	02e69063          	bne	a3,a4,8000094c <main+0x170>
-        GPIO->OE |= GPIO_PIN_4;
-80000930:	0087a703          	lw	a4,8(a5)
-80000934:	01076713          	ori	a4,a4,16
-80000938:	00e7a423          	sw	a4,8(a5)
-        GPIO->OUT |= GPIO_PIN_4;
-8000093c:	0047a703          	lw	a4,4(a5)
-80000940:	01076713          	ori	a4,a4,16
-80000944:	00e7a223          	sw	a4,4(a5)
-        while (DEBUG_WHILE_TEST_SUCCESS);
-80000948:	0000006f          	j	80000948 <main+0x16c>
+80000602:	00014703          	lbu	a4,0(sp)
+80000606:	00e69863          	bne	a3,a4,80000616 <main+0xf4>
+8000060a:	00714683          	lbu	a3,7(sp)
+8000060e:	00114703          	lbu	a4,1(sp)
+80000612:	00e68363          	beq	a3,a4,80000618 <main+0xf6>
             while (DEBUG_WHILE_RW_DATA_CHECK_FAIL);
-8000094c:	0000006f          	j	8000094c <main+0x170>
-
-Disassembly of section .nops:
-
-80000950 <.nops>:
-80000950:	00000013          	nop
-80000954:	00000013          	nop
+80000616:	a001                	j	80000616 <main+0xf4>
+        GPIO->OE |= GPIO_PIN_4;
+80000618:	4798                	lw	a4,8(a5)
+8000061a:	01076713          	ori	a4,a4,16
+8000061e:	c798                	sw	a4,8(a5)
+        GPIO->OUT |= GPIO_PIN_4;
+80000620:	43d8                	lw	a4,4(a5)
+80000622:	01076713          	ori	a4,a4,16
+80000626:	c3d8                	sw	a4,4(a5)
+        while (DEBUG_WHILE_TEST_SUCCESS);
+80000628:	a001                	j	80000628 <main+0x106>
+	...

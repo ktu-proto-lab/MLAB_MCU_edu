@@ -12,6 +12,9 @@ module simple_system_tb;
     parameter GPIO_COUNT = `GPIO_IOS;
     parameter CLK_PERIOD = 12.5;
     parameter MEMInitFile = {"../../sw/ibex/",program_folder,"/build/verilog_hex.v"};
+    parameter IMEM_1_InitFile = {"../../sw/ibex/",program_folder,"/build/instr_hex_1.mem"};
+    parameter IMEM_2_InitFile = {"../../sw/ibex/",program_folder,"/build/instr_hex_2.mem"};
+    parameter DMEM_InitFile = {"../../sw/ibex/",program_folder,"/build/data_hex.mem"};
 
     //==================================================
     // Clock / reset
@@ -48,7 +51,11 @@ module simple_system_tb;
     //==================================================
     // DUT
     //==================================================
-    ibex_simple_system dut (
+    ibex_simple_system #(
+        .IMEM_1_InitFile(IMEM_1_InitFile),
+        .IMEM_2_InitFile(IMEM_2_InitFile),
+        .DMEM_InitFile(DMEM_InitFile)
+    ) dut (
         .clk_sys      (clk_sys),
         .rst_async_n  (rst_sys_n),
 
@@ -174,7 +181,9 @@ module simple_system_tb;
         // Set GPIO0 to output for UART TX
         out_valid[0] = 1;
 
+`ifndef BOOT_SKIP
         #125_000_000; // Bootloader working
+`endif
         
         #1_000_000;
 

@@ -5,17 +5,20 @@ module tb();
     integer i;
     task wait_bootloader();
         begin
-`ifdef BOOT_WRITEBACK
+`ifndef BOOT_SKIP
+
+    `ifdef BOOT_WRITEBACK
             #725_000_000; // Bootloader working
-`else
+    `else
             #120_000_000; // Bootloader working
-`endif
+    `endif
             // Outputs to vcd file waveform 5ms before bootloader is done (there is no need to see whole bootloader process)
-`ifdef DUMPVCD
+    `ifdef DUMPVCD
             $dumpfile("output.vcd");
             $dumpvars(0,simple_system_tb);
-`endif
+    `endif
             #4_524_000; // Bootloader is done
+`endif
         end
     endtask
     
