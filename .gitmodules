@@ -1,4 +1,4 @@
 [submodule "uvm"]
 	path = uvm
-	url = https://github.com/ManfredasLamsargis/MLAB_riscv_mcu_uvm.git
+	url = https://github.com/ManfredasLamsargis/MLAB_MCU_UVM.git
 	branch = main
