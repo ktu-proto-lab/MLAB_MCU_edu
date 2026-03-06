@@ -16,7 +16,8 @@ module wb_spi_flash (
 
     qflexpress #(
         .LGFLASHSZ(24),
-        .OPT_STARTUP(1)
+        .OPT_STARTUP(1),
+        .OPT_CLKDIV(1)
 	) u_wb_spi_flash (
         .i_clk          (wb.clk),
         .i_reset        (~wb.rst),
@@ -24,7 +25,7 @@ module wb_spi_flash (
         .i_wb_stb       (wb.stb),
         .i_cfg_stb      (1'b0),
         .i_wb_we        (wb.we),
-        .i_wb_addr      (wb.adr[21:0]),
+        .i_wb_addr      ({1'b0, 1'b0, wb.adr[21:2]}),
         .o_wb_stall     (stall),
         .o_wb_ack       (wb.ack),
 

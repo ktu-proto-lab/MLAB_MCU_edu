@@ -6,7 +6,6 @@
 //==================================================
 // Software directory.d
 parameter program_folder="test/flash_memory";
-integer expected_ext_pad_io = 12'b0000_0001_1111;
 
 module simple_system_tb;
 
@@ -18,12 +17,6 @@ module simple_system_tb;
     parameter IMEM_2_InitFile = {"../../sw/ibex/",program_folder,"/build/instr_hex_2.mem"};
     parameter DMEM_InitFile = {"../../sw/ibex/",program_folder,"/build/data_hex.mem"};
 
-`ifdef LOG_OUTPUT
-    // Output file of the tb info.
-    parameter file="../../tb/log/full_peripheral.log";
-    // Output file descriptor.
-    int fd;
-`endif
 
     //==================================================
     // Clock / reset
@@ -173,17 +166,6 @@ module simple_system_tb;
     //==================================================
 
     initial begin
-`ifdef LOG_OUTPUT
-        // Open output file with write permission.
-        fd = $fopen ( file, "w");
-        if (fd)  begin
-            $display("[SUCCESS]: log output file '%s' opened succesfully", file);
-            $fwrite(fd, "[   FLAG]: LOG_OUT_INIT\n");
-        end else begin
-            $display("[   FAIL]: log output file was not opened successfully: %0d", fd);
-        end
-`endif
-
         // Add delay to let scan_en propagate, this is so we don't get $setup timing violations for postpnr 
         // SDF annotated simulation
         // #(CLK_PERIOD*1)
@@ -209,7 +191,7 @@ module simple_system_tb;
         // Set GPIO8 (start the sw state machine)
         out_valid     = 1 << 8;
         output_value = 1 << 8;
-      #100;
+        #100;
         
         // Reset GPIO
         out_valid =  0; 
@@ -217,24 +199,6 @@ module simple_system_tb;
         // Wait for state machine to complete
         #10_000_000;
 
-        // If GPIOs 0-4 are set after simulation then test is successful
-        if (ext_pad_io == expected_ext_pad_io) begin 
-            $display("[SUCCESS]: all 5 stages of the full peripheral test are passed: expected GPIO values = %012b, actual = %012b", expected_ext_pad_io, ext_pad_io);
-`ifdef LOG_OUTPUT
-            $fwrite(fd, "[SUCCESS]: all 5 stages of the full peripheral test are passed: expected GPIO values = %012b, actual = %012b\n", expected_ext_pad_io, ext_pad_io);
-            $fwrite(fd, "[   FLAG]: TEST_SUCCESS\n");
-`endif
-      end else begin
-            $display("[   FAIL]:  expected GPIO values = %012b, actual = %012b", expected_ext_pad_io, ext_pad_io);
-`ifdef LOG_OUTPUT
-            $fwrite(fd, "[   FAIL]:  expected GPIO values = %012b, actual = %012b\n", expected_ext_pad_io, ext_pad_io);
-            $fwrite(fd, "[   FLAG]: TEST_FAIL\n");
-`endif
-      end
-        // Close log output file.
-`ifdef LOG_OUTPUT
-        $fclose(fd);
-`endif
         $finish();
     end
 

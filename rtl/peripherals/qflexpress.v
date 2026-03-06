@@ -479,9 +479,11 @@ module	qflexpress #(
 		// Dummy clocks, x6 for this flash
 		m_cmd_word[5'h1a] = { 1'b0, QUAD_WRITE, 8'h00 };
 		m_cmd_word[5'h1b] = { 1'b0, QUAD_WRITE, 8'h00 };
-		m_cmd_word[5'h1c] = { 1'b0, QUAD_WRITE, 8'h00 };
-		// Now read a byte for form
-		m_cmd_word[5'h1d] = { 1'b0, QUAD_READ, 8'h00 };
+		// m_cmd_word[5'h1c] = { 1'b0, QUAD_WRITE, 8'h00 };
+		// // Now read a byte for form
+		// m_cmd_word[5'h1d] = { 1'b0, QUAD_READ, 8'h00 };
+		m_cmd_word[5'h1c] = { 1'b0, QUAD_READ, 8'h00 };
+		m_cmd_word[5'h1d] = -1;
 		//
 		// Idle -- These last two idles are *REQUIRED* and not optional
 		// (although they might be able to be trimmed back a bit...)
