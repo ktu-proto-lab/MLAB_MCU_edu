@@ -20,7 +20,13 @@ module ibex_simple_system #(
   input   logic [`GPIO_IOS-1:0] ext_pad_i,
 
   output  logic [`GPIO_IOS-1:0] gpio_o,
-  output  logic [`GPIO_IOS-1:0] gpio_oe
+  output  logic [`GPIO_IOS-1:0] gpio_oe,
+
+  output logic o_qspi_sck,
+  output logic o_qspi_cs_n,
+  output logic [1:0] o_qspi_mod,
+  output logic [3:0] o_qspi_dat,
+  input logic [3:0] i_qspi_dat
 
   // input   logic   scan_en,
   // input   logic   scan_in,
@@ -70,7 +76,7 @@ module ibex_simple_system #(
   //==================================================
 
   localparam int NUM_MASTERS        = 3;
-  localparam int NUM_SLAVES         = 6;
+  localparam int NUM_SLAVES         = 7;
   localparam int PIT_SLAVE_PORT_NUM = 4;
 
   //==================================================
@@ -99,6 +105,9 @@ module ibex_simple_system #(
 
   localparam [31:0] pit_base_addr   = `PIT_BASE_ADDR;
   localparam [31:0] pit_size        = 'h10; // CTRL, MOD and CNT regs
+
+  localparam [31:0] spi_flash_base_addr   = `SPI_FLASH_BASE_ADDR;
+  localparam [31:0] spi_flash_size        = 'h2000; // Round up to be divisable by 4
 
   //==================================================
   // Instantiate modules
@@ -261,6 +270,15 @@ module ibex_simple_system #(
       .pit_irq_o  (pit_irq)
   );
 
+  wb_spi_flash u_spi_flash (
+      .wb(wbs[6]),
+      .o_qspi_sck     (o_qspi_sck),
+      .o_qspi_cs_n    (o_qspi_cs_n),
+      .o_qspi_mod     (o_qspi_mod),
+      .o_qspi_dat     (o_qspi_dat),
+      .i_qspi_dat     (i_qspi_dat)
+  );
+
   //==================================================
   // Shared or crossbar interconnect
   //==================================================
@@ -268,8 +286,8 @@ module ibex_simple_system #(
        wb_interconnect_sharedbus
          #(.numm      (NUM_MASTERS),
            .nums      (NUM_SLAVES),
-           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr}),
-           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size}))
+           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr}),
+           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, spi_flash_size}))
        u_wb_interconnect
          (.wbm, .wbs);
 endmodule

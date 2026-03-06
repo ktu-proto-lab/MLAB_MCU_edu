@@ -57,6 +57,15 @@ module simple_system_tb;
     logic [GPIO_COUNT-1:0] gpio_o;
     logic [GPIO_COUNT-1:0] gpio_oe;
 
+    //DUT-facing SPI
+    logic o_qspi_sck;
+    logic o_qspi_cs_n;
+    logic [1:0] o_qspi_mod;
+    logic [3:0] o_qspi_dat;
+    logic [3:0] i_qspi_dat;
+
+    tri [3:0] io_qspi_dat;
+
     //==================================================
     // DUT
     //==================================================
@@ -78,7 +87,13 @@ module simple_system_tb;
 
         .ext_pad_i    (ext_pad_i),
         .gpio_o       (gpio_o),
-        .gpio_oe      (gpio_oe)
+        .gpio_oe      (gpio_oe),
+
+        .o_qspi_sck   (o_qspi_sck),
+        .o_qspi_cs_n  (o_qspi_cs_n),
+        .o_qspi_mod   (o_qspi_mod),
+        .o_qspi_dat   (o_qspi_dat),
+        .i_qspi_dat   (i_qspi_dat)
     );
 
     //==================================================
@@ -115,6 +130,12 @@ module simple_system_tb;
     endgenerate
 
     //==================================================
+    // SPI tristate modeling
+    //==================================================
+    assign i_qspi_dat = io_qspi_dat;
+    assign io_qspi_dat = (~o_qspi_mod[1])?({2'b11,1'bz,o_qspi_dat[0]}) // Serial mode
+                        :((o_qspi_mod[0])?(4'bzzzz):(o_qspi_dat[3:0])); // Quad mode
+    //==================================================
     // External EEPROM
     //==================================================
     M24CS512 #(
@@ -127,6 +148,15 @@ module simple_system_tb;
         .SDA    (SDA),
         .SCL    (SCL),
         .RESET  (1'b0)   // Reset without internal function
+    );
+
+    //==================================================
+    // External Flash
+    //==================================================
+    sst26wf040b flash (
+        .SCK    (o_qspi_sck),
+        .SIO    (io_qspi_dat),
+        .CEb    (o_qspi_cs_n)
     );
 
     //==================================================
@@ -160,6 +190,9 @@ module simple_system_tb;
         // Initial top signal values
         clk_sys = 1'b0;
         out_valid = 0;
+        rst_sys_n = 1'b1;
+
+        #(CLK_PERIOD*4)
         rst_sys_n = 1'b0;
 
         #(CLK_PERIOD*4)

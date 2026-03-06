@@ -32,6 +32,9 @@
 
 `define PIT_BASE_ADDR   32'h2000_0000
 
+`define SPI_FLASH_BASE_ADDR   32'hA000_0000
+
+
 // GPIO Count
 `define GPIO_IOS 10
 
