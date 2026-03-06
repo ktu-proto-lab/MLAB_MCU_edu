@@ -60,12 +60,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //
-`default_nettype	none
+// `default_nettype	none
 // }}}
 // 290 raw, 372 w/ pipe, 410 cfg, 499 cfg w/pipe
 module	qflexpress #(
 		// {{{
-		// LGFLASHSZ
+		// LGFLASHSZOPT_ODDR
 		// {{{
 		// LGFLASHSZ is the size of the flash memory.  It defines the
 		// number of bits in the address register and more.  This
@@ -177,7 +177,7 @@ module	qflexpress #(
 		localparam [7:0] QIO_READ_CMD = OPT_ADDR32 ? 8'hec : 8'heb,
 		//
 		localparam	AW=LGFLASHSZ-2,
-		localparam	DW=32,
+		localparam	DW=32
 `ifdef	FORMAL
 		, localparam	F_LGDEPTH=$clog2(3+RDDELAY+(OPT_ADDR32 ? 2:0))
 `endif
@@ -268,13 +268,17 @@ module	qflexpress #(
 	generate if (OPT_ODDR)
 	begin // Flash clock == system clock speed
 		// {{{
-		always @(*)
-		begin
-			ckstb = 1'b1;
-			ckpos = 1'b1;
-			ckneg = 1'b1;
-			ckpre = 1'b1;
-		end
+		assign ckstb = 1'b1;
+		assign ckpos = 1'b1;
+		assign ckneg = 1'b1;
+		assign ckpre = 1'b1;
+		// always @(*)
+		// begin
+		// 	ckstb = 1'b1;
+		// 	ckpos = 1'b1;
+		// 	ckneg = 1'b1;
+		// 	ckpre = 1'b1;
+		// end
 		// }}}
 	end else if (OPT_CLKDIV == 1)
 	begin : CKSTB_ONE // Flash clock can be generated logically, == sysclk/2
@@ -568,7 +572,7 @@ module	qflexpress #(
 
 		// m_cs_n, m_mod, m_bitcount
 		// {{{
-		initial	m_cs_n      = 1'b1;
+		// initial	m_cs_n      = 1'b1;
 		initial	m_mod       = NORMAL_SPI;
 		always @(posedge i_clk)
 		if (i_reset)
@@ -602,6 +606,7 @@ module	qflexpress #(
 
 		// m_dat, m_byte
 		// {{{
+		initial m_dat = 0;
 		always @(posedge i_clk)
 		if (m_ce)
 		begin
@@ -1088,7 +1093,7 @@ module	qflexpress #(
 
 	// dly_ack
 	// {{{
-	initial	dly_ack = 1'b0;
+	// initial	dly_ack = 1'b0;
 	always @(posedge i_clk)
 	if (i_reset)
 		dly_ack <= 1'b0;
