@@ -5,7 +5,7 @@
 // Configs
 //==================================================
 // Software directory.d
-parameter program_folder="test/flash_memory";
+parameter program_folder="test/full_peripheral";
 integer expected_ext_pad_io = 12'b0000_0001_1111;
 
 module simple_system_tb;
