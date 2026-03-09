@@ -23,7 +23,7 @@
 
 // Peripheral base addresses
 
-`define IMEM_BASE_ADDR  32'h8000_0000
+`define IMEM_BASE_ADDR  32'hA000_0000
 `define DMEM_BASE_ADDR  32'h9000_0000
 
 `define UART_BASE_ADDR	32'h5000_0000
@@ -32,7 +32,7 @@
 
 `define PIT_BASE_ADDR   32'h2000_0000
 
-`define SPI_FLASH_BASE_ADDR   32'hA000_0000
+`define SPI_FLASH_BASE_ADDR   32'h8000_0000
 
 
 // GPIO Count
