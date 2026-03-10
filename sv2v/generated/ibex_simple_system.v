@@ -13039,7 +13039,7 @@ module ibex_simple_system (
 	wire uart_tx_o;
 	wire pit_irq;
 	localparam signed [31:0] NUM_MASTERS = 3;
-	localparam signed [31:0] NUM_SLAVES = 7;
+	localparam signed [31:0] NUM_SLAVES = 5;
 	localparam signed [31:0] PIT_SLAVE_PORT_NUM = 4;
 	localparam [31:0] imem_base_addr = 32'ha0000000;
 	localparam [31:0] imem_size = 'h2000;
@@ -13083,7 +13083,7 @@ module ibex_simple_system (
 	endgenerate
 	genvar _arr_3103E;
 	generate
-		for (_arr_3103E = 0; _arr_3103E <= 6; _arr_3103E = _arr_3103E + 1) begin : wbs
+		for (_arr_3103E = 0; _arr_3103E <= 4; _arr_3103E = _arr_3103E + 1) begin : wbs
 			wire rst;
 			wire clk;
 			reg ack;
@@ -13097,7 +13097,7 @@ module ibex_simple_system (
 			wire [31:0] dat_m;
 			wire [31:0] dat_s;
 		end
-		for (_arr_3103E = 0; _arr_3103E <= 6; _arr_3103E = _arr_3103E + 1) begin : wbs_port_bindings
+		for (_arr_3103E = 0; _arr_3103E <= 4; _arr_3103E = _arr_3103E + 1) begin : wbs_port_bindings
 			assign wbs[_arr_3103E].rst = rst_sync_n;
 			assign wbs[_arr_3103E].clk = clk_sys;
 		end
@@ -13348,7 +13348,6 @@ module ibex_simple_system (
 				end
 				initial _sv2v_0 = 0;
 			end
-			wire last_read;
 			assign i_i2c_fsm.clk = clk;
 			assign i_i2c_fsm.start = start;
 			assign i_i2c_fsm.w_data = wdata;
@@ -13363,6 +13362,7 @@ module ibex_simple_system (
 			assign i_i2c_fsm.sram_access = sram_access;
 			assign i_i2c_fsm.mem_addr = mem_addr;
 			assign mem_addr = mem_addr_reg;
+			wire last_read;
 			assign last_read = mem_index == ((32'd8192 + 32'd4096) - 4);
 			always @(posedge clk or negedge ibex_simple_system.wbm[_mbase_wb].rst)
 				if (!ibex_simple_system.wbm[_mbase_wb].rst) begin
@@ -13813,146 +13813,7 @@ module ibex_simple_system (
 	assign u_wb_ibex_top.debug_req = 1'b0;
 	assign u_wb_ibex_top.fetch_enable = ibex_pkg_IbexMuBiOn;
 	assign u_wb_ibex_top.scan_rst_n = 1'b0;
-	localparam _bbase_00C25_wb = 0;
-	localparam _param_00C25_MEMInitFile_1 = IMEM_1_InitFile;
-	localparam _param_00C25_MEMInitFile_2 = IMEM_2_InitFile;
-	generate
-		if (1) begin : imem
-			localparam _mbase_wb = _bbase_00C25_wb;
-			localparam MEMInitFile_1 = _param_00C25_MEMInitFile_1;
-			localparam MEMInitFile_2 = _param_00C25_MEMInitFile_2;
-			localparam size = 'h1000;
-			localparam addr_width = $clog2('h1000) - 2;
-			wire valid;
-			wire [9:0] sram_addr;
-			wire sram1_me;
-			wire sram2_me;
-			wire sram_we;
-			wire sram_re;
-			wire [31:0] sram_bm;
-			wire [31:0] sram_wdata;
-			wire [31:0] sram_rdata;
-			wire [31:0] sram1_rdata;
-			wire [31:0] sram2_rdata;
-			wire [3:0] sram_be;
-			reg sram_sel;
-			assign sram2_me = ibex_simple_system.wbs[_mbase_wb].adr[12] & valid;
-			assign sram1_me = !sram2_me & valid;
-			assign sram_rdata = (sram_sel ? sram2_rdata : sram1_rdata);
-			assign valid = ibex_simple_system.wbs[_mbase_wb].cyc & ibex_simple_system.wbs[_mbase_wb].stb;
-			assign ibex_simple_system.wbs[_mbase_wb].stall = 1'b0;
-			assign ibex_simple_system.wbs[_mbase_wb].err = 1'b0;
-			always @(posedge ibex_simple_system.wbs[_mbase_wb].clk or negedge ibex_simple_system.wbs[_mbase_wb].rst)
-				if (!ibex_simple_system.wbs[_mbase_wb].rst) begin
-					ibex_simple_system.wbs[_mbase_wb].ack <= 1'b0;
-					sram_sel <= 1'b0;
-				end
-				else begin
-					ibex_simple_system.wbs[_mbase_wb].ack <= valid & ~ibex_simple_system.wbs[_mbase_wb].stall;
-					sram_sel <= ibex_simple_system.wbs[_mbase_wb].adr[12];
-				end
-			assign sram_addr = ibex_simple_system.wbs[_mbase_wb].adr[addr_width + 1:2];
-			assign sram_we = ibex_simple_system.wbs[_mbase_wb].we;
-			assign sram_be = {4 {ibex_simple_system.wbs[_mbase_wb].we}} & ibex_simple_system.wbs[_mbase_wb].sel;
-			assign sram_bm = {{8 {sram_be[3]}}, {8 {sram_be[2]}}, {8 {sram_be[1]}}, {8 {sram_be[0]}}};
-			assign sram_wdata = ibex_simple_system.wbs[_mbase_wb].dat_m;
-			assign ibex_simple_system.wbs[_mbase_wb].dat_s = sram_rdata;
-			assign sram_re = valid;
-			RM_IHPSG13_1P_1024x32_c2_bm_bist #(.MEMInitFile(MEMInitFile_1)) sram1(
-				.A_CLK(ibex_simple_system.wbs[_mbase_wb].clk),
-				.A_MEN(sram1_me),
-				.A_WEN(sram_we),
-				.A_REN(sram_re),
-				.A_ADDR(sram_addr),
-				.A_DIN(sram_wdata),
-				.A_DLY(1'b1),
-				.A_DOUT(sram1_rdata),
-				.A_BM(sram_bm),
-				.A_BIST_CLK(1'sb0),
-				.A_BIST_EN(1'sb0),
-				.A_BIST_MEN(1'sb0),
-				.A_BIST_WEN(1'sb0),
-				.A_BIST_REN(1'sb0),
-				.A_BIST_ADDR(1'sb0),
-				.A_BIST_DIN(1'sb0),
-				.A_BIST_BM(1'sb0)
-			);
-			RM_IHPSG13_1P_1024x32_c2_bm_bist #(.MEMInitFile(MEMInitFile_2)) sram2(
-				.A_CLK(ibex_simple_system.wbs[_mbase_wb].clk),
-				.A_MEN(sram2_me),
-				.A_WEN(sram_we),
-				.A_REN(sram_re),
-				.A_ADDR(sram_addr),
-				.A_DIN(sram_wdata),
-				.A_DLY(1'b1),
-				.A_DOUT(sram2_rdata),
-				.A_BM(sram_bm),
-				.A_BIST_CLK(1'sb0),
-				.A_BIST_EN(1'sb0),
-				.A_BIST_MEN(1'sb0),
-				.A_BIST_WEN(1'sb0),
-				.A_BIST_REN(1'sb0),
-				.A_BIST_ADDR(1'sb0),
-				.A_BIST_DIN(1'sb0),
-				.A_BIST_BM(1'sb0)
-			);
-		end
-	endgenerate
-	localparam _bbase_ADB81_wb = 1;
-	localparam _param_ADB81_MEMInitFile = DMEM_InitFile;
-	generate
-		if (1) begin : dmem
-			localparam _mbase_wb = _bbase_ADB81_wb;
-			localparam MEMInitFile = _param_ADB81_MEMInitFile;
-			localparam size = 'h1000;
-			localparam addr_width = $clog2('h1000) - 2;
-			wire valid;
-			wire [9:0] sram_addr;
-			wire sram_me;
-			wire sram_we;
-			wire sram_re;
-			wire [31:0] sram_bm;
-			wire [31:0] sram_wdata;
-			wire [31:0] sram_rdata;
-			wire [3:0] sram_be;
-			assign valid = ibex_simple_system.wbs[_mbase_wb].cyc & ibex_simple_system.wbs[_mbase_wb].stb;
-			assign ibex_simple_system.wbs[_mbase_wb].stall = 1'b0;
-			assign ibex_simple_system.wbs[_mbase_wb].err = 1'b0;
-			always @(posedge ibex_simple_system.wbs[_mbase_wb].clk or negedge ibex_simple_system.wbs[_mbase_wb].rst)
-				if (!ibex_simple_system.wbs[_mbase_wb].rst)
-					ibex_simple_system.wbs[_mbase_wb].ack <= 1'b0;
-				else
-					ibex_simple_system.wbs[_mbase_wb].ack <= valid & ~ibex_simple_system.wbs[_mbase_wb].stall;
-			assign sram_addr = ibex_simple_system.wbs[_mbase_wb].adr[addr_width + 1:2];
-			assign sram_me = valid;
-			assign sram_we = ibex_simple_system.wbs[_mbase_wb].we;
-			assign sram_be = {4 {ibex_simple_system.wbs[_mbase_wb].we}} & ibex_simple_system.wbs[_mbase_wb].sel;
-			assign sram_bm = {{8 {sram_be[3]}}, {8 {sram_be[2]}}, {8 {sram_be[1]}}, {8 {sram_be[0]}}};
-			assign sram_wdata = ibex_simple_system.wbs[_mbase_wb].dat_m;
-			assign ibex_simple_system.wbs[_mbase_wb].dat_s = sram_rdata;
-			assign sram_re = sram_me;
-			RM_IHPSG13_1P_1024x32_c2_bm_bist #(.MEMInitFile(MEMInitFile)) sram(
-				.A_CLK(ibex_simple_system.wbs[_mbase_wb].clk),
-				.A_MEN(sram_me),
-				.A_WEN(sram_we),
-				.A_REN(sram_re),
-				.A_ADDR(sram_addr),
-				.A_DIN(sram_wdata),
-				.A_DLY(1'b1),
-				.A_DOUT(sram_rdata),
-				.A_BM(sram_bm),
-				.A_BIST_CLK(1'sb0),
-				.A_BIST_EN(1'sb0),
-				.A_BIST_MEN(1'sb0),
-				.A_BIST_WEN(1'sb0),
-				.A_BIST_REN(1'sb0),
-				.A_BIST_ADDR(1'sb0),
-				.A_BIST_DIN(1'sb0),
-				.A_BIST_BM(1'sb0)
-			);
-		end
-	endgenerate
-	localparam _bbase_AF6D0_wb = 2;
+	localparam _bbase_AF6D0_wb = 0;
 	generate
 		if (1) begin : u_gpio
 			localparam _mbase_wb = _bbase_AF6D0_wb;
@@ -13990,7 +13851,7 @@ module ibex_simple_system (
 	assign gpio_o = u_gpio.ext_pad_o;
 	assign gpio_oe = u_gpio.ext_padoe_o;
 	assign gpio_aux = {uart_tx_o, 1'b0};
-	localparam _bbase_5EA00_wb = 5;
+	localparam _bbase_5EA00_wb = 3;
 	generate
 		if (1) begin : u_uart
 			localparam _mbase_wb = _bbase_5EA00_wb;
@@ -14025,7 +13886,7 @@ module ibex_simple_system (
 	assign uart_tx_int_o = u_uart.o_uart_tx_int;
 	assign u_uart.i_uart_rx = ext_pad_i[0];
 	assign uart_tx_o = u_uart.o_uart_tx;
-	localparam _bbase_BCA4E_wb = 3;
+	localparam _bbase_BCA4E_wb = 1;
 	localparam _param_BCA4E_BOOT_I2C_PRESCALER = 16'd15;
 	generate
 		if (1) begin : u_i2c
@@ -14073,7 +13934,7 @@ module ibex_simple_system (
 	assign u_i2c.sda_pad_i = sda_pad_i;
 	assign sda_pad_o = u_i2c.sda_pad_o;
 	assign sda_padoen_o = u_i2c.sda_padoen_o;
-	localparam _bbase_3A12E_wb = PIT_SLAVE_PORT_NUM;
+	localparam _bbase_3A12E_wb = 2;
 	generate
 		if (1) begin : u_pit
 			localparam _mbase_wb = _bbase_3A12E_wb;
@@ -14115,7 +13976,7 @@ module ibex_simple_system (
 		end
 	endgenerate
 	assign pit_irq = u_pit.pit_irq_o;
-	localparam _bbase_08BBA_wb = 6;
+	localparam _bbase_08BBA_wb = 4;
 	generate
 		if (1) begin : u_spi_flash
 			localparam _mbase_wb = _bbase_08BBA_wb;
@@ -14162,15 +14023,15 @@ module ibex_simple_system (
 	localparam _bbase_C42A7_wbs = 0;
 	localparam _param_C42A7_numm = NUM_MASTERS;
 	localparam _param_C42A7_nums = NUM_SLAVES;
-	localparam _param_C42A7_base_addr = {imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr};
-	localparam _param_C42A7_size = {imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, spi_flash_size};
+	localparam _param_C42A7_base_addr = {gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr};
+	localparam _param_C42A7_size = {gpio_size, i2c_size, pit_size, uart_size, spi_flash_size};
 	generate
 		if (1) begin : u_wb_interconnect
 			reg _sv2v_0;
 			localparam numm = _param_C42A7_numm;
 			localparam nums = _param_C42A7_nums;
-			localparam [223:0] base_addr = _param_C42A7_base_addr;
-			localparam [223:0] size = _param_C42A7_size;
+			localparam [159:0] base_addr = _param_C42A7_base_addr;
+			localparam [159:0] size = _param_C42A7_size;
 			localparam _mbase_wbm = 0;
 			localparam _mbase_wbs = 0;
 			reg cyc;
@@ -14185,8 +14046,8 @@ module ibex_simple_system (
 			reg [31:0] dat_rd;
 			reg [2:0] gnt;
 			reg [2:0] gnt1;
-			reg [6:0] ss;
-			reg [6:0] ss1;
+			reg [4:0] ss;
+			reg [4:0] ss1;
 			wire [2:0] wbm_cyc;
 			wire [2:0] wbm_stb;
 			wire [2:0] wbm_we;
@@ -14211,16 +14072,16 @@ module ibex_simple_system (
 				assign wbm_dat_i[i * 32+:32] = ibex_simple_system.wbm[i + _mbase_wbm].dat_m;
 				assign ibex_simple_system.wbm[i + _mbase_wbm].dat_s = wbm_dat_o[i * 32+:32];
 			end
-			reg [6:0] wbs_cyc;
-			reg [6:0] wbs_stb;
-			reg [6:0] wbs_we;
-			wire [6:0] wbs_ack;
-			wire [6:0] wbs_err;
-			wire [6:0] wbs_stall;
-			reg [223:0] wbs_adr;
-			reg [27:0] wbs_sel;
-			wire [223:0] wbs_dat_i;
-			reg [223:0] wbs_dat_o;
+			reg [4:0] wbs_cyc;
+			reg [4:0] wbs_stb;
+			reg [4:0] wbs_we;
+			wire [4:0] wbs_ack;
+			wire [4:0] wbs_err;
+			wire [4:0] wbs_stall;
+			reg [159:0] wbs_adr;
+			reg [19:0] wbs_sel;
+			wire [159:0] wbs_dat_i;
+			reg [159:0] wbs_dat_o;
 			genvar _gv_i_35;
 			for (_gv_i_35 = 0; _gv_i_35 < nums; _gv_i_35 = _gv_i_35 + 1) begin : genblk2
 				localparam i = _gv_i_35;
@@ -14240,7 +14101,7 @@ module ibex_simple_system (
 				if (_sv2v_0)
 					;
 				for (i = 0; i < nums; i = i + 1)
-					ss[i] = (adr >= base_addr[(6 - i) * 32+:32]) && (adr < (base_addr[(6 - i) * 32+:32] + size[(6 - i) * 32+:32]));
+					ss[i] = (adr >= base_addr[(4 - i) * 32+:32]) && (adr < (base_addr[(4 - i) * 32+:32] + size[(4 - i) * 32+:32]));
 			end
 			always @(posedge ibex_simple_system.wbs[0].clk or negedge ibex_simple_system.wbs[0].rst)
 				if (!ibex_simple_system.wbs[0].rst)

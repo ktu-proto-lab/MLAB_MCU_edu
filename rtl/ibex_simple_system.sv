@@ -76,7 +76,7 @@ module ibex_simple_system #(
   //==================================================
 
   localparam int NUM_MASTERS        = 3;
-  localparam int NUM_SLAVES         = 7;
+  localparam int NUM_SLAVES         = 5;
   localparam int PIT_SLAVE_PORT_NUM = 4;
 
   //==================================================
@@ -178,26 +178,26 @@ module ibex_simple_system #(
       .scan_rst_n           (1'b0));
 
   // Instruction and Data memories TODO switch to PDK SRAM when we get it
-  wb_sram_2048x32 #(
-`ifdef BOOT_SKIP
-    .MEMInitFile_1(IMEM_1_InitFile),
-    .MEMInitFile_2(IMEM_2_InitFile)
-`endif
-    ) imem (
-    .wb(wbs[0])
-  );
+//   wb_sram_2048x32 #(
+// `ifdef BOOT_SKIP
+//     .MEMInitFile_1(IMEM_1_InitFile),
+//     .MEMInitFile_2(IMEM_2_InitFile)
+// `endif
+//     ) imem (
+//     .wb(wbs[0])
+//   );
 
-  wb_sram_1024x32 #(
-`ifdef BOOT_SKIP
-    .MEMInitFile(DMEM_InitFile)
-`endif
-  ) dmem (
-    .wb(wbs[1])
-  );
+//   wb_sram_1024x32 #(
+// `ifdef BOOT_SKIP
+//     .MEMInitFile(DMEM_InitFile)
+// `endif
+//   ) dmem (
+//     .wb(wbs[1])
+//   );
 
   // GPIO module
   wb_gpio u_gpio(
-    .wb(wbs[2]),
+    .wb(wbs[0]),
 
     .int_o        (gpio_int),
     .aux_i        (gpio_aux),         // Multiplexed outputs can be connected here
@@ -210,7 +210,7 @@ module ibex_simple_system #(
 
   // UART module
   wb_uart u_uart(
-    .wb(wbs[5]),
+    .wb(wbs[3]),
     
     
     // .i_cts_n		(uart_ncts_i),
@@ -249,7 +249,7 @@ module ibex_simple_system #(
   wb_i2c #(
       .BOOT_I2C_PRESCALER(`BOOT_I2C_PRESCALER)
     ) u_i2c (
-    .wb(wbs[3]),
+    .wb(wbs[1]),
 
     .int_o         (i2c_int),
 
@@ -265,13 +265,13 @@ module ibex_simple_system #(
 
   // Programmable Interrupt Timer module
   wb_pit u_pit (
-      .wb(wbs[PIT_SLAVE_PORT_NUM]),
+      .wb(wbs[2]),
 
       .pit_irq_o  (pit_irq)
   );
 
   wb_spi_flash u_spi_flash (
-      .wb(wbs[6]),
+      .wb(wbs[4]),
       .o_qspi_sck     (o_qspi_sck),
       .o_qspi_cs_n    (o_qspi_cs_n),
       .o_qspi_mod     (o_qspi_mod),
@@ -286,8 +286,8 @@ module ibex_simple_system #(
        wb_interconnect_sharedbus
          #(.numm      (NUM_MASTERS),
            .nums      (NUM_SLAVES),
-           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr}),
-           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, spi_flash_size}))
+           .base_addr ('{gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr}),
+           .size      ('{gpio_size, i2c_size, pit_size, uart_size, spi_flash_size}))
        u_wb_interconnect
          (.wbm, .wbs);
 endmodule
