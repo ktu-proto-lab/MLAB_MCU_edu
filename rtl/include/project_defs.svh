@@ -36,7 +36,7 @@
 
 
 // GPIO Count
-`define GPIO_IOS 10
+`define GPIO_IOS 2
 
 `define UART_NO_FIFO
 
