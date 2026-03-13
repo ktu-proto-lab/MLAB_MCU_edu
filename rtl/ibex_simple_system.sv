@@ -76,7 +76,7 @@ module ibex_simple_system #(
   //==================================================
 
   localparam int NUM_MASTERS        = 3;
-  localparam int NUM_SLAVES         = 5;
+  localparam int NUM_SLAVES         = 4;
   localparam int PIT_SLAVE_PORT_NUM = 4;
 
   //==================================================
@@ -210,7 +210,7 @@ module ibex_simple_system #(
 
   // UART module
   wb_uart u_uart(
-    .wb(wbs[3]),
+    .wb(wbs[2]),
     
     
     // .i_cts_n		(uart_ncts_i),
@@ -246,32 +246,32 @@ module ibex_simple_system #(
   // );
 
   // I2C module
-  wb_i2c #(
-      .BOOT_I2C_PRESCALER(`BOOT_I2C_PRESCALER)
-    ) u_i2c (
-    .wb(wbs[1]),
+  // wb_i2c #(
+  //     .BOOT_I2C_PRESCALER(`BOOT_I2C_PRESCALER)
+  //   ) u_i2c (
+  //   .wb(wbs[1]),
 
-    .int_o         (i2c_int),
+  //   .int_o         (i2c_int),
 
-    // .scl_pad_i     (scl_pad_i_debounced),
-    .scl_pad_i     (scl_pad_i),
-    .scl_pad_o     (scl_pad_o),
-    .scl_padoen_o  (scl_padoen_o),
-    .sda_pad_i     (sda_pad_i),
-    // .sda_pad_i     (sda_pad_i_debounced),
-    .sda_pad_o     (sda_pad_o),
-    .sda_padoen_o  (sda_padoen_o)  
-  );
+  //   // .scl_pad_i     (scl_pad_i_debounced),
+  //   .scl_pad_i     (scl_pad_i),
+  //   .scl_pad_o     (scl_pad_o),
+  //   .scl_padoen_o  (scl_padoen_o),
+  //   .sda_pad_i     (sda_pad_i),
+  //   // .sda_pad_i     (sda_pad_i_debounced),
+  //   .sda_pad_o     (sda_pad_o),
+  //   .sda_padoen_o  (sda_padoen_o)  
+  // );
 
   // Programmable Interrupt Timer module
   wb_pit u_pit (
-      .wb(wbs[2]),
+      .wb(wbs[1]),
 
       .pit_irq_o  (pit_irq)
   );
 
   wb_spi_flash u_spi_flash (
-      .wb(wbs[4]),
+      .wb(wbs[3]),
       .o_qspi_sck     (o_qspi_sck),
       .o_qspi_cs_n    (o_qspi_cs_n),
       .o_qspi_mod     (o_qspi_mod),
@@ -286,8 +286,8 @@ module ibex_simple_system #(
        wb_interconnect_sharedbus
          #(.numm      (NUM_MASTERS),
            .nums      (NUM_SLAVES),
-           .base_addr ('{gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr}),
-           .size      ('{gpio_size, i2c_size, pit_size, uart_size, spi_flash_size}))
+           .base_addr ('{gpio_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr}),
+           .size      ('{gpio_size, pit_size, uart_size, spi_flash_size}))
        u_wb_interconnect
          (.wbm, .wbs);
 endmodule

@@ -10602,15 +10602,15 @@ module gpio_top (
 	assign wb_ack = (wb_cyc_i & wb_stb_i) & !wb_err_o;
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			wb_ack_o <= #(1) 1'b0;
+			wb_ack_o <=  1'b0;
 		else
-			wb_ack_o <= #(1) (wb_ack & ~wb_ack_o) & !wb_err;
+			wb_ack_o <=  (wb_ack & ~wb_ack_o) & !wb_err;
 	assign wb_err = (wb_cyc_i & wb_stb_i) & (wb_sel_i != 4'b1111);
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			wb_err_o <= #(1) 1'b0;
+			wb_err_o <=  1'b0;
 		else
-			wb_err_o <= #(1) wb_err & ~wb_err_o;
+			wb_err_o <=  wb_err & ~wb_err_o;
 	assign full_decoding = 1'b1;
 	assign rgpio_out_sel = ((wb_cyc_i & wb_stb_i) & (wb_adr_i[5:2] == 4'h1)) & full_decoding;
 	assign rgpio_oe_sel = ((wb_cyc_i & wb_stb_i) & (wb_adr_i[5:2] == 4'h2)) & full_decoding;
@@ -10621,52 +10621,52 @@ module gpio_top (
 	assign rgpio_ints_sel = ((wb_cyc_i & wb_stb_i) & (wb_adr_i[5:2] == 4'h7)) & full_decoding;
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			rgpio_ctrl <= #(1) 2'b00;
+			rgpio_ctrl <=  2'b00;
 		else if (rgpio_ctrl_sel && wb_we_i)
-			rgpio_ctrl <= #(1) wb_dat_i[1:0];
+			rgpio_ctrl <=  wb_dat_i[1:0];
 		else if (rgpio_ctrl[0])
-			rgpio_ctrl[1] <= #(1) rgpio_ctrl[1] | wb_inta_o;
+			rgpio_ctrl[1] <=  rgpio_ctrl[1] | wb_inta_o;
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			rgpio_out <= #(1) {gw {1'b0}};
+			rgpio_out <=  {gw {1'b0}};
 		else if (rgpio_out_sel && wb_we_i)
-			rgpio_out <= #(1) wb_dat_i[gw - 1:0];
+			rgpio_out <=  wb_dat_i[gw - 1:0];
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			rgpio_oe <= #(1) {gw {1'b0}};
+			rgpio_oe <=  {gw {1'b0}};
 		else if (rgpio_oe_sel && wb_we_i)
-			rgpio_oe <= #(1) wb_dat_i[gw - 1:0];
+			rgpio_oe <=  wb_dat_i[gw - 1:0];
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			rgpio_inte <= #(1) {gw {1'b0}};
+			rgpio_inte <=  {gw {1'b0}};
 		else if (rgpio_inte_sel && wb_we_i)
-			rgpio_inte <= #(1) wb_dat_i[gw - 1:0];
+			rgpio_inte <=  wb_dat_i[gw - 1:0];
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			rgpio_ptrig <= #(1) {gw {1'b0}};
+			rgpio_ptrig <=  {gw {1'b0}};
 		else if (rgpio_ptrig_sel && wb_we_i)
-			rgpio_ptrig <= #(1) wb_dat_i[gw - 1:0];
+			rgpio_ptrig <=  wb_dat_i[gw - 1:0];
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			rgpio_aux <= #(1) {gw {1'b0}};
+			rgpio_aux <=  {gw {1'b0}};
 		else if (rgpio_aux_sel && wb_we_i)
-			rgpio_aux <= #(1) wb_dat_i[gw - 1:0];
+			rgpio_aux <=  wb_dat_i[gw - 1:0];
 	assign rgpio_eclk = 2'h0;
 	assign rgpio_nec = 2'h0;
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n) begin
-			sync <= #(1) {gw {1'b0}};
-			ext_pad_s <= #(1) {gw {1'b0}};
+			sync <=  {gw {1'b0}};
+			ext_pad_s <=  {gw {1'b0}};
 		end
 		else begin
-			sync <= #(1) ext_pad_i;
-			ext_pad_s <= #(1) sync;
+			sync <=  ext_pad_i;
+			ext_pad_s <=  sync;
 		end
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			rgpio_in <= #(1) {gw {1'b0}};
+			rgpio_in <=  {gw {1'b0}};
 		else
-			rgpio_in <= #(1) in_muxed;
+			rgpio_in <=  in_muxed;
 	assign in_muxed = ext_pad_s;
 	always @(wb_adr_i or rgpio_in or rgpio_out or rgpio_oe or rgpio_inte or rgpio_ptrig or rgpio_aux or rgpio_ctrl or rgpio_ints or rgpio_eclk or rgpio_nec)
 		case (wb_adr_i[5:2])
@@ -10684,22 +10684,22 @@ module gpio_top (
 		endcase
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			wb_dat_o <= #(1) {dw {1'b0}};
+			wb_dat_o <=  {dw {1'b0}};
 		else
-			wb_dat_o <= #(1) wb_dat;
+			wb_dat_o <=  wb_dat;
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			rgpio_ints <= #(1) {gw {1'b0}};
+			rgpio_ints <=  {gw {1'b0}};
 		else if (rgpio_ints_sel && wb_we_i)
-			rgpio_ints <= #(1) wb_dat_i[gw - 1:0];
+			rgpio_ints <=  wb_dat_i[gw - 1:0];
 		else if (rgpio_ctrl[0])
-			rgpio_ints <= #(1) rgpio_ints | (((in_muxed ^ rgpio_in) & ~(in_muxed ^ rgpio_ptrig)) & rgpio_inte);
+			rgpio_ints <=  rgpio_ints | (((in_muxed ^ rgpio_in) & ~(in_muxed ^ rgpio_ptrig)) & rgpio_inte);
 	assign wb_inta = (|rgpio_ints ? rgpio_ctrl[0] : 1'b0);
 	always @(posedge wb_clk_i or negedge wb_rst_i_n)
 		if (!wb_rst_i_n)
-			wb_inta_o <= #(1) 1'b0;
+			wb_inta_o <=  1'b0;
 		else
-			wb_inta_o <= #(1) wb_inta;
+			wb_inta_o <=  wb_inta;
 	assign ext_padoe_o = rgpio_oe;
 	assign out_pad = (rgpio_out & ~rgpio_aux) | (aux_i & rgpio_aux);
 	assign ext_pad_o = out_pad;
@@ -10758,45 +10758,45 @@ module i2c_master_top (
 	reg al;
 	wire rst_i = arst_i ^ ARST_LVL;
 	wire wb_wacc = wb_we_i & wb_ack_o;
-	always @(posedge wb_clk_i) wb_ack_o <= #(1) (wb_cyc_i & wb_stb_i) & ~wb_ack_o;
+	always @(posedge wb_clk_i) wb_ack_o <=  (wb_cyc_i & wb_stb_i) & ~wb_ack_o;
 	always @(posedge wb_clk_i)
 		case (wb_adr_i)
-			3'b000: wb_dat_o <= #(1) prer[7:0];
-			3'b001: wb_dat_o <= #(1) prer[15:8];
-			3'b010: wb_dat_o <= #(1) ctr;
-			3'b011: wb_dat_o <= #(1) rxr;
-			3'b100: wb_dat_o <= #(1) sr;
-			3'b101: wb_dat_o <= #(1) txr;
-			3'b110: wb_dat_o <= #(1) cr;
-			3'b111: wb_dat_o <= #(1) 0;
+			3'b000: wb_dat_o <=  prer[7:0];
+			3'b001: wb_dat_o <=  prer[15:8];
+			3'b010: wb_dat_o <=  ctr;
+			3'b011: wb_dat_o <=  rxr;
+			3'b100: wb_dat_o <=  sr;
+			3'b101: wb_dat_o <=  txr;
+			3'b110: wb_dat_o <=  cr;
+			3'b111: wb_dat_o <=  0;
 		endcase
 	always @(posedge wb_clk_i or negedge rst_i)
 		if (!rst_i) begin
-			prer <= #(1) BOOT_I2C_PRESCALER;
-			ctr <= #(1) 8'h00;
-			txr <= #(1) 8'h00;
+			prer <=  BOOT_I2C_PRESCALER;
+			ctr <=  8'h00;
+			txr <=  8'h00;
 		end
 		else if (wb_wacc)
 			case (wb_adr_i)
-				3'b000: prer[7:0] <= #(1) wb_dat_i;
-				3'b001: prer[15:8] <= #(1) wb_dat_i;
-				3'b010: ctr <= #(1) wb_dat_i;
-				3'b011: txr <= #(1) wb_dat_i;
+				3'b000: prer[7:0] <=  wb_dat_i;
+				3'b001: prer[15:8] <=  wb_dat_i;
+				3'b010: ctr <=  wb_dat_i;
+				3'b011: txr <=  wb_dat_i;
 				default:
 					;
 			endcase
 	always @(posedge wb_clk_i or negedge rst_i)
 		if (!rst_i)
-			cr <= #(1) 8'h00;
+			cr <=  8'h00;
 		else if (wb_wacc) begin
 			if (core_en & (wb_adr_i == 3'b100))
-				cr <= #(1) wb_dat_i;
+				cr <=  wb_dat_i;
 		end
 		else begin
 			if (done | i2c_al)
-				cr[7:4] <= #(1) 4'h0;
-			cr[2:1] <= #(1) 2'b00;
-			cr[0] <= #(1) 1'b0;
+				cr[7:4] <=  4'h0;
+			cr[2:1] <=  2'b00;
+			cr[0] <=  1'b0;
 		end
 	wire sta = cr[7];
 	wire sto = cr[6];
@@ -10831,22 +10831,22 @@ module i2c_master_top (
 	);
 	always @(posedge wb_clk_i or negedge rst_i)
 		if (!rst_i) begin
-			al <= #(1) 1'b0;
-			rxack <= #(1) 1'b0;
-			tip <= #(1) 1'b0;
-			irq_flag <= #(1) 1'b0;
+			al <=  1'b0;
+			rxack <=  1'b0;
+			tip <=  1'b0;
+			irq_flag <=  1'b0;
 		end
 		else begin
-			al <= #(1) i2c_al | (al & ~sta);
-			rxack <= #(1) irxack;
-			tip <= #(1) rd | wr;
-			irq_flag <= #(1) ((done | i2c_al) | irq_flag) & ~iack;
+			al <=  i2c_al | (al & ~sta);
+			rxack <=  irxack;
+			tip <=  rd | wr;
+			irq_flag <=  ((done | i2c_al) | irq_flag) & ~iack;
 		end
 	always @(posedge wb_clk_i or negedge rst_i)
 		if (!rst_i)
-			wb_inta_o <= #(1) 1'b0;
+			wb_inta_o <=  1'b0;
 		else
-			wb_inta_o <= #(1) irq_flag && ien;
+			wb_inta_o <=  irq_flag && ien;
 	assign sr[7] = rxack;
 	assign sr[6] = i2c_busy;
 	assign sr[5] = al;
@@ -10936,123 +10936,123 @@ module i2c_master_byte_ctrl (
 	assign dout = sr;
 	always @(posedge clk or negedge nReset)
 		if (!nReset)
-			sr <= #(1) 8'h00;
+			sr <=  8'h00;
 		else if (ld)
-			sr <= #(1) din;
+			sr <=  din;
 		else if (shift)
-			sr <= #(1) {sr[6:0], core_rxd};
+			sr <=  {sr[6:0], core_rxd};
 	always @(posedge clk or negedge nReset)
 		if (!nReset)
-			dcnt <= #(1) 3'h0;
+			dcnt <=  3'h0;
 		else if (ld)
-			dcnt <= #(1) 3'h7;
+			dcnt <=  3'h7;
 		else if (shift)
-			dcnt <= #(1) dcnt - 3'h1;
+			dcnt <=  dcnt - 3'h1;
 	assign cnt_done = ~(|dcnt);
 	reg [4:0] c_state;
 	always @(posedge clk or negedge nReset)
 		if (!nReset) begin
-			core_cmd <= #(1) 4'b0000;
-			core_txd <= #(1) 1'b0;
-			shift <= #(1) 1'b0;
-			ld <= #(1) 1'b0;
-			cmd_ack <= #(1) 1'b0;
-			c_state <= #(1) ST_IDLE;
-			ack_out <= #(1) 1'b0;
+			core_cmd <=  4'b0000;
+			core_txd <=  1'b0;
+			shift <=  1'b0;
+			ld <=  1'b0;
+			cmd_ack <=  1'b0;
+			c_state <=  ST_IDLE;
+			ack_out <=  1'b0;
 		end
 		else if (i2c_al) begin
-			core_cmd <= #(1) 4'b0000;
-			core_txd <= #(1) 1'b0;
-			shift <= #(1) 1'b0;
-			ld <= #(1) 1'b0;
-			cmd_ack <= #(1) 1'b0;
-			c_state <= #(1) ST_IDLE;
-			ack_out <= #(1) 1'b0;
+			core_cmd <=  4'b0000;
+			core_txd <=  1'b0;
+			shift <=  1'b0;
+			ld <=  1'b0;
+			cmd_ack <=  1'b0;
+			c_state <=  ST_IDLE;
+			ack_out <=  1'b0;
 		end
 		else begin
-			core_txd <= #(1) sr[7];
-			shift <= #(1) 1'b0;
-			ld <= #(1) 1'b0;
-			cmd_ack <= #(1) 1'b0;
+			core_txd <=  sr[7];
+			shift <=  1'b0;
+			ld <=  1'b0;
+			cmd_ack <=  1'b0;
 			case (c_state)
 				ST_IDLE:
 					if (go) begin
 						if (start) begin
-							c_state <= #(1) ST_START;
-							core_cmd <= #(1) 4'b0001;
+							c_state <=  ST_START;
+							core_cmd <=  4'b0001;
 						end
 						else if (read) begin
-							c_state <= #(1) ST_READ;
-							core_cmd <= #(1) 4'b1000;
+							c_state <=  ST_READ;
+							core_cmd <=  4'b1000;
 						end
 						else if (write) begin
-							c_state <= #(1) ST_WRITE;
-							core_cmd <= #(1) 4'b0100;
+							c_state <=  ST_WRITE;
+							core_cmd <=  4'b0100;
 						end
 						else begin
-							c_state <= #(1) ST_STOP;
-							core_cmd <= #(1) 4'b0010;
+							c_state <=  ST_STOP;
+							core_cmd <=  4'b0010;
 						end
-						ld <= #(1) 1'b1;
+						ld <=  1'b1;
 					end
 				ST_START:
 					if (core_ack) begin
 						if (read) begin
-							c_state <= #(1) ST_READ;
-							core_cmd <= #(1) 4'b1000;
+							c_state <=  ST_READ;
+							core_cmd <=  4'b1000;
 						end
 						else begin
-							c_state <= #(1) ST_WRITE;
-							core_cmd <= #(1) 4'b0100;
+							c_state <=  ST_WRITE;
+							core_cmd <=  4'b0100;
 						end
-						ld <= #(1) 1'b1;
+						ld <=  1'b1;
 					end
 				ST_WRITE:
 					if (core_ack) begin
 						if (cnt_done) begin
-							c_state <= #(1) ST_ACK;
-							core_cmd <= #(1) 4'b1000;
+							c_state <=  ST_ACK;
+							core_cmd <=  4'b1000;
 						end
 						else begin
-							c_state <= #(1) ST_WRITE;
-							core_cmd <= #(1) 4'b0100;
-							shift <= #(1) 1'b1;
+							c_state <=  ST_WRITE;
+							core_cmd <=  4'b0100;
+							shift <=  1'b1;
 						end
 					end
 				ST_READ:
 					if (core_ack) begin
 						if (cnt_done) begin
-							c_state <= #(1) ST_ACK;
-							core_cmd <= #(1) 4'b0100;
+							c_state <=  ST_ACK;
+							core_cmd <=  4'b0100;
 						end
 						else begin
-							c_state <= #(1) ST_READ;
-							core_cmd <= #(1) 4'b1000;
+							c_state <=  ST_READ;
+							core_cmd <=  4'b1000;
 						end
-						shift <= #(1) 1'b1;
-						core_txd <= #(1) ack_in;
+						shift <=  1'b1;
+						core_txd <=  ack_in;
 					end
 				ST_ACK:
 					if (core_ack) begin
 						if (stop) begin
-							c_state <= #(1) ST_STOP;
-							core_cmd <= #(1) 4'b0010;
+							c_state <=  ST_STOP;
+							core_cmd <=  4'b0010;
 						end
 						else begin
-							c_state <= #(1) ST_IDLE;
-							core_cmd <= #(1) 4'b0000;
-							cmd_ack <= #(1) 1'b1;
+							c_state <=  ST_IDLE;
+							core_cmd <=  4'b0000;
+							cmd_ack <=  1'b1;
 						end
-						ack_out <= #(1) core_rxd;
-						core_txd <= #(1) 1'b1;
+						ack_out <=  core_rxd;
+						core_txd <=  1'b1;
 					end
 					else
-						core_txd <= #(1) ack_in;
+						core_txd <=  ack_in;
 				ST_STOP:
 					if (core_ack) begin
-						c_state <= #(1) ST_IDLE;
-						core_cmd <= #(1) 4'b0000;
-						cmd_ack <= #(1) 1'b1;
+						c_state <=  ST_IDLE;
+						core_cmd <=  4'b0000;
+						cmd_ack <=  1'b1;
 					end
 			endcase
 		end
@@ -11106,7 +11106,7 @@ module i2c_master_bit_ctrl (
 	reg [15:0] cnt;
 	reg [13:0] filter_cnt;
 	reg [17:0] c_state;
-	always @(posedge clk) dscl_oen <= #(1) scl_oen;
+	always @(posedge clk) dscl_oen <=  scl_oen;
 	always @(posedge clk or negedge nReset)
 		if (!nReset)
 			slave_wait <= 1'b0;
@@ -11115,25 +11115,25 @@ module i2c_master_bit_ctrl (
 	wire scl_sync = (dSCL & ~sSCL) & scl_oen;
 	always @(posedge clk or negedge nReset)
 		if (!nReset) begin
-			cnt <= #(1) 16'h0000;
-			clk_en <= #(1) 1'b1;
+			cnt <=  16'h0000;
+			clk_en <=  1'b1;
 		end
 		else if ((~|cnt || !ena) || scl_sync) begin
-			cnt <= #(1) clk_cnt;
-			clk_en <= #(1) 1'b1;
+			cnt <=  clk_cnt;
+			clk_en <=  1'b1;
 		end
 		else if (slave_wait) begin
-			cnt <= #(1) cnt;
-			clk_en <= #(1) 1'b0;
+			cnt <=  cnt;
+			clk_en <=  1'b0;
 		end
 		else begin
-			cnt <= #(1) cnt - 16'h0001;
-			clk_en <= #(1) 1'b0;
+			cnt <=  cnt - 16'h0001;
+			clk_en <=  1'b0;
 		end
 	always @(posedge clk or negedge nReset)
 		if (!nReset) begin
-			cSCL <= #(1) 2'b00;
-			cSDA <= #(1) 2'b00;
+			cSCL <=  2'b00;
+			cSDA <=  2'b00;
 		end
 		else begin
 			cSCL <= {cSCL[0], scl_i};
@@ -11159,47 +11159,47 @@ module i2c_master_bit_ctrl (
 		end
 	always @(posedge clk or negedge nReset)
 		if (!nReset) begin
-			sSCL <= #(1) 1'b1;
-			sSDA <= #(1) 1'b1;
-			dSCL <= #(1) 1'b1;
-			dSDA <= #(1) 1'b1;
+			sSCL <=  1'b1;
+			sSDA <=  1'b1;
+			dSCL <=  1'b1;
+			dSDA <=  1'b1;
 		end
 		else begin
-			sSCL <= #(1) (&fSCL[2:1] | &fSCL[1:0]) | (fSCL[2] & fSCL[0]);
-			sSDA <= #(1) (&fSDA[2:1] | &fSDA[1:0]) | (fSDA[2] & fSDA[0]);
-			dSCL <= #(1) sSCL;
-			dSDA <= #(1) sSDA;
+			sSCL <=  (&fSCL[2:1] | &fSCL[1:0]) | (fSCL[2] & fSCL[0]);
+			sSDA <=  (&fSDA[2:1] | &fSDA[1:0]) | (fSDA[2] & fSDA[0]);
+			dSCL <=  sSCL;
+			dSDA <=  sSDA;
 		end
 	reg sta_condition;
 	reg sto_condition;
 	always @(posedge clk or negedge nReset)
 		if (~nReset) begin
-			sta_condition <= #(1) 1'b0;
-			sto_condition <= #(1) 1'b0;
+			sta_condition <=  1'b0;
+			sto_condition <=  1'b0;
 		end
 		else begin
-			sta_condition <= #(1) (~sSDA & dSDA) & sSCL;
-			sto_condition <= #(1) (sSDA & ~dSDA) & sSCL;
+			sta_condition <=  (~sSDA & dSDA) & sSCL;
+			sto_condition <=  (sSDA & ~dSDA) & sSCL;
 		end
 	always @(posedge clk or negedge nReset)
 		if (!nReset)
-			busy <= #(1) 1'b0;
+			busy <=  1'b0;
 		else
-			busy <= #(1) (sta_condition | busy) & ~sto_condition;
+			busy <=  (sta_condition | busy) & ~sto_condition;
 	reg cmd_stop;
 	always @(posedge clk or negedge nReset)
 		if (!nReset)
-			cmd_stop <= #(1) 1'b0;
+			cmd_stop <=  1'b0;
 		else if (clk_en)
-			cmd_stop <= #(1) cmd == 4'b0010;
+			cmd_stop <=  cmd == 4'b0010;
 	always @(posedge clk or negedge nReset)
 		if (!nReset)
-			al <= #(1) 1'b0;
+			al <=  1'b0;
 		else
-			al <= #(1) ((sda_chk & ~sSDA) & sda_oen) | ((|c_state & sto_condition) & ~cmd_stop);
+			al <=  ((sda_chk & ~sSDA) & sda_oen) | ((|c_state & sto_condition) & ~cmd_stop);
 	always @(posedge clk)
 		if (sSCL & ~dSCL)
-			dout <= #(1) sSDA;
+			dout <=  sSDA;
 	parameter [17:0] idle = 18'b000000000000000000;
 	parameter [17:0] start_a = 18'b000000000000000001;
 	parameter [17:0] start_b = 18'b000000000000000010;
@@ -11220,140 +11220,140 @@ module i2c_master_bit_ctrl (
 	parameter [17:0] wr_d = 18'b010000000000000000;
 	always @(posedge clk or negedge nReset)
 		if (!nReset) begin
-			c_state <= #(1) idle;
-			cmd_ack <= #(1) 1'b0;
-			scl_oen <= #(1) 1'b1;
-			sda_oen <= #(1) 1'b1;
-			sda_chk <= #(1) 1'b0;
+			c_state <=  idle;
+			cmd_ack <=  1'b0;
+			scl_oen <=  1'b1;
+			sda_oen <=  1'b1;
+			sda_chk <=  1'b0;
 		end
 		else if (al) begin
-			c_state <= #(1) idle;
-			cmd_ack <= #(1) 1'b0;
-			scl_oen <= #(1) 1'b1;
-			sda_oen <= #(1) 1'b1;
-			sda_chk <= #(1) 1'b0;
+			c_state <=  idle;
+			cmd_ack <=  1'b0;
+			scl_oen <=  1'b1;
+			sda_oen <=  1'b1;
+			sda_chk <=  1'b0;
 		end
 		else begin
-			cmd_ack <= #(1) 1'b0;
+			cmd_ack <=  1'b0;
 			if (clk_en)
 				case (c_state)
 					idle: begin
 						case (cmd)
-							4'b0001: c_state <= #(1) start_a;
-							4'b0010: c_state <= #(1) stop_a;
-							4'b0100: c_state <= #(1) wr_a;
-							4'b1000: c_state <= #(1) rd_a;
-							default: c_state <= #(1) idle;
+							4'b0001: c_state <=  start_a;
+							4'b0010: c_state <=  stop_a;
+							4'b0100: c_state <=  wr_a;
+							4'b1000: c_state <=  rd_a;
+							default: c_state <=  idle;
 						endcase
-						scl_oen <= #(1) scl_oen;
-						sda_oen <= #(1) sda_oen;
-						sda_chk <= #(1) 1'b0;
+						scl_oen <=  scl_oen;
+						sda_oen <=  sda_oen;
+						sda_chk <=  1'b0;
 					end
 					start_a: begin
-						c_state <= #(1) start_b;
-						scl_oen <= #(1) scl_oen;
-						sda_oen <= #(1) 1'b1;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  start_b;
+						scl_oen <=  scl_oen;
+						sda_oen <=  1'b1;
+						sda_chk <=  1'b0;
 					end
 					start_b: begin
-						c_state <= #(1) start_c;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) 1'b1;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  start_c;
+						scl_oen <=  1'b1;
+						sda_oen <=  1'b1;
+						sda_chk <=  1'b0;
 					end
 					start_c: begin
-						c_state <= #(1) start_d;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) 1'b0;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  start_d;
+						scl_oen <=  1'b1;
+						sda_oen <=  1'b0;
+						sda_chk <=  1'b0;
 					end
 					start_d: begin
-						c_state <= #(1) start_e;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) 1'b0;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  start_e;
+						scl_oen <=  1'b1;
+						sda_oen <=  1'b0;
+						sda_chk <=  1'b0;
 					end
 					start_e: begin
-						c_state <= #(1) idle;
-						cmd_ack <= #(1) 1'b1;
-						scl_oen <= #(1) 1'b0;
-						sda_oen <= #(1) 1'b0;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  idle;
+						cmd_ack <=  1'b1;
+						scl_oen <=  1'b0;
+						sda_oen <=  1'b0;
+						sda_chk <=  1'b0;
 					end
 					stop_a: begin
-						c_state <= #(1) stop_b;
-						scl_oen <= #(1) 1'b0;
-						sda_oen <= #(1) 1'b0;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  stop_b;
+						scl_oen <=  1'b0;
+						sda_oen <=  1'b0;
+						sda_chk <=  1'b0;
 					end
 					stop_b: begin
-						c_state <= #(1) stop_c;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) 1'b0;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  stop_c;
+						scl_oen <=  1'b1;
+						sda_oen <=  1'b0;
+						sda_chk <=  1'b0;
 					end
 					stop_c: begin
-						c_state <= #(1) stop_d;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) 1'b0;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  stop_d;
+						scl_oen <=  1'b1;
+						sda_oen <=  1'b0;
+						sda_chk <=  1'b0;
 					end
 					stop_d: begin
-						c_state <= #(1) idle;
-						cmd_ack <= #(1) 1'b1;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) 1'b1;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  idle;
+						cmd_ack <=  1'b1;
+						scl_oen <=  1'b1;
+						sda_oen <=  1'b1;
+						sda_chk <=  1'b0;
 					end
 					rd_a: begin
-						c_state <= #(1) rd_b;
-						scl_oen <= #(1) 1'b0;
-						sda_oen <= #(1) 1'b1;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  rd_b;
+						scl_oen <=  1'b0;
+						sda_oen <=  1'b1;
+						sda_chk <=  1'b0;
 					end
 					rd_b: begin
-						c_state <= #(1) rd_c;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) 1'b1;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  rd_c;
+						scl_oen <=  1'b1;
+						sda_oen <=  1'b1;
+						sda_chk <=  1'b0;
 					end
 					rd_c: begin
-						c_state <= #(1) rd_d;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) 1'b1;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  rd_d;
+						scl_oen <=  1'b1;
+						sda_oen <=  1'b1;
+						sda_chk <=  1'b0;
 					end
 					rd_d: begin
-						c_state <= #(1) idle;
-						cmd_ack <= #(1) 1'b1;
-						scl_oen <= #(1) 1'b0;
-						sda_oen <= #(1) 1'b1;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  idle;
+						cmd_ack <=  1'b1;
+						scl_oen <=  1'b0;
+						sda_oen <=  1'b1;
+						sda_chk <=  1'b0;
 					end
 					wr_a: begin
-						c_state <= #(1) wr_b;
-						scl_oen <= #(1) 1'b0;
-						sda_oen <= #(1) din;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  wr_b;
+						scl_oen <=  1'b0;
+						sda_oen <=  din;
+						sda_chk <=  1'b0;
 					end
 					wr_b: begin
-						c_state <= #(1) wr_c;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) din;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  wr_c;
+						scl_oen <=  1'b1;
+						sda_oen <=  din;
+						sda_chk <=  1'b0;
 					end
 					wr_c: begin
-						c_state <= #(1) wr_d;
-						scl_oen <= #(1) 1'b1;
-						sda_oen <= #(1) din;
-						sda_chk <= #(1) 1'b1;
+						c_state <=  wr_d;
+						scl_oen <=  1'b1;
+						sda_oen <=  din;
+						sda_chk <=  1'b1;
 					end
 					wr_d: begin
-						c_state <= #(1) idle;
-						cmd_ack <= #(1) 1'b1;
-						scl_oen <= #(1) 1'b0;
-						sda_oen <= #(1) din;
-						sda_chk <= #(1) 1'b0;
+						c_state <=  idle;
+						cmd_ack <=  1'b1;
+						scl_oen <=  1'b0;
+						sda_oen <=  din;
+						sda_chk <=  1'b0;
 					end
 				endcase
 		end
@@ -13348,6 +13348,7 @@ module ibex_simple_system (
 				end
 				initial _sv2v_0 = 0;
 			end
+			wire last_read;
 			assign i_i2c_fsm.clk = clk;
 			assign i_i2c_fsm.start = start;
 			assign i_i2c_fsm.w_data = wdata;
@@ -13362,7 +13363,7 @@ module ibex_simple_system (
 			assign i_i2c_fsm.sram_access = sram_access;
 			assign i_i2c_fsm.mem_addr = mem_addr;
 			assign mem_addr = mem_addr_reg;
-			wire last_read;
+			
 			assign last_read = mem_index == ((32'd8192 + 32'd4096) - 4);
 			always @(posedge clk or negedge ibex_simple_system.wbm[_mbase_wb].rst)
 				if (!ibex_simple_system.wbm[_mbase_wb].rst) begin
@@ -13851,7 +13852,7 @@ module ibex_simple_system (
 	assign gpio_o = u_gpio.ext_pad_o;
 	assign gpio_oe = u_gpio.ext_padoe_o;
 	assign gpio_aux = {uart_tx_o, 1'b0};
-	localparam _bbase_5EA00_wb = 3;
+	localparam _bbase_5EA00_wb = 2;
 	generate
 		if (1) begin : u_uart
 			localparam _mbase_wb = _bbase_5EA00_wb;
@@ -13886,55 +13887,7 @@ module ibex_simple_system (
 	assign uart_tx_int_o = u_uart.o_uart_tx_int;
 	assign u_uart.i_uart_rx = ext_pad_i[0];
 	assign uart_tx_o = u_uart.o_uart_tx;
-	localparam _bbase_BCA4E_wb = 1;
-	localparam _param_BCA4E_BOOT_I2C_PRESCALER = 16'd15;
-	generate
-		if (1) begin : u_i2c
-			localparam _mbase_wb = _bbase_BCA4E_wb;
-			wire int_o;
-			wire scl_pad_i;
-			wire scl_pad_o;
-			wire scl_padoen_o;
-			wire sda_pad_i;
-			wire sda_pad_o;
-			wire sda_padoen_o;
-			localparam BOOT_I2C_PRESCALER = _param_BCA4E_BOOT_I2C_PRESCALER;
-			wire [7:0] wb_dat_o_8;
-			assign ibex_simple_system.wbs[_mbase_wb].stall = 1'b0;
-			assign ibex_simple_system.wbs[_mbase_wb].err = 1'b0;
-			assign ibex_simple_system.wbs[_mbase_wb].dat_s = {{24 {1'b0}}, wb_dat_o_8};
-			wire [29:0] wb_adr_8;
-			assign wb_adr_8 = ibex_simple_system.wbs[_mbase_wb].adr >> 2;
-			wire [1:1] sv2v_tmp_u_wb_i2c_wb_ack_o;
-			always @(*) ibex_simple_system.wbs[_mbase_wb].ack = sv2v_tmp_u_wb_i2c_wb_ack_o;
-			i2c_master_top #(.BOOT_I2C_PRESCALER(BOOT_I2C_PRESCALER)) u_wb_i2c(
-				.wb_clk_i(ibex_simple_system.wbs[_mbase_wb].clk),
-				.wb_adr_i(wb_adr_8[2:0]),
-				.wb_dat_i(ibex_simple_system.wbs[_mbase_wb].dat_m[7:0]),
-				.wb_dat_o(wb_dat_o_8),
-				.wb_we_i(ibex_simple_system.wbs[_mbase_wb].we),
-				.wb_stb_i(ibex_simple_system.wbs[_mbase_wb].stb),
-				.wb_cyc_i(ibex_simple_system.wbs[_mbase_wb].cyc),
-				.wb_ack_o(sv2v_tmp_u_wb_i2c_wb_ack_o),
-				.wb_inta_o(int_o),
-				.arst_i(ibex_simple_system.wbs[_mbase_wb].rst),
-				.scl_pad_i(scl_pad_i),
-				.scl_pad_o(scl_pad_o),
-				.scl_padoen_o(scl_padoen_o),
-				.sda_pad_i(sda_pad_i),
-				.sda_pad_o(sda_pad_o),
-				.sda_padoen_o(sda_padoen_o)
-			);
-		end
-	endgenerate
-	assign i2c_int = u_i2c.int_o;
-	assign u_i2c.scl_pad_i = scl_pad_i;
-	assign scl_pad_o = u_i2c.scl_pad_o;
-	assign scl_padoen_o = u_i2c.scl_padoen_o;
-	assign u_i2c.sda_pad_i = sda_pad_i;
-	assign sda_pad_o = u_i2c.sda_pad_o;
-	assign sda_padoen_o = u_i2c.sda_padoen_o;
-	localparam _bbase_3A12E_wb = 2;
+	localparam _bbase_3A12E_wb = 1;
 	generate
 		if (1) begin : u_pit
 			localparam _mbase_wb = _bbase_3A12E_wb;
@@ -13976,7 +13929,7 @@ module ibex_simple_system (
 		end
 	endgenerate
 	assign pit_irq = u_pit.pit_irq_o;
-	localparam _bbase_08BBA_wb = 4;
+	localparam _bbase_08BBA_wb = 3;
 	generate
 		if (1) begin : u_spi_flash
 			localparam _mbase_wb = _bbase_08BBA_wb;
@@ -14023,8 +13976,8 @@ module ibex_simple_system (
 	localparam _bbase_C42A7_wbs = 0;
 	localparam _param_C42A7_numm = NUM_MASTERS;
 	localparam _param_C42A7_nums = NUM_SLAVES;
-	localparam _param_C42A7_base_addr = {gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr};
-	localparam _param_C42A7_size = {gpio_size, i2c_size, pit_size, uart_size, spi_flash_size};
+	localparam _param_C42A7_base_addr = {gpio_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr};
+	localparam _param_C42A7_size = {gpio_size, pit_size, uart_size, spi_flash_size};
 	generate
 		if (1) begin : u_wb_interconnect
 			reg _sv2v_0;
