@@ -29,3 +29,8 @@ done < $file_list
     $files \
     > "./generated/$DESIGN.v" \
     2> "./log/$DESIGN.log"
+
+# deletes all "#(1)"
+    sed 's/#(1)//' "./generated/$DESIGN.v" > "./generated/${DESIGN}_2.v"
+
+    mv "./generated/${DESIGN}_2.v" "./generated/$DESIGN.v"
