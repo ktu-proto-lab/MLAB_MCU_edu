@@ -10,12 +10,12 @@ module ibex_simple_system #(
   input   logic   clk_sys,
   input   logic   rst_async_n,
 
-  input   logic      scl_pad_i,
-  output  logic      scl_pad_o,
-  output  logic      scl_padoen_o,
-  input   logic      sda_pad_i,
-  output  logic      sda_pad_o,
-  output  logic      sda_padoen_o,
+  // input   logic      scl_pad_i,
+  // output  logic      scl_pad_o,
+  // output  logic      scl_padoen_o,
+  // input   logic      sda_pad_i,
+  // output  logic      sda_pad_o,
+  // output  logic      sda_padoen_o,
   
   input   logic [`GPIO_IOS-1:0] ext_pad_i,
 
@@ -46,6 +46,7 @@ module ibex_simple_system #(
   
   // I2C signals
   logic      i2c_int; 
+  assign i2c_int = 0; // Assign to 0 temporarely as yosys gives error for undriven signal
 
   // logic scl_pad_i_debounced;
   // logic sda_pad_i_debounced; 

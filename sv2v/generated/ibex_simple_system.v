@@ -12993,12 +12993,6 @@ endmodule
 module ibex_simple_system (
 	clk_sys,
 	rst_async_n,
-	scl_pad_i,
-	scl_pad_o,
-	scl_padoen_o,
-	sda_pad_i,
-	sda_pad_o,
-	sda_padoen_o,
 	ext_pad_i,
 	gpio_o,
 	gpio_oe,
@@ -13014,12 +13008,6 @@ module ibex_simple_system (
 	parameter DMEM_InitFile = "";
 	input wire clk_sys;
 	input wire rst_async_n;
-	input wire scl_pad_i;
-	output wire scl_pad_o;
-	output wire scl_padoen_o;
-	input wire sda_pad_i;
-	output wire sda_pad_o;
-	output wire sda_padoen_o;
 	input wire [1:0] ext_pad_i;
 	output wire [1:0] gpio_o;
 	output wire [1:0] gpio_oe;
@@ -13033,13 +13021,14 @@ module ibex_simple_system (
 	wire gpio_int;
 	wire [1:0] gpio_aux;
 	wire i2c_int;
+	assign i2c_int = 0;
 	wire uart_rx_int_o;
 	wire uart_tx_int_o;
 	wire uart_rx_i;
 	wire uart_tx_o;
 	wire pit_irq;
 	localparam signed [31:0] NUM_MASTERS = 3;
-	localparam signed [31:0] NUM_SLAVES = 5;
+	localparam signed [31:0] NUM_SLAVES = 4;
 	localparam signed [31:0] PIT_SLAVE_PORT_NUM = 4;
 	localparam [31:0] imem_base_addr = 32'ha0000000;
 	localparam [31:0] imem_size = 'h2000;
@@ -13083,7 +13072,7 @@ module ibex_simple_system (
 	endgenerate
 	genvar _arr_3103E;
 	generate
-		for (_arr_3103E = 0; _arr_3103E <= 4; _arr_3103E = _arr_3103E + 1) begin : wbs
+		for (_arr_3103E = 0; _arr_3103E <= 3; _arr_3103E = _arr_3103E + 1) begin : wbs
 			wire rst;
 			wire clk;
 			reg ack;
@@ -13097,7 +13086,7 @@ module ibex_simple_system (
 			wire [31:0] dat_m;
 			wire [31:0] dat_s;
 		end
-		for (_arr_3103E = 0; _arr_3103E <= 4; _arr_3103E = _arr_3103E + 1) begin : wbs_port_bindings
+		for (_arr_3103E = 0; _arr_3103E <= 3; _arr_3103E = _arr_3103E + 1) begin : wbs_port_bindings
 			assign wbs[_arr_3103E].rst = rst_sync_n;
 			assign wbs[_arr_3103E].clk = clk_sys;
 		end
@@ -13983,8 +13972,8 @@ module ibex_simple_system (
 			reg _sv2v_0;
 			localparam numm = _param_C42A7_numm;
 			localparam nums = _param_C42A7_nums;
-			localparam [159:0] base_addr = _param_C42A7_base_addr;
-			localparam [159:0] size = _param_C42A7_size;
+			localparam [127:0] base_addr = _param_C42A7_base_addr;
+			localparam [127:0] size = _param_C42A7_size;
 			localparam _mbase_wbm = 0;
 			localparam _mbase_wbs = 0;
 			reg cyc;
@@ -13999,8 +13988,8 @@ module ibex_simple_system (
 			reg [31:0] dat_rd;
 			reg [2:0] gnt;
 			reg [2:0] gnt1;
-			reg [4:0] ss;
-			reg [4:0] ss1;
+			reg [3:0] ss;
+			reg [3:0] ss1;
 			wire [2:0] wbm_cyc;
 			wire [2:0] wbm_stb;
 			wire [2:0] wbm_we;
@@ -14025,16 +14014,16 @@ module ibex_simple_system (
 				assign wbm_dat_i[i * 32+:32] = ibex_simple_system.wbm[i + _mbase_wbm].dat_m;
 				assign ibex_simple_system.wbm[i + _mbase_wbm].dat_s = wbm_dat_o[i * 32+:32];
 			end
-			reg [4:0] wbs_cyc;
-			reg [4:0] wbs_stb;
-			reg [4:0] wbs_we;
-			wire [4:0] wbs_ack;
-			wire [4:0] wbs_err;
-			wire [4:0] wbs_stall;
-			reg [159:0] wbs_adr;
-			reg [19:0] wbs_sel;
-			wire [159:0] wbs_dat_i;
-			reg [159:0] wbs_dat_o;
+			reg [3:0] wbs_cyc;
+			reg [3:0] wbs_stb;
+			reg [3:0] wbs_we;
+			wire [3:0] wbs_ack;
+			wire [3:0] wbs_err;
+			wire [3:0] wbs_stall;
+			reg [127:0] wbs_adr;
+			reg [15:0] wbs_sel;
+			wire [127:0] wbs_dat_i;
+			reg [127:0] wbs_dat_o;
 			genvar _gv_i_35;
 			for (_gv_i_35 = 0; _gv_i_35 < nums; _gv_i_35 = _gv_i_35 + 1) begin : genblk2
 				localparam i = _gv_i_35;
@@ -14054,7 +14043,7 @@ module ibex_simple_system (
 				if (_sv2v_0)
 					;
 				for (i = 0; i < nums; i = i + 1)
-					ss[i] = (adr >= base_addr[(4 - i) * 32+:32]) && (adr < (base_addr[(4 - i) * 32+:32] + size[(4 - i) * 32+:32]));
+					ss[i] = (adr >= base_addr[(3 - i) * 32+:32]) && (adr < (base_addr[(3 - i) * 32+:32] + size[(3 - i) * 32+:32]));
 			end
 			always @(posedge ibex_simple_system.wbs[0].clk or negedge ibex_simple_system.wbs[0].rst)
 				if (!ibex_simple_system.wbs[0].rst)
