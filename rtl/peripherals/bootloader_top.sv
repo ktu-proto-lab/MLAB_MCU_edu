@@ -41,6 +41,7 @@ module bootloader_top (
     logic generate_STA;
     logic generate_NACK;
     logic generate_STO;
+    logic last_read;
 
     i2c_access_fsm i_i2c_fsm (
         .clk(clk),
