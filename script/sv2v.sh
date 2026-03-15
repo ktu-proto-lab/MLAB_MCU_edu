@@ -34,3 +34,7 @@ done < $file_list
     sed 's/#(1)//' "./generated/$DESIGN.v" > "./generated/${DESIGN}_2.v"
 
     mv "./generated/${DESIGN}_2.v" "./generated/$DESIGN.v"
+
+# insert `default_nettype wire in the beninging of file
+    sed '1 i `default_nettype wire' "./generated/$DESIGN.v" > "./generated/${DESIGN}_2.v"
+    mv "./generated/${DESIGN}_2.v" "./generated/$DESIGN.v"
