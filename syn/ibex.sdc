@@ -1,6 +1,5 @@
 
-# System frequency 20MHz
-set CYCLE 50
+set CYCLE 25
 
 # Default INPUT / OUTPUT delay - half cycle
 set INPUT_DLY [expr 0.5*$CYCLE]

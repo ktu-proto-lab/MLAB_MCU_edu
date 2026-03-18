@@ -47,7 +47,10 @@ read_libs "sky130_fd_sc_hd__ss_100C_1v60.lib"
 ####################################################################
 ## Load Design
 ####################################################################
-read_hdl -define SYNTHESIS -language sv ../sv2v/generated/ibex_simple_system.v
+set_db init_hdl_search_path "../rtl/include"
+
+# read_hdl -define SYNTHESIS -language sv ../sv2v/generated/ibex_simple_system.v
+read_hdl -define SYNTHESIS  -language sv -f file_list.f
 
 elaborate $DESIGN
 

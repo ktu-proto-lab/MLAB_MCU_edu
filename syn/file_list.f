@@ -47,7 +47,7 @@
 ../rtl/peripherals/pit_top.v
 ../rtl/peripherals/pit_wb_bus.v
 ../rtl/peripherals/uart.sv
-
+../rtl/peripherals/qflexpress.v
 
 ../rtl/wb/wb_gpio.sv
 ../rtl/wb/wb_i2c.sv
@@ -60,5 +60,6 @@
 ../rtl/wb/wb_pit.sv
 ../rtl/wb/wb_sram_2048x32.sv
 ../rtl/wb/wb_sram_1024x32.sv
+../rtl/wb/wb_spi_flash.sv
 
 ../rtl/ibex_simple_system.sv
