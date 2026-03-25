@@ -6,10 +6,10 @@ set_db opt_fix_fanout_load true
 set_db opt_detail_drv_failure_reason true
 
 #two attributes to limit local density
-set_db place_global_max_density 0.85
+# set_db place_global_max_density 0.85
 
 # Route with Metals 1 - 5
-set_db design_top_routing_layer 5
+# set_db design_top_routing_layer 5
 
 #set_db opt_max_density 0.80
 place_opt_design -report_dir Reports/Place

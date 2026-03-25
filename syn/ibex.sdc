@@ -1,51 +1,68 @@
+# chip_top.sdc - Innovus
+create_clock -name clk_PAD -period 40.0 [get_ports clk_PAD]
+set_propagated_clock [all_clocks]
 
-# System frequency 20MHz
-set CYCLE 50
+set_clock_uncertainty 0.25 [all_clocks]
+set_clock_transition  0.15 [all_clocks]
 
-# Default INPUT / OUTPUT delay - half cycle
-set INPUT_DLY [expr 0.5*$CYCLE]
-set OUTPUT_DLY [expr 0.5*$CYCLE]
+# IO delays: 20% of clock period = 8ns
+set_input_delay  8.0 -clock clk_PAD [get_ports rst_n_PAD]
+set_input_delay  8.0 -clock clk_PAD [get_ports {bidir_PAD[*]}]
+set_output_delay 8.0 -clock clk_PAD [get_ports {bidir_PAD[*]}]
 
-# -------------------------------------
-# CLOCK CONSTRAINTS
-# -------------------------------------
-# System clock
-create_clock -name clk_sys -period $CYCLE -waveform [list 0 [expr 0.5*$CYCLE]] [get_ports clk_sys]
+set_load 0.033 [all_outputs]
+set_max_fanout 10 [current_design]
 
-# Rising clock edge for each DFF will be 0.2ns
-set_clock_transition 0.2  [get_clocks clk_sys]
+set_timing_derate -early 0.95
+set_timing_derate -late  1.05
 
-# Clock skew
-set_clock_uncertainty 1 [get_clocks clk_sys] -setup
-set_clock_uncertainty 0.05 [get_clocks clk_sys] -hold
+# # System frequency 20MHz
+# set CYCLE 50
 
-# ------------------------------------
-# IO CONSTRAINTS
-# ------------------------------------
+# # Default INPUT / OUTPUT delay - half cycle
+# set INPUT_DLY [expr 0.5*$CYCLE]
+# set OUTPUT_DLY [expr 0.5*$CYCLE]
 
-set_input_delay -max $INPUT_DLY -clock clk_sys [get_ports {rst_async_n scl_pad_i sda_pad_i ext_pad*}]
-set_input_delay -min 0 -clock clk_sys [get_ports {rst_async_n scl_pad_i sda_pad_i ext_pad*}]
+# # -------------------------------------
+# # CLOCK CONSTRAINTS
+# # -------------------------------------
+# # System clock
+# create_clock -name clk_sys -period $CYCLE -waveform [list 0 [expr 0.5*$CYCLE]] [get_ports clk_sys]
 
-set_output_delay -max $OUTPUT_DLY -clock clk_sys [get_ports {scl_pad_o scl_padoen_o sda_pad_o sda_padoen_o gpio_o* gpio_oe*}]
-set_output_delay -min 0 -clock clk_sys [get_ports {scl_pad_o scl_padoen_o sda_pad_o sda_padoen_o gpio_o* gpio_oe*}]
+# # Rising clock edge for each DFF will be 0.2ns
+# set_clock_transition 0.2  [get_clocks clk_sys]
 
-# Set transition at input
-set_input_transition 0.5 [all_inputs]
-# Alternatively a more accurate approach is to set a driving cell (cell that will drive the primary input)
-# set_driving_cell -cell [get_lib_cells MYLIB/INV4] -pin Z [remove_from_collection [all_inputs] [get_ports clk_100m]]
+# # Clock skew
+# set_clock_uncertainty 1 [get_clocks clk_sys] -setup
+# set_clock_uncertainty 0.05 [get_clocks clk_sys] -hold
 
-# Set the capacitance on chip outputs
-set_load 0.05 [all_outputs]
-# Can also use a stdcell for output loading
+# # ------------------------------------
+# # IO CONSTRAINTS
+# # ------------------------------------
 
-# ------------------------------------
-# FALSE PATHS
-# ------------------------------------
+# set_input_delay -max $INPUT_DLY -clock clk_sys [get_ports {rst_async_n scl_pad_i sda_pad_i ext_pad*}]
+# set_input_delay -min 0 -clock clk_sys [get_ports {rst_async_n scl_pad_i sda_pad_i ext_pad*}]
 
-# Set false paths from asynchronous inputs as we use 2DFF synchronizers which need to be ignored by STA
-set_false_path -from [get_ports scl_pad_i] 
-set_false_path -from [get_ports sda_pad_i] 
+# set_output_delay -max $OUTPUT_DLY -clock clk_sys [get_ports {scl_pad_o scl_padoen_o sda_pad_o sda_padoen_o gpio_o* gpio_oe*}]
+# set_output_delay -min 0 -clock clk_sys [get_ports {scl_pad_o scl_padoen_o sda_pad_o sda_padoen_o gpio_o* gpio_oe*}]
 
-set_disable_timing [get_ports rst_async_n]
+# # Set transition at input
+# set_input_transition 0.5 [all_inputs]
+# # Alternatively a more accurate approach is to set a driving cell (cell that will drive the primary input)
+# # set_driving_cell -cell [get_lib_cells MYLIB/INV4] -pin Z [remove_from_collection [all_inputs] [get_ports clk_100m]]
 
-set_false_path -from [get_ports ext_pad*]
+# # Set the capacitance on chip outputs
+# set_load 0.05 [all_outputs]
+# # Can also use a stdcell for output loading
+
+# # ------------------------------------
+# # FALSE PATHS
+# # ------------------------------------
+
+# # Set false paths from asynchronous inputs as we use 2DFF synchronizers which need to be ignored by STA
+# set_false_path -from [get_ports scl_pad_i] 
+# set_false_path -from [get_ports sda_pad_i] 
+
+# set_disable_timing [get_ports rst_async_n]
+
+# set_false_path -from [get_ports ext_pad*]

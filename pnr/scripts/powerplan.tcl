@@ -45,31 +45,31 @@ add_rings \
 #####################################
 # Block ring around dmem
 #####################################
-set_db add_rings_target default
-set_db add_rings_extend_over_row 0
-set_db add_rings_ignore_rows 0
-set_db add_rings_avoid_short 0
-set_db add_rings_skip_shared_inner_ring none
-set_db add_rings_stacked_via_top_layer TopMetal2
-set_db add_rings_stacked_via_bottom_layer Metal1
-set_db add_rings_via_using_exact_crossover_size 1
-set_db add_rings_orthogonal_only true
-set_db add_rings_skip_via_on_pin {  standardcell }
-set_db add_rings_skip_via_on_wire_shape {  noshape }
-add_rings \
-    -nets {VDD VSS} \
-    -around user_defined \
-    -user_defined_region {2.52 3.5 2.52 371.74 451.68 371.74 451.68 3.5 2.52 3.5} \
-    -type block_rings \
-    -layer {top Metal5 bottom Metal5 left TopMetal1 right TopMetal1} \
-    -width {top 2 bottom 2 left 2 right 2} \
-    -spacing {top 2 bottom 2 left 2 right 2} \
-    -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} \
-    -center 0 \
-    -skip_side {bottom left } \
-    -threshold 0 \
-    -jog_distance 0 \
-    -snap_wire_center_to_grid none
+# set_db add_rings_target default
+# set_db add_rings_extend_over_row 0
+# set_db add_rings_ignore_rows 0
+# set_db add_rings_avoid_short 0
+# set_db add_rings_skip_shared_inner_ring none
+# set_db add_rings_stacked_via_top_layer TopMetal2
+# set_db add_rings_stacked_via_bottom_layer Metal1
+# set_db add_rings_via_using_exact_crossover_size 1
+# set_db add_rings_orthogonal_only true
+# set_db add_rings_skip_via_on_pin {  standardcell }
+# set_db add_rings_skip_via_on_wire_shape {  noshape }
+# add_rings \
+#     -nets {VDD VSS} \
+#     -around user_defined \
+#     -user_defined_region {2.52 3.5 2.52 371.74 451.68 371.74 451.68 3.5 2.52 3.5} \
+#     -type block_rings \
+#     -layer {top Metal5 bottom Metal5 left TopMetal1 right TopMetal1} \
+#     -width {top 2 bottom 2 left 2 right 2} \
+#     -spacing {top 2 bottom 2 left 2 right 2} \
+#     -offset {top 1.8 bottom 1.8 left 1.8 right 1.8} \
+#     -center 0 \
+#     -skip_side {bottom left } \
+#     -threshold 0 \
+#     -jog_distance 0 \
+#     -snap_wire_center_to_grid none
 
 #####################################
 # Stripes
@@ -77,67 +77,67 @@ add_rings \
 #####################################
 # Metal5 (Over SRAMs)
 #####################################
-set_db add_stripes_ignore_block_check false
-set_db add_stripes_break_at none
-set_db add_stripes_route_over_rows_only false
-set_db add_stripes_rows_without_stripes_only false
-set_db add_stripes_extend_to_closest_target ring
-set_db add_stripes_stop_at_last_wire_for_area false
-set_db add_stripes_partial_set_through_domain false
-set_db add_stripes_ignore_non_default_domains false
-set_db add_stripes_trim_antenna_back_to_shape none
-set_db add_stripes_spacing_type edge_to_edge
-set_db add_stripes_spacing_from_block 0
-set_db add_stripes_stripe_min_length stripe_width
-set_db add_stripes_stacked_via_top_layer TopMetal2
-set_db add_stripes_stacked_via_bottom_layer Metal1
-set_db add_stripes_via_using_exact_crossover_size false
-set_db add_stripes_split_vias false
-set_db add_stripes_orthogonal_only true
-set_db add_stripes_allow_jog { block_ring }
-set_db add_stripes_skip_via_on_pin {  pad  cover  standardcell }
-set_db add_stripes_skip_via_on_wire_shape {  blockring  blockwire  corewire   followpin  fillwire   iowire     padring    stripe     noshape   }
-add_stripes \
-    -nets {VDD VSS} \
-    -layer Metal5 \
-    -direction horizontal \
-    -width 2 \
-    -spacing 4 \
-    -set_to_set_distance 12 \
-    -start_from top \
-    -stop_offset 680 \
-    -switch_layer_over_obs false \
-    -max_same_layer_jog_length 2 \
-    -pad_core_ring_top_layer_limit TopMetal2 \
-    -pad_core_ring_bottom_layer_limit Metal1 \
-    -block_ring_top_layer_limit TopMetal2 \
-    -block_ring_bottom_layer_limit Metal1 \
-    -use_wire_group 0 \
-    -snap_wire_center_to_grid none
+# set_db add_stripes_ignore_block_check false
+# set_db add_stripes_break_at none
+# set_db add_stripes_route_over_rows_only false
+# set_db add_stripes_rows_without_stripes_only false
+# set_db add_stripes_extend_to_closest_target ring
+# set_db add_stripes_stop_at_last_wire_for_area false
+# set_db add_stripes_partial_set_through_domain false
+# set_db add_stripes_ignore_non_default_domains false
+# set_db add_stripes_trim_antenna_back_to_shape none
+# set_db add_stripes_spacing_type edge_to_edge
+# set_db add_stripes_spacing_from_block 0
+# set_db add_stripes_stripe_min_length stripe_width
+# set_db add_stripes_stacked_via_top_layer TopMetal2
+# set_db add_stripes_stacked_via_bottom_layer Metal1
+# set_db add_stripes_via_using_exact_crossover_size false
+# set_db add_stripes_split_vias false
+# set_db add_stripes_orthogonal_only true
+# set_db add_stripes_allow_jog { block_ring }
+# set_db add_stripes_skip_via_on_pin {  pad  cover  standardcell }
+# set_db add_stripes_skip_via_on_wire_shape {  blockring  blockwire  corewire   followpin  fillwire   iowire     padring    stripe     noshape   }
+# add_stripes \
+#     -nets {VDD VSS} \
+#     -layer Metal5 \
+#     -direction horizontal \
+#     -width 2 \
+#     -spacing 4 \
+#     -set_to_set_distance 12 \
+#     -start_from top \
+#     -stop_offset 680 \
+#     -switch_layer_over_obs false \
+#     -max_same_layer_jog_length 2 \
+#     -pad_core_ring_top_layer_limit TopMetal2 \
+#     -pad_core_ring_bottom_layer_limit Metal1 \
+#     -block_ring_top_layer_limit TopMetal2 \
+#     -block_ring_bottom_layer_limit Metal1 \
+#     -use_wire_group 0 \
+#     -snap_wire_center_to_grid none
 
-# Metal5 for DMEM
-gui_select -point {217.29200 204.49300}
-set_db add_stripes_ignore_block_check false
-set_db add_stripes_break_at none
-set_db add_stripes_route_over_rows_only false
-set_db add_stripes_rows_without_stripes_only false
-set_db add_stripes_extend_to_closest_target ring
-set_db add_stripes_stop_at_last_wire_for_area false
-set_db add_stripes_partial_set_through_domain false
-set_db add_stripes_ignore_non_default_domains false
-set_db add_stripes_trim_antenna_back_to_shape none
-set_db add_stripes_spacing_type edge_to_edge
-set_db add_stripes_spacing_from_block 0
-set_db add_stripes_stripe_min_length stripe_width
-set_db add_stripes_stacked_via_top_layer TopMetal2
-set_db add_stripes_stacked_via_bottom_layer Metal1
-set_db add_stripes_via_using_exact_crossover_size false
-set_db add_stripes_split_vias false
-set_db add_stripes_orthogonal_only true
-set_db add_stripes_allow_jog { block_ring }
-set_db add_stripes_skip_via_on_pin {  pad  cover  standardcell }
-set_db add_stripes_skip_via_on_wire_shape {  blockwire  corewire   followpin  fillwire   iowire     padring    stripe     noshape   }
-add_stripes -nets {VDD VSS} -layer Metal5 -direction horizontal -width 2 -spacing 4 -set_to_set_distance 12 -over_power_domain 1 -start_from bottom -stop_offset 0 -switch_layer_over_obs false -max_same_layer_jog_length 2 -pad_core_ring_top_layer_limit TopMetal2 -pad_core_ring_bottom_layer_limit Metal1 -block_ring_top_layer_limit TopMetal2 -block_ring_bottom_layer_limit Metal1 -use_wire_group 0 -snap_wire_center_to_grid none
+# # Metal5 for DMEM
+# gui_select -point {217.29200 204.49300}
+# set_db add_stripes_ignore_block_check false
+# set_db add_stripes_break_at none
+# set_db add_stripes_route_over_rows_only false
+# set_db add_stripes_rows_without_stripes_only false
+# set_db add_stripes_extend_to_closest_target ring
+# set_db add_stripes_stop_at_last_wire_for_area false
+# set_db add_stripes_partial_set_through_domain false
+# set_db add_stripes_ignore_non_default_domains false
+# set_db add_stripes_trim_antenna_back_to_shape none
+# set_db add_stripes_spacing_type edge_to_edge
+# set_db add_stripes_spacing_from_block 0
+# set_db add_stripes_stripe_min_length stripe_width
+# set_db add_stripes_stacked_via_top_layer TopMetal2
+# set_db add_stripes_stacked_via_bottom_layer Metal1
+# set_db add_stripes_via_using_exact_crossover_size false
+# set_db add_stripes_split_vias false
+# set_db add_stripes_orthogonal_only true
+# set_db add_stripes_allow_jog { block_ring }
+# set_db add_stripes_skip_via_on_pin {  pad  cover  standardcell }
+# set_db add_stripes_skip_via_on_wire_shape {  blockwire  corewire   followpin  fillwire   iowire     padring    stripe     noshape   }
+# add_stripes -nets {VDD VSS} -layer Metal5 -direction horizontal -width 2 -spacing 4 -set_to_set_distance 12 -over_power_domain 1 -start_from bottom -stop_offset 0 -switch_layer_over_obs false -max_same_layer_jog_length 2 -pad_core_ring_top_layer_limit TopMetal2 -pad_core_ring_bottom_layer_limit Metal1 -block_ring_top_layer_limit TopMetal2 -block_ring_bottom_layer_limit Metal1 -use_wire_group 0 -snap_wire_center_to_grid none
 
 #####################################
 # TopMetal1
@@ -214,13 +214,16 @@ add_stripes -nets {VDD VSS} \
 
 # delete_obj [get_db route_blockages]
 
+# USEFUL for getting bbox for below blockages
+get_db inst:chip_top/i_ibex_simple_system/imem.sram2 .bbox
+
 # Routing blockages over SRAMS to make sure no routing on M1-M5
 # dmem/sram
-create_route_blockage -area 35.04 35.28 451.68 371.74 -layer {Metal1 Metal2 Metal3 Metal4 Metal5}
+create_route_blockage -area 250.0 250.0 666.64 586.46 -layer {Metal1 Metal2 Metal3 Metal4 Metal5}
 # imem/sram1
-create_route_blockage -area 35.04 708.08 451.68 1044.54 -layer {Metal1 Metal2 Metal3 Metal4 Metal5}
+create_route_blockage -area 820.0 250.0 1236.64 586.46 -layer {Metal1 Metal2 Metal3 Metal4 Metal5}
 # imem/sram2
-create_route_blockage -area 630.24 708.08 1046.88 1044.54 -layer {Metal1 Metal2 Metal3 Metal4 Metal5}
+create_route_blockage -area 820.0 920.0 1236.64 1256.46 -layer {Metal1 Metal2 Metal3 Metal4 Metal5}
 
 #####################################
 # Rails

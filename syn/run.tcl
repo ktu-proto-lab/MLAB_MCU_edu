@@ -1,5 +1,5 @@
 
-set DESIGN "ibex_simple_system"
+set DESIGN "chip_top"
 
 ###############################################################
 ## Synthesis options
@@ -28,17 +28,19 @@ set_db lbr_seq_in_out_phase_opto true
 ###############################################################
 
 # Tell Genus where to find include files
-set_db init_hdl_search_path "../rtl/include"
+# set_db init_hdl_search_path "../rtl/include"
 
 # Use slow libs for synthesis because we are interested in setup time
 read_libs "/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lib/sg13g2_stdcell_slow_1p08V_125C.lib \
-/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x32_c2_bm_bist_slow_1p08V_125C.lib"
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lib/RM_IHPSG13_1P_1024x32_c2_bm_bist_slow_1p08V_125C.lib \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_io/lib/sg13g2_io_slow_1p08V_3p0V_125C.lib"
 
 # Specifying lef libraries is optional, it enables physical synthesis - the tool makes more precise estimations on wire loads
 # this results in the synthesis result being more accurate and more similar to the result after pnr 
 read_physical -lef "/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_tech.lef \
 /eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/lef/sg13g2_stdcell.lef \
-/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lef/RM_IHPSG13_1P_1024x32_c2_bm_bist.lef"
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_sram/lef/RM_IHPSG13_1P_1024x32_c2_bm_bist.lef \
+/eda/cad_run/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_io/lef/sg13g2_io.lef"
 
 ####################################################################
 ## Load Design
