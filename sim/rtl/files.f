@@ -65,7 +65,11 @@
 ../../rtl/wb/core_if.sv
 ../../rtl/wb/core2wb.sv
 ../../rtl/wb/wb_ibex_top.sv
-../../rtl/wb/wb_interconnect_sharedbus.sv
+//../../rtl/wb/wb_interconnect_sharedbus.sv
+../../rtl/wb/wb_interconnect_xbar.sv
+../../rtl/wb/wbxbar.v
+../../rtl/wb/skidbuffer.v
+../../rtl/wb/addrdecode.v
 ../../rtl/wb/wb_pit.sv
 ../../rtl/wb/wb_sram_2048x32.sv
 ../../rtl/wb/wb_sram_1024x32.sv

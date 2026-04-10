@@ -14,9 +14,31 @@ module  wb_interconnect_xbar
    localparam dw = $bits(dat_t);
    localparam sw = $bits(sel_t);
 
-   localparam [nums-1:0][aw-1:0] slave_addr = {base_addr[2], base_addr[1], base_addr[0]};
+
+   function [nums*aw-1:0] flatten_addr(logic [aw-1:0] in_arr[nums]);
+      logic [nums*aw-1:0] flattened;
+       for (int i = 0; i < nums; i++) begin
+          // Packs from index 0 at the LSB to index nums-1 at the MSB
+          flattened[i*aw +: aw] = in_arr[i];
+       end
+       return flattened;
+   endfunction
+
+   function [nums*aw-1:0] flatten_mask(logic [aw-1:0] in_arr[nums]);
+      logic [nums*aw-1:0] flattened;
+       for (int i = 0; i < nums; i++) begin
+          // Packs from index 0 at the LSB to index nums-1 at the MSB
+          flattened[i*aw +: aw] = ~(in_arr[i]-1);
+       end
+       return flattened;
+   endfunction
+
+   localparam [nums-1:0][aw-1:0] slave_addr=flatten_addr(base_addr);
+   // localparam [nums-1:0][aw-1:0] slave_addr = {base_addr[2], base_addr[1], base_addr[0]};
    //localparam [nums-1:0][aw-1:0] slave_mask = {32'hfffff000, 32'hffff0000, 32'hfffff000};
-   localparam [nums-1:0][aw-1:0] slave_mask = {~(size[2]-1), ~(size[1]-1), ~(size[0]-1)};
+   // localparam [nums-1:0][aw-1:0] slave_mask = {~(size[2]-1), ~(size[1]-1), ~(size[0]-1)};
+
+   localparam [nums-1:0][aw-1:0] slave_mask=flatten_mask(size);
 
    logic [numm-1:0]         wbm_cyc;
    logic [numm-1:0]         wbm_stb;
@@ -59,7 +81,7 @@ module  wb_interconnect_xbar
        .SLAVE_MASK (slave_mask))
    u_wbxbar
      (.i_clk    (wbm[0].clk),
-      .i_reset  (wbm[0].rst),
+      .i_reset  (~wbm[0].rst),
 
       .i_mcyc   (wbm_cyc),
       .i_mstb   (wbm_stb),

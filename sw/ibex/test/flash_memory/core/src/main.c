@@ -12,7 +12,7 @@
 #include "i2c_master.h"
 #include "timer.h"
 
-#define FLASH_BASE_ADDR 0xA0000000
+#define FLASH_BASE_ADDR 0x80000000
 
 #define GPIO_BASE_ADDR 0x40000000
 
@@ -21,6 +21,8 @@ I2C_HandleTypeDef I2C;
 
 
 volatile uint32_t flashread;
+volatile uint32_t flashread2;
+volatile uint32_t flashread3;
 
 int main() {
   GPIO_Init(&gpio);
@@ -28,19 +30,24 @@ int main() {
   gpio.regs->OE = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 |
   GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7;
 
-
   volatile uint32_t* flash;
   flash = (uint32_t*) FLASH_BASE_ADDR; // First GPIO reg - output register
 
-  for (int j = 0; j<16; j++){
+  for (int j = 0; j<16; j+=3){
     flashread = *(flash + j);
+    flashread2 = *(flash + j+1);
+    flashread3 = *(flash + j+2);
+
     for (int i = 0; i<4; i++){
       gpio.regs->OUT = (flashread >> (i*8)) & 0xFF;
     }
+    for (int i = 0; i<4; i++){
+      gpio.regs->OUT = (flashread2 >> (i*8)) & 0xFF;
+    }
+    for (int i = 0; i<4; i++){
+      gpio.regs->OUT = (flashread3 >> (i*8)) & 0xFF;
+    }
   }
-
-
-
 
   return 0;
 }

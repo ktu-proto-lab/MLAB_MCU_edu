@@ -12,7 +12,8 @@ module wb_spi_flash (
     // To fix this, multiplex wb. stall signal, so it only be true, then cycle and strobe is true (master starting transaction)
     logic stall;
     // assign wb.stall	= ((stall & wb.cyc) & wb.stb);
-    assign wb.stall	= (wb.cyc & wb.stb) ? stall : 1'b0;
+    // assign wb.stall	= (wb.cyc & wb.stb) ? stall : 1'b0;
+    assign wb.stall	= stall;
 
     qflexpress #(
         .LGFLASHSZ(24),

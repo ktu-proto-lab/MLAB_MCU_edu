@@ -282,8 +282,16 @@ module ibex_simple_system #(
   //==================================================
   // Shared or crossbar interconnect
   //==================================================
-    // For now only sharedbus is functional
-       wb_interconnect_sharedbus
+  // Since now not only sharedbus is functional
+       // wb_interconnect_sharedbus
+       //   #(.numm      (NUM_MASTERS),
+       //     .nums      (NUM_SLAVES),
+       //     .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr}),
+       //     .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, spi_flash_size}))
+       // u_wb_interconnect
+       //   (.wbm, .wbs);
+
+      wb_interconnect_xbar
          #(.numm      (NUM_MASTERS),
            .nums      (NUM_SLAVES),
            .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, spi_flash_base_addr}),
