@@ -28,7 +28,8 @@ module  wb_interconnect_xbar
       logic [nums*aw-1:0] flattened;
        for (int i = 0; i < nums; i++) begin
           // Packs from index 0 at the LSB to index nums-1 at the MSB
-          flattened[i*aw +: aw] = ~(in_arr[i]-1);
+          // flattened[i*aw +: aw] = ~(in_arr[i]-1);
+          flattened[i*aw +: aw] = ~((1 << $clog2(in_arr[i])) - 1);
        end
        return flattened;
    endfunction
