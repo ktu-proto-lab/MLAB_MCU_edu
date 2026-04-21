@@ -55,20 +55,20 @@ write_netlist pnrOutData/pnr_netlist_LVS.v \
 -include_phys_cells {sg13g2_decap_8 sg13g2_decap_4 sg13g2_fill_1 sg13g2_fill_2 sg13g2_fill_4 sg13g2_fill_8 } \
 
 # WRite SDF for netlist annotation noedge writes single path between comb non-unate timing arcs
-write_sdf pnrOutData/simple_system.sdf -edges noedge -recompute_delay_calc
+#write_sdf pnrOutData/simple_system.sdf -edges noedge -recompute_delay_calc
 
 ##############################################
 # GENERATE FILES FOR EQUIVALENCE CHECKING    
 ##############################################
 #  Set LEC write directory
-set_db write_lec_directory_naming_style LEC/%s
+#set_db write_lec_directory_naming_style LEC/%s
 # Write LEC script
-write_do_lec PnRvsSYN.tcl \
-			-golden_design /mlab_shares/Skaitmena/IbexD/syn/synOutData/post_syn_netlist.v \
-			-revised_design pnrOutData/pnr_netlist.v \
-			-flat \
-			-log_file log/postroute_vs_syn.log
-
+#write_do_lec PnRvsSYN.tcl \
+#			-golden_design /mlab_shares/Skaitmena/IbexD/syn/synOutData/post_syn_netlist.v \
+#			-revised_design pnrOutData/pnr_netlist.v \
+#			-flat \
+#			-log_file log/postroute_vs_syn.log
+report_resource -verbose
 # Write final dbs
 write_db dbs/final.enc
 

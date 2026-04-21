@@ -146,6 +146,8 @@ write_hdl > $_OUTPUTS_PATH/post_syn_netlist.v
 write_sdc > $_OUTPUTS_PATH/post_syn.sdc
 
 # Reports
+report_qor > $_REPORTS_PATH/${DESIGN}_qor.rpt
+
 report_messages > $_REPORTS_PATH/${DESIGN}_messages.rpt
 write_snapshot -outdir $_REPORTS_PATH/final -tag final
 
