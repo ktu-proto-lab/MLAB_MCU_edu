@@ -6,8 +6,8 @@
 // Sizes in bytes
 `define IMEM_SIZE 32'd8192
 `define DMEM_SIZE 32'd4096
-`define IMEM_BASE_ADDR 32'h8000_0000
-`define DMEM_BASE_ADDR 32'h9000_0000
+// `define IMEM_BASE_ADDR 32'h8000_0000
+// `define DMEM_BASE_ADDR 32'h9000_0000
 `define EEPROM_READ_ADDR 16'h0000 // EEPROM read start address
 `define EEPROM_WRITE_ADDR 16'h3000 // must be aligned with page size
 `define EEPROM_PAGE_SIZE 7 // page size = 2^EEPROM_PAGE_SIZE

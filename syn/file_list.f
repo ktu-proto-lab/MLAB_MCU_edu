@@ -38,15 +38,13 @@
 ../rtl/peripherals/i2c_master_defines.v
 ../rtl/peripherals/i2c_master_byte_ctrl.v
 ../rtl/peripherals/i2c_master_bit_ctrl.v
-../rtl/peripherals/wb_access_fsm.sv
-../rtl/peripherals/i2c_access_fsm.sv
-../rtl/peripherals/bootloader_top.sv
 ../rtl/peripherals/pit_count.v
 ../rtl/peripherals/pit_prescale.v
 ../rtl/peripherals/pit_regs.v
 ../rtl/peripherals/pit_top.v
 ../rtl/peripherals/pit_wb_bus.v
 ../rtl/peripherals/uart.sv
+../rtl/peripherals/qflexpress.v
 
 
 ../rtl/wb/wb_gpio.sv
@@ -56,9 +54,10 @@
 ../rtl/wb/core_if.sv
 ../rtl/wb/core2wb.sv
 ../rtl/wb/wb_ibex_top.sv
-../rtl/wb/wb_interconnect_sharedbus.sv
+../rtl/wb/wb_interconnect_xbar.sv
 ../rtl/wb/wb_pit.sv
 ../rtl/wb/wb_sram_2048x32.sv
 ../rtl/wb/wb_sram_1024x32.sv
+../../rtl/wb/wb_spi_flash.sv
 
 ../rtl/ibex_simple_system.sv

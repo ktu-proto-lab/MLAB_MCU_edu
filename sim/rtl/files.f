@@ -46,9 +46,9 @@
 ../../rtl/peripherals/i2c_master_defines.v
 ../../rtl/peripherals/i2c_master_byte_ctrl.v
 ../../rtl/peripherals/i2c_master_bit_ctrl.v
-../../rtl/peripherals/wb_access_fsm.sv
-../../rtl/peripherals/i2c_access_fsm.sv
-../../rtl/peripherals/bootloader_top.sv
+// ../../rtl/peripherals/wb_access_fsm.sv
+// ../../rtl/peripherals/i2c_access_fsm.sv
+// ../../rtl/peripherals/bootloader_top.sv
 ../../rtl/peripherals/pit_count.v
 ../../rtl/peripherals/pit_prescale.v
 ../../rtl/peripherals/pit_regs.v

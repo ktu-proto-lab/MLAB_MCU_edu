@@ -38,7 +38,7 @@ module ibex_simple_system #(
   // Signals
   //==================================================
 
-  logic rst_sync_n, rst_core_n;
+  logic rst_sync_n;
   
   // // GPIO signals
   logic gpio_int; // Interrupt signal to Core
@@ -75,7 +75,7 @@ module ibex_simple_system #(
   // Local Parameters
   //==================================================
 
-  localparam int NUM_MASTERS        = 3;
+  localparam int NUM_MASTERS        = 2;
   localparam int NUM_SLAVES         = 7;
   localparam int PIT_SLAVE_PORT_NUM = 4;
 
@@ -126,11 +126,11 @@ module ibex_simple_system #(
   wb_if wbs[NUM_SLAVES] (.rst(rst_sync_n), .clk(clk_sys));  // Slaves
 
   // Bootloader as wishbone master with top priority
-  bootloader_top u_bootloader(
-        .wb(wbm[0]),
-        .clk(clk_sys),
-        .rst_core_n(rst_core_n) // rst for Ibex only
-  );
+  // bootloader_top u_bootloader(
+  //       .wb(wbm[0]),
+  //       .clk(clk_sys),
+  //       .rst_core_n(rst_core_n) // rst for Ibex only
+  // );
 
   // Wishbone wrapped Ibex Core
   wb_ibex_top #( 
@@ -138,9 +138,9 @@ module ibex_simple_system #(
     )
    u_wb_ibex_top
      (.clk                  (clk_sys),
-      .rst_n                (rst_core_n),
-      .instr_wb             (wbm[2]),
-      .data_wb              (wbm[1]),
+      .rst_n                (rst_sync_n),
+      .instr_wb             (wbm[1]),
+      .data_wb              (wbm[0]),
 
       .test_en              (1'b0),
       .ram_cfg              ('0),

@@ -53,4 +53,18 @@ A simple fix is to take the base 2 logarithm of the address size and then set th
 ### Did
 - Fixed improper address masking in `rtl/wb/wb_interconnect_xbar.sv`
 
-### Next 
+### Next
+
+
+---
+## 2026-04-21
+
+Rokas
+
+### Notes
+
+### Did
+- Removed bootloader
+
+### Next
+

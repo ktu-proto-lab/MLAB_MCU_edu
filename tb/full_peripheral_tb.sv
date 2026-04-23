@@ -191,9 +191,6 @@ module simple_system_tb;
         // Initial top signal values
         clk_sys = 1'b0;
         out_valid = 0;
-        rst_sys_n = 1'b1;
-
-        #(CLK_PERIOD*4)
         rst_sys_n = 1'b0;
 
         #(CLK_PERIOD*4)
