@@ -32,6 +32,8 @@
 
 `define PIT_BASE_ADDR   32'h2000_0000
 
+`define SOBEL_BASE_ADDR 32'h6000_0000
+
 // GPIO Count
 `define GPIO_IOS 10
 

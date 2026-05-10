@@ -55,7 +55,11 @@
 ../../rtl/peripherals/pit_top.v
 ../../rtl/peripherals/pit_wb_bus.v
 ../../rtl/peripherals/uart.sv
+../../rtl/peripherals/sobel_acc.sv
+../../rtl/peripherals/bram.sv
 
+../../fpga/IP/fifo_generator_vlog_beh.v
+../../fpga/IP/camera_fifo.v
 
 ../../rtl/wb/wb_gpio.sv
 ../../rtl/wb/wb_i2c.sv
@@ -72,5 +76,6 @@
 ../../rtl/ibex_simple_system.sv
 
 ../../tb/misc/24CS512.sv
+../../tb/tb_sobel_acc.sv
 
 

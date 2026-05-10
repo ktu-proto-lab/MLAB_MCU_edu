@@ -30,20 +30,17 @@ Each subproject team works independently against a well-defined interface. Integ
                        PYNQ-Z2 FPGA
 ┌───────────────────────────────────────────────────────┐
 │                                                       │
-│  OV7670 ──► [Camera IF*] ──► [Frame BRAM A]           │
+│  OV7670 ──► [Camera IF*] ──► [Input FIFO*]            │
 │                                     │                 │
 │                             [ImgProc Accel]    ◄── WB │
-│                                     |                 │
 │                                     │                 │
-│                              [Frame BRAM B]           │
+│                              [Frame BRAM B*]          │
 │                                     │                 │
 │                            [Compression Accel] ◄── WB │
-│                                     │                 │
 │                                     │                 │
 │                                [TX FIFO]              │
 │                                     │                 │
 │              [FTDI Sync FIFO IF*] ◄─┘                 │
-│                       │                               │
 │                       │                               │
 └───────────────────────────────────────────────────────┘
                         │
@@ -56,14 +53,14 @@ Each subproject team works independently against a well-defined interface. Integ
 
 The Ibex CPU acts as the control plane. It does not sit in the data path during normal operation - it configures the accelerators, starts transfers, and monitors status registers. The data path is:
 
-1. Camera interface captures a full frame into Frame BRAM A.
-2. CPU detects the frame-ready interrupt, writes the source/destination addresses and length to the image processing accelerator CSR, then asserts the start bit.
-3. Image processing accelerator reads from Frame BRAM A, applies Sobel edge detection, and writes the result to Frame BRAM B. It asserts the done bit when complete.
-4. CPU detects done, configures the compression accelerator with the source address and length, and asserts its start bit.
-5. Compression accelerator reads from Frame BRAM B, compresses the data, and streams output into the TX FIFO. It does not wait for a full frame before outputting - compression is pipelined.
+1. Camera interface writes pixel data into the Input FIFO (32-bit words, 4 pixels packed).
+2. Image processing accelerator streams words from the FIFO as they arrive, processes them, and writes the result to Frame BRAM B. It asserts `done` and pulses `frame_ready_i` when a full frame is complete.
+3. With `auto_start` set, the accelerator restarts automatically on the next `frame_ready_i` pulse with no CPU involvement.
+4. CPU configures the compression accelerator and asserts its start bit (or the compression accelerator also operates in auto-start mode).
+5. Compression accelerator reads from Frame BRAM B, compresses the data, and streams output into the TX FIFO.
 6. The FTDI sync FIFO interface drains the TX FIFO and sends data to the PC over USB.
 
-This architecture keeps the two accelerators decoupled and independently testable. The CPU moves a pointer between stages rather than pixel data, so CPU overhead is minimal.
+The pipeline is self-sustaining in steady state once configured. The CPU role is boot-time configuration, mode switching (`algo_sel`), error recovery, and liveness monitoring via `FRAME_COUNT`.
 
 ### 2.3 Hardware Platform
 
@@ -93,40 +90,39 @@ All pixel data flowing between BRAMs and accelerators is defined as follows. Bot
 The following components are provided complete and are not student deliverables. Students should understand their interfaces but do not need to implement them.
 
 - MLAB_MCU SoC with Ibex core, memory, and Wishbone interconnect
-- OV7670 camera capture interface (DVP to Frame BRAM A)
+- OV7670 camera capture interface (DVP → Input FIFO)
+- Input FIFO (1024×32-bit FWFT, Vivado FIFO Generator IP)
+- Frame BRAM B instantiation with fixed port definition
 - FTDI FT2232H sync FIFO interface (TX FIFO to USB)
-- Frame BRAM A and Frame BRAM B instantiations with fixed port definitions
 - Wishbone slave wrapper with CSR register map skeleton (students fill in the logic)
-- Simulation testbenches with a synthetic image pre-loaded in BRAM
+- Simulation testbenches with a synthetic image streamed through the FIFO
 
 The testbenches are the primary development environment. Students must have a fully working simulation before moving to hardware.
 
-### 3.1 Wishbone CSR Register Map
+### 3.1 Wishbone CSR Register Map (Image Processing Accelerator)
 
-Each accelerator is given a Wishbone slave with the following memory-mapped registers. The base address differs per accelerator and is provided in the SoC address map.
+Base address: `0x6000_0000`.
 
 | Offset | Name | Access | Description |
 |---|---|---|---|
-| `0x00` | `CTRL` | R/W | Bit 0: start. Write 1 to begin. Auto-clears when done. |
-| `0x04` | `STATUS` | RO | Bit 0: busy. Bit 1: done. Bit 2: error. |
-| `0x08` | `SRC_ADDR` | R/W | Base address of source data in BRAM. |
-| `0x0C` | `DST_ADDR` | R/W | Base address of destination in BRAM. |
-| `0x10` | `LENGTH` | R/W | Number of bytes to process. |
+| `0x00` | `CTRL` | R/W | bit[0]: `start` - manual trigger, self-clears. bit[1]: `auto_start` - restart automatically on `frame_ready`. bit[2]: `algo_sel` - 0: pixel inversion, 1: Sobel (student impl). |
+| `0x04` | `STATUS` | RO | bit[0]: `busy`. bit[1]: `done` - held until next CTRL write. bit[2]: `frame_ready` - latched from camera IF; cleared on start. bit[3]: `error`. |
+| `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². Read to verify pipeline liveness. |
 
-The done bit remains set until CTRL is written again. The CPU polls STATUS or waits for an interrupt (interrupt support is optional).
+The `done` bit remains set until CTRL is written again. The CPU may poll STATUS or wait for an interrupt (interrupt support is optional).
 
-### 3.2 BRAM Port Interface
+### 3.2 Frame BRAM B Port Interface
 
-Both BRAMs present the following synchronous single-port interface to the accelerators:
+Frame BRAM B is 32-bit wide and word-addressed. Four pixels are packed into each word, little-endian (pixel N in bits [7:0], pixel N+1 in bits [15:8], etc.).
 
 | Signal | Direction | Width | Description |
 |---|---|---|---|
 | `clk` | Input | 1 | System clock |
-| `en` | Input | 1 | Enable. Must be high for read or write. |
-| `we` | Input | 1 | Write enable. High = write, low = read. |
-| `addr` | Input | 17 | Byte address. 0 to 76,799 for a 320×240 frame. |
-| `wdata` | Input | 8 | Write data. |
-| `rdata` | Output | 8 | Read data. Valid one cycle after addr with en=1, we=0. |
+| `en` | Input | 1 | Enable |
+| `we` | Input | 1 | Write enable |
+| `addr` | Input | 15 | Word address. 0 to 19,199 for a 320×240 frame. |
+| `wdata` | Input | 32 | Write data (4 pixels) |
+| `rdata` | Output | 32 | Read data. Valid one cycle after `en=1, we=0`. |
 
 ---
 
@@ -134,7 +130,9 @@ Both BRAMs present the following synchronous single-port interface to the accele
 
 ### 4.1 Overview
 
-The image processing accelerator reads a raw grayscale frame from Frame BRAM A, applies Sobel edge detection, and writes the result to Frame BRAM B. The CPU configures and starts the accelerator via the Wishbone CSR interface.
+The image processing accelerator streams 32-bit words (4 pixels) from the Input FIFO, processes them, and writes results to Frame BRAM B. Processing begins as pixels arrive - no full-frame buffering on the input side. The CPU configures and starts the accelerator via the Wishbone CSR interface; in `auto_start` mode the pipeline runs without CPU involvement after initial setup.
+
+The reference implementation provided to students performs pixel inversion (`output = ~input`). Students replace this with Sobel edge detection by implementing the `algo_sel=1` branch in the accelerator.
 
 ### 4.2 The Sobel Algorithm
 
@@ -160,7 +158,7 @@ The output pixel is G clamped to [0, 255]. Pixels on the image border where the 
 
 ### 4.3 Performance Requirement
 
-Would be nice to set a performance requirement like at least 4 pixels per clock cycle. Although at a 50 MHz system clock:
+The accelerator processes one 32-bit word (4 pixels) per clock cycle when the FIFO is not empty. At 50 MHz this gives:
 
 ```
    320 × 240 pixels / 4 pixels per cycle / 50 MHz = 384 µs per frame
@@ -168,14 +166,14 @@ Would be nice to set a performance requirement like at least 4 pixels per clock 
    → Accelerator has ~86× headroom vs camera rate
 ```
 
-The 4 pixel/cycle is quite faster than the camera but we might replace with a faster camera later.
+The accelerator therefore spends most of its time stalled waiting for the camera. The Input FIFO absorbs timing differences between the camera and the accelerator.
 
-### 4.4 Design Hints (HIDEN FROM STUDENTS, reveal if they struggle)
+### 4.4 Design Hints (HIDDEN FROM STUDENTS - reveal if they struggle)
 
-- The Sobel kernel requires access to three rows of pixels simultaneously. Think about what you need to store to have those three rows available as the image streams through.
-- A pipelined datapath can begin computing a new output pixel every cycle once the pipeline is filled, even if each individual computation takes multiple stages.
-- The Sobel kernel values are only ±1 and ±2, so all 8 multiplications reduce to additions and a single left shift.
-- Consider what happens at the edges of the image - your design must handle boundaries without reading out-of-bounds addresses.
+- Data arrives as a stream from a FIFO, 4 pixels per 32-bit word. The Sobel kernel needs three rows simultaneously - you will need internal line buffers to hold rows N-1 and N while row N+1 streams in.
+- A pipelined datapath can produce one output pixel per cycle once the pipeline is filled, even if each individual computation takes multiple stages.
+- The Sobel kernel values are only ±1 and ±2, so all multiplications reduce to additions and a single left shift.
+- Consider what happens at image borders - your design must handle boundary pixels without reading out-of-bounds addresses.
 
 
 
@@ -231,23 +229,22 @@ Students must measure and report the following at each stage:
 
 Each subproject receives a self-contained Verilog testbench that exercises the accelerator in isolation. The testbench:
 
-- Pre-loads a 320×240 synthetic test image into the source BRAM at time zero
+- Streams a 320×240 synthetic test image into the Input FIFO word by word
 - Instantiates the student's accelerator module under test
 - Drives the Wishbone CSR interface to configure and start the accelerator
-- Monitors the destination BRAM (or TX FIFO) for output data
+- Monitors Frame BRAM B (or TX FIFO) for output data
 - Compares output against a golden reference and reports pass/fail
 - Reports elapsed clock cycles for throughput calculation
 
-Make the testbench simple so the students can modify it to their needs. But it must be there so they have something to start with.
-
+Make the testbench simple so students can modify it. It must be there so they have something to start from.
 
 ## 8. System Integration
 
-Integration in Phase 5 is a supervised activity. The following must be resolved jointly:
+Integration is a supervised activity. The following must be resolved jointly:
 
-- **Clock domain crossing:** both accelerators share the 50 MHz system clock. The FTDI interface runs on the 60 MHz CLKOUT from the FT2232H chip. The TX FIFO is an asynchronous FIFO crossing this boundary - this is provided by the framework.
-- **Frame synchronisation:** the camera interface raises an interrupt when a new frame is written to Frame BRAM A. The CPU interrupt handler starts the image processing accelerator. Students must ensure their done/busy status registers are correctly implemented so the CPU can sequence the two accelerators without race conditions.
-- **Backpressure:** if the TX FIFO fills, the compression accelerator must stall rather than drop data. The FIFO full signal must be respected.
+- **Clock domain crossing:** both accelerators share the 50 MHz system clock. The FTDI interface runs on the 60 MHz CLKOUT from the FT2232H chip. The TX FIFO is an asynchronous FIFO crossing this boundary - provided by the framework.
+- **Frame synchronisation:** in `auto_start` mode the pipeline sequences itself via `frame_ready_i` and `FRAME_COUNT`. In manual mode the CPU interrupt handler starts each stage. Students must ensure `done`/`busy` flags are correctly implemented so the CPU can sequence accelerators without race conditions.
+- **Backpressure:** the Input FIFO asserts `full` to stall the camera interface. If the TX FIFO fills, the compression accelerator must stall rather than drop data.
 
 ---
 
@@ -258,8 +255,8 @@ Integration in Phase 5 is a supervised activity. The following must be resolved 
 | OV7670 raw output (YUV422) | ~18 MB/s | Full 640×480 @ 30 fps |
 | Y channel only at QVGA | ~2.3 MB/s | 320×240 × 30 fps × 1 byte |
 | After Sobel (same size) | ~2.3 MB/s | Lossless transform, same frame size |
-| After RLE (typical) | ~0.5–1.5 MB/s | Depends on image content |
-| After LZSS / Delta+Rice | ~0.3–0.8 MB/s | Estimated 3–8× compression |
+| After RLE (typical) | ~0.5-1.5 MB/s | Depends on image content |
+| After LZSS / Delta+Rice | ~0.3-0.8 MB/s | Estimated 3-8× compression |
 | FTDI sync FIFO budget | ~40 MB/s | FT2232H in synchronous FIFO mode |
 
 The bandwidth budget shows significant headroom. Even uncompressed QVGA at 30 fps (2.3 MB/s) fits within the FTDI budget. Compression is therefore primarily a design and algorithm exercise rather than a strict necessity at this resolution - which means students can verify the pipeline is working before compression is fully implemented.

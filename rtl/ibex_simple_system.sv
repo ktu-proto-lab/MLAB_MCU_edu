@@ -70,8 +70,7 @@ module ibex_simple_system #(
   //==================================================
 
   localparam int NUM_MASTERS        = 3;
-  localparam int NUM_SLAVES         = 6;
-  localparam int PIT_SLAVE_PORT_NUM = 4;
+  localparam int NUM_SLAVES         = 7;
 
   //==================================================
   // Memory mapped device base addresses
@@ -99,6 +98,9 @@ module ibex_simple_system #(
 
   localparam [31:0] pit_base_addr   = `PIT_BASE_ADDR;
   localparam [31:0] pit_size        = 'h10; // CTRL, MOD and CNT regs
+
+  localparam [31:0] sobel_base_addr = `SOBEL_BASE_ADDR;
+  localparam [31:0] sobel_size      = 'h0C; // CTRL, STATUS, FRAME_COUNT
 
   //==================================================
   // Instantiate modules
@@ -168,7 +170,7 @@ module ibex_simple_system #(
 
       .scan_rst_n           (1'b0));
 
-  // Instruction and Data memories TODO switch to PDK SRAM when we get it
+  // Instruction and Data memories
   wb_sram_2048x32 #(
 `ifdef BOOT_SKIP
     .MEMInitFile_1(IMEM_1_InitFile),
@@ -256,9 +258,63 @@ module ibex_simple_system #(
 
   // Programmable Interrupt Timer module
   wb_pit u_pit (
-      .wb(wbs[PIT_SLAVE_PORT_NUM]),
+      .wb(wbs[4]),
 
       .pit_irq_o  (pit_irq)
+  );
+
+  // Camera FIFO signals
+  logic        fifo_wr_en, fifo_rd_en;
+  logic        fifo_full,  fifo_empty;
+  logic [31:0] fifo_din,   fifo_dout;
+  logic [10:0] fifo_data_count;
+
+  // Frame BRAM B port wires
+  logic        sobel_dst_en, sobel_dst_we;
+  logic [14:0] sobel_dst_addr;
+  logic [31:0] sobel_dst_wdata, sobel_dst_rdata;
+
+  // Input FIFO: camera interface writes, sobel_acc reads
+  camera_fifo u_camera_fifo (
+      .clk        (clk_sys),
+      .srst       (~rst_sync_n),   // active-high sync reset
+      .din        (fifo_din),
+      .wr_en      (fifo_wr_en),
+      .rd_en      (fifo_rd_en),
+      .dout       (fifo_dout),
+      .full       (fifo_full),
+      .empty      (fifo_empty),
+      .data_count (fifo_data_count)
+  );
+
+  // Tie camera-side inputs low until camera interface is integrated
+  assign fifo_din   = 32'h0;
+  assign fifo_wr_en = 1'b0;
+
+  // Frame BRAM B - processed frame (destination for edge detection)
+  bram u_frame_bram_b (
+      .clk   (clk_sys),
+      .en    (sobel_dst_en),
+      .we    (sobel_dst_we),
+      .addr  (sobel_dst_addr),
+      .wdata (sobel_dst_wdata),
+      .rdata (sobel_dst_rdata)
+  );
+
+  // Edge detection accelerator
+  sobel_acc u_sobel_acc (
+      .wb            (wbs[6]),
+      .frame_ready_i (1'b0),
+
+      .fifo_empty    (fifo_empty),
+      .fifo_dout     (fifo_dout),
+      .fifo_rd_en    (fifo_rd_en),
+
+      .dst_en    (sobel_dst_en),
+      .dst_we    (sobel_dst_we),
+      .dst_addr  (sobel_dst_addr),
+      .dst_wdata (sobel_dst_wdata),
+      .dst_rdata (sobel_dst_rdata)
   );
 
   //==================================================
@@ -268,8 +324,8 @@ module ibex_simple_system #(
        wb_interconnect_sharedbus
          #(.numm      (NUM_MASTERS),
            .nums      (NUM_SLAVES),
-           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr}),
-           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size}))
+           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, sobel_base_addr}),
+           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, sobel_size}))
        u_wb_interconnect
          (.wbm, .wbs);
 endmodule
