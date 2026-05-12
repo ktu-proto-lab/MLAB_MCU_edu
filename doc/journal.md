@@ -68,3 +68,23 @@ Rokas
 
 ### Next
 
+
+## 2026-04-24
+
+Rokas
+
+### Notes
+https://www.reddit.com/r/embedded/comments/bj9cc4/loading_of_binary_files/
+https://sourceware.org/binutils/docs/ld/Output-Section-LMA.html
+https://stackoverflow.com/questions/57181652/understanding-linker-script-noload-sections-in-embedded-software
+https://mcuoneclipse.com/2014/04/19/gnu-linker-can-you-not-initialize-my-variable/
+
+- Loader address (LMA) – where section will be in flash.
+- Virtual addresses (VMA) – the address relative to where it will run once loaded into memory
+
+### Did
+-
+
+### Next
+
+
