@@ -58,6 +58,7 @@
 ../../rtl/peripherals/sobel_acc.sv
 ../../rtl/peripherals/bram.sv
 
+../../fpga/IP/fifo_generator_v13_2_rfs.v
 ../../fpga/IP/fifo_generator_vlog_beh.v
 ../../fpga/IP/camera_fifo.v
 
@@ -76,6 +77,6 @@
 ../../rtl/ibex_simple_system.sv
 
 ../../tb/misc/24CS512.sv
-../../tb/tb_sobel_acc.sv
+../../tb/sobel_acc_tb.sv
 
 

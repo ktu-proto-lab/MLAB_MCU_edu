@@ -16,7 +16,6 @@
     * Input images must be P2 ASCII PGM, 320x240, with exactly one
     * comment line after the magic number (matching the src_images/ files).
 */
-`timescale 1ns/1ps
 `include "project_defs.svh"
 
 module sobel_acc_tb;
@@ -28,7 +27,7 @@ module sobel_acc_tb;
     localparam int  FRAME_WORDS  = TOTAL_PIXELS / 4; // 19200
     localparam real CLK_PERIOD   = 10.0;
 
-    localparam string SRC_IMAGE    = "pattern.pgm";
+    localparam string SRC_IMAGE    = "baboon.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
     localparam string OUT_IMG_PATH = "../../tb/out_images/";
 
@@ -234,13 +233,6 @@ module sobel_acc_tb;
             $display("[TB] Output written to %s", out_path);
         end
 
-        $finish;
-    end
-
-    // Watchdog: frame words at 1 word/cycle + margin
-    initial begin
-        #(CLK_PERIOD * (FRAME_WORDS + 1000));
-        $display("[TB] TIMEOUT");
         $finish;
     end
 

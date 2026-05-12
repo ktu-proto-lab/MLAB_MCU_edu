@@ -102,13 +102,15 @@ module sobel_acc (
 
     state_t      state;
     logic [31:0] wr_ptr;
-
-    logic wb_wr;
+    logic wb_wr, do_start;
+    
     assign wb_wr = wb.cyc & wb.stb & wb.we & ~wb.stall;
 
-    logic do_start;
     assign do_start = (wb_wr && wb.adr[3:2] == 2'h0 && wb_wdata[0]) ||
                       (ctrl_auto_start && csr_frame_ready && state == IDLE);
+
+    assign fifo_rd_en = (state == RUN) && !fifo_empty;
+
 
     always_ff @(posedge wb.clk or negedge wb.rst) begin
         if (!wb.rst) begin
@@ -121,13 +123,11 @@ module sobel_acc (
             csr_error       <= 1'b0;
             csr_frame_count <= 32'h0;
             wr_ptr          <= 32'h0;
-            fifo_rd_en      <= 1'b0;
             dst_en          <= 1'b0;
             dst_we          <= 1'b0;
             dst_addr        <= 15'h0;
             dst_wdata       <= 32'h0;
         end else begin
-            fifo_rd_en <= 1'b0;
             dst_en     <= 1'b0;
             dst_we     <= 1'b0;
 
@@ -160,8 +160,6 @@ module sobel_acc (
                 // Consume one word per cycle, stall when FIFO is empty.
                 RUN: begin
                     if (!fifo_empty) begin
-                        fifo_rd_en <= 1'b1;
-
                         dst_en    <= 1'b1;
                         dst_we    <= 1'b1;
                         dst_addr  <= wr_ptr[14:0];
