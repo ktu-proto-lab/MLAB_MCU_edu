@@ -77,6 +77,4 @@
 ../../rtl/ibex_simple_system.sv
 
 ../../tb/misc/24CS512.sv
-../../tb/sobel_acc_tb.sv
-
 
