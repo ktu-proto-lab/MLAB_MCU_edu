@@ -8,24 +8,17 @@
     * them, and writes results to Frame BRAM B.
     *
     * Register map (word-aligned, byte offsets):
-    *   0x00  CTRL        R/W  bit[0]: start      - write 1 to begin; self-clears when done
-    *                          bit[1]: auto_start  - start automatically on frame_ready
-    *                          bit[2]: algo_sel    - 0: inversion (default)  1: Sobel (student impl)
+    *   0x00  CTRL        R/W  bit[0]: auto_start  - start automatically when FIFO is non-empty
+    *                          bit[1]: algo_sel    - 0: inversion (default)  1: Sobel (student impl)
     *   0x04  STATUS      RO   bit[0]: busy
     *                          bit[1]: done        - held until next CTRL write
-    *                          bit[2]: frame_ready - set when BRAM A is full; cleared on start
-    *                          bit[3]: error
+    *                          bit[2]: error
     *   0x08  FRAME_COUNT RO   increments each completed frame; wraps at 2^32
-    *
-    * frame_ready_i is asserted by the camera interface for one cycle when a
-    * full frame has been written.
     *
     *   Each 32-bit word (4 pixels) costs 2 cycles (one FETCH + one WRITE).
 */
 module sobel_acc (
     wb_if.slave  wb,
-
-    input  logic        frame_ready_i,
 
     input  logic        fifo_empty,
     input  logic [31:0] fifo_dout,
@@ -34,9 +27,8 @@ module sobel_acc (
     output logic        dst_en,
     output logic        dst_we,
     output logic [14:0] dst_addr,
-    output logic [31:0] dst_wdata,
-    input  logic [31:0] dst_rdata
-);
+    output logic [31:0] dst_wdata
+    );
 
     localparam int FRAME_WORDS = 19200;
 
@@ -52,7 +44,6 @@ module sobel_acc (
     logic        ctrl_algo_sel,   ctrl_algo_sel_next;
     logic        csr_busy,        csr_busy_next;
     logic        csr_done,        csr_done_next;
-    logic        csr_frame_ready, csr_frame_ready_next;
     logic        csr_error,       csr_error_next;
     logic [31:0] csr_frame_count, csr_frame_count_next;
     logic        wb_wr, do_start;
@@ -87,9 +78,6 @@ module sobel_acc (
 
     assign wb_wr = wb.cyc & wb.stb & wb.we & ~wb.stall;
 
-    assign do_start = (wb_wr && wb.adr[3:2] == 2'h0 && wb_wdata[0]) ||
-                      (ctrl_auto_start && csr_frame_ready && state == IDLE);
-
     assign fifo_rd_en = (state == RUN) && !fifo_empty;
 
     // -------------------------------------------------------------------------
@@ -97,8 +85,8 @@ module sobel_acc (
     // -------------------------------------------------------------------------
     always_comb begin
         case (wb.adr[3:2])
-            2'h0:    wb_rdata = {29'h0, ctrl_algo_sel, ctrl_auto_start, csr_busy};
-            2'h1:    wb_rdata = {28'h0, csr_error, csr_frame_ready, csr_done, csr_busy};
+            2'h0:    wb_rdata = {30'h0, ctrl_algo_sel, ctrl_auto_start};
+            2'h1:    wb_rdata = {29'h0, csr_error, csr_done, csr_busy};
             2'h2:    wb_rdata = csr_frame_count;
             default: wb_rdata = 32'h0;
         endcase
@@ -115,7 +103,6 @@ module sobel_acc (
             ctrl_algo_sel   <= 1'b0;
             csr_busy        <= 1'b0;
             csr_done        <= 1'b0;
-            csr_frame_ready <= 1'b0;
             csr_error       <= 1'b0;
             csr_frame_count <= 32'h0;
         end else begin
@@ -125,7 +112,6 @@ module sobel_acc (
             ctrl_algo_sel   <= ctrl_algo_sel_next;
             csr_busy        <= csr_busy_next;
             csr_done        <= csr_done_next;
-            csr_frame_ready <= csr_frame_ready_next;
             csr_error       <= csr_error_next;
             csr_frame_count <= csr_frame_count_next;
         end
@@ -135,14 +121,13 @@ module sobel_acc (
     // FSM registers
     // -------------------------------------------------------------------------
     always_comb begin
-        // Default: hold all registers
+        // Defaults
         state_next           = state;
         wr_ptr_next          = wr_ptr;
         ctrl_auto_start_next = ctrl_auto_start;
         ctrl_algo_sel_next   = ctrl_algo_sel;
         csr_busy_next        = csr_busy;
         csr_done_next        = csr_done;
-        csr_frame_ready_next = csr_frame_ready;
         csr_error_next       = csr_error;
         csr_frame_count_next = csr_frame_count;
 
@@ -152,22 +137,17 @@ module sobel_acc (
         dst_addr  = 15'h0;
         dst_wdata = 32'h0;
 
-        // Latch frame_ready pulse from camera interface
-        if (frame_ready_i)
-            csr_frame_ready_next = 1'b1;
-
         // CPU write to CTRL register: update config bits, clear done
         if (wb_wr && wb.adr[3:2] == 2'h0) begin
-            ctrl_auto_start_next = wb_wdata[1];
-            ctrl_algo_sel_next   = wb_wdata[2];
+            ctrl_auto_start_next = wb_wdata[0];
+            ctrl_algo_sel_next   = wb_wdata[1];
             csr_done_next        = 1'b0;
         end
 
         case (state)
             // -----------------------------------------------------------------
             IDLE: begin
-                if (do_start) begin
-                    csr_frame_ready_next = 1'b0;
+                if (ctrl_auto_start && !fifo_empty) begin
                     csr_done_next        = 1'b0;
                     csr_error_next       = 1'b0;
                     csr_busy_next        = 1'b1;
@@ -201,7 +181,6 @@ module sobel_acc (
             // -----------------------------------------------------------------
             DONE: begin
                 if (do_start) begin
-                    csr_frame_ready_next = 1'b0;
                     csr_done_next        = 1'b0;
                     csr_error_next       = 1'b0;
                     csr_busy_next        = 1'b1;

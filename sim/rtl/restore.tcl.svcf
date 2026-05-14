@@ -1,10 +1,10 @@
-# SimVision Command Script (Tue May 12 06:33:31 PM EEST 2026)
+# SimVision Command Script (Thu May 14 05:09:18 PM EEST 2026)
 #
 # Version 25.03.s006
 #
 # You can restore this configuration with:
 #
-#      xrun -sv -access +rw +gui -timescale 1ns/1ns -clean +define+RANDOM_NUMBER=248 -define FUNCTIONAL -f files.f ../../tb/sobel_full_tb.sv -s -input restore.tcl
+#      xrun -sv -access +rw +gui -timescale 1ns/1ns -clean +define+RANDOM_NUMBER=37 -define FUNCTIONAL -f files.f ../../tb/sobel_full_tb.sv -s -input restore.tcl
 #
 
 
@@ -19,6 +19,10 @@ preferences set toolbar-Standard-Console {
 preferences set toolbar-Search-Console {
   usual
   position -pos 2
+}
+preferences set toolbar-Standard-WaveWindow {
+  usual
+  position -pos 4
 }
 preferences set plugin-enable-groupscope 0
 preferences set plugin-enable-interleaveandcompare 0
@@ -73,7 +77,7 @@ preferences set toolbar-sendToIndago-WaveWindow {
 # Simulator
 #
 database require simulator -hints {
-	simulator "xrun -sv -access +rw +gui -timescale 1ns/1ns -clean +define+RANDOM_NUMBER=248 -define FUNCTIONAL -f files.f ../../tb/sobel_full_tb.sv -s -input restore.tcl"
+	simulator "xrun -sv -access +rw +gui -timescale 1ns/1ns -clean +define+RANDOM_NUMBER=37 -define FUNCTIONAL -f files.f ../../tb/sobel_full_tb.sv -s -input restore.tcl"
 }
 #
 # Groups
@@ -113,6 +117,9 @@ catch {group new -name UART_TX -overlay 0}
 catch {group new -name sobel_acc -overlay 0}
 catch {group new -name {Group 2} -overlay 0}
 catch {group new -name bram_b -overlay 0}
+catch {group new -name camera_fifo -overlay 0}
+catch {group new -name {Group 3} -overlay 0}
+catch {group new -name sobel_acc_wb_s -overlay 0}
 group using TB
 group set -overlay 0
 group set -comment {}
@@ -143,7 +150,6 @@ group using IMEM_Swb
 group set -overlay 0
 group set -comment {}
 group clear 0 end
-
 
 group using IMEM_wb_s
 group set -overlay 0
@@ -271,13 +277,11 @@ group set -comment {}
 group clear 0 end
 
 group insert \
-    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.int_o}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.ext_padoe_o[9:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.ext_pad_o[9:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.ext_pad_i[9:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_gpio.aux_i[9:0]}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_gpio.u_wb_gpio.rgpio_ptrig[9:0]}]} ] \
     GPIO_wb_s
 group using GPIO_wb_s
@@ -355,7 +359,6 @@ group using EEPROM_regs
 group set -overlay 0
 group set -comment {}
 group clear 0 end
-
 
 group using Bootloader_wb_m
 group set -overlay 0
@@ -478,7 +481,6 @@ group set -overlay 0
 group set -comment {}
 group clear 0 end
 
-
 group using UART_wb_s
 group set -overlay 0
 group set -comment {}
@@ -488,7 +490,6 @@ group using UART_RX
 group set -overlay 0
 group set -comment {}
 group clear 0 end
-
 
 group using SRAM1
 group set -overlay 0
@@ -531,42 +532,15 @@ group set -comment {}
 group clear 0 end
 
 group insert \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.wr_ptr[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.wb_wr}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.wb_wdata[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.wb_rdata[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.state_t}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.state[1:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.frame_ready_i}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_rd_en}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_empty}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_dout[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_we}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_wdata[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_rdata[31:0]}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_addr[14:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.do_start}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.ctrl_auto_start}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.ctrl_algo_sel}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_frame_ready}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_frame_count[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_error}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_done}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_busy}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.FRAME_WORDS}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.we}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.stb}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.stall}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.sel[3:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.rst}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.err}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.dat_o[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.dat_i[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.cyc}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.clk}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.adr[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.ack}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_en}]} ]
+    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_en}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_wdata[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_we}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_dout[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_empty}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.wr_ptr[31:0]}]} ] \
+    sobel_acc_wb_s
 group using {Group 2}
 group set -overlay 0
 group set -comment {}
@@ -584,6 +558,43 @@ group insert \
     [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.en}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.clk}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.addr[14:0]}]} ]
+group using camera_fifo
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {simulator::[format {simple_system_tb.fifo_i}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.clk}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.din[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.dout[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.empty}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_dout[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_empty}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_rd_en}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.full}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.rd_en}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.rst}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.wr_en}]} ]
+group using {Group 3}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using sobel_acc_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.cyc}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.stb}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.we}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.adr[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.dat_i[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.dat_o[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.sel[3:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.ack}]} ]
 
 #
 # Mnemonic Maps
@@ -603,10 +614,10 @@ if {[catch {window new WatchList -name "Design Browser 1" -geometry 1046x892+512
 }
 window target "Design Browser 1" on
 browser using {Design Browser 1}
-browser set -scope [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b}]} ]
+browser set -scope [subst  {simulator::[format {simple_system_tb.dut.u_gpio}]} ]
 browser set \
     -signalsort name
-browser yview see [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b}]} ]
+browser yview see [subst  {simulator::[format {simple_system_tb.dut.u_gpio}]} ]
 browser timecontrol set -lock 0
 
 #
@@ -624,14 +635,12 @@ waveform set \
     -signalwidth 173 \
     -units ns \
     -valuewidth 82
-waveform baseline set -time 191,168,750ps
+waveform baseline set -time 224,156,250ps
 
 
 set groupId0 [waveform add -groups TB]
 
 set groupId1 [waveform find -name UART_RX]
-waveform hierarchy collapse $groupId1
-
 
 set groupId1 [waveform find -name UART_TX]
 waveform hierarchy collapse $groupId0
@@ -707,7 +716,6 @@ set groupId0 [waveform add -groups GPIO]
 set groupId1 [waveform find -name GPIO_wb_s]
 waveform hierarchy collapse $groupId1
 
-waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups I2C]
@@ -729,74 +737,30 @@ waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups EEPROM_regs]
-waveform hierarchy collapse $groupId0
-
 
 set groupId0 [waveform add -groups sobel_acc]
+
+set groupId1 [waveform find -name sobel_acc_wb_s]
+
+
+
+set groupId0 [waveform add -groups camera_fifo]
 set gpGlist0 [waveform hierarchy contents $groupId0]
 set gpID0 [lindex $gpGlist0 0]
 foreach {name attrs} [subst  {
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.wr_ptr[31:0]}]} {-radix %d}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.wb_wr}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.wb_wdata[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.wb_rdata[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.state_t}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.state[1:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.frame_ready_i}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_rd_en}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_empty}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_dout[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_we}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_wdata[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_rdata[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_addr[14:0]}]} {-radix %d}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.do_start}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.ctrl_auto_start}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.ctrl_algo_sel}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_frame_ready}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_frame_count[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_error}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_done}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_busy}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.FRAME_WORDS}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.we}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.stb}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.stall}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.sel[3:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.rst}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.err}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.dat_o[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.dat_i[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.cyc}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.clk}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.adr[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.wbs[6].slave.ack}]} {}
-    {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_en}]} {}
+    {simulator::[format {simple_system_tb.fifo_i}]} {-color #0099ff}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.clk}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.din[31:0]}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.dout[31:0]}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.empty}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_dout[31:0]}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_empty}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_rd_en}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.full}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.rd_en}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.rst}]} {}
+    {simulator::[format {simple_system_tb.dut.u_camera_fifo.wr_en}]} {}
 }] childcmds {
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
     {}
     {}
     {}
@@ -824,10 +788,7 @@ foreach {name attrs} [subst  {
 }
 
 
-set groupId0 [waveform add -groups bram_b]
-
-
-waveform xview limits 199890.281ns 200469.275ns
+waveform xview limits 0 440193.75ns
 
 #
 # Waveform Window Links
@@ -836,8 +797,8 @@ waveform xview limits 199890.281ns 200469.275ns
 #
 # Memory Viewer windows
 #
-if {[catch {window new MemViewer -name "Memory Viewer 1" -geometry 1108x686+585+130}] != ""} {
-    window geometry "Memory Viewer 1" 1108x686+585+130
+if {[catch {window new MemViewer -name "Memory Viewer 1" -geometry 1108x686+526+109}] != ""} {
+    window geometry "Memory Viewer 1" 1108x686+526+109
 }
 window target "Memory Viewer 1" on
 memviewer using {Memory Viewer 1}
@@ -848,7 +809,12 @@ memviewer set \
 -addressradix default \
 -addressorder MSBtoLSB
 
-memviewer add [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.mem[0:19199]}]} ]
+memviewer add [subst  {simulator::[format {simple_system_tb.src_mem[0:19199]}]} ]
+
+# Load memory viewer instances
+memviewer add -instanceonly  \
+	[subst  {simulator::[format {simple_system_tb.pixels_in[0:76799]}]} ] \
+	[subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.mem[0:19199]}]} ]
 
 memviewer sidebar visibility partial
 

@@ -267,7 +267,6 @@ module ibex_simple_system #(
   logic        fifo_wr_en, fifo_rd_en;
   logic        fifo_full,  fifo_empty;
   logic [31:0] fifo_din,   fifo_dout;
-  logic [10:0] fifo_data_count;
 
   // Frame BRAM B port wires
   logic        sobel_dst_en, sobel_dst_we;
@@ -275,19 +274,18 @@ module ibex_simple_system #(
   logic [31:0] sobel_dst_wdata, sobel_dst_rdata;
 
   // Input FIFO: camera interface writes, sobel_acc reads
-  camera_fifo u_camera_fifo (
-      .clk        (clk_sys),
-      .srst       (~rst_sync_n),   // active-high sync reset
-      .din        (fifo_din),
-      .wr_en      (fifo_wr_en),
-      .rd_en      (fifo_rd_en),
-      .dout       (fifo_dout),
-      .full       (fifo_full),
-      .empty      (fifo_empty),
-      .data_count (fifo_data_count)
+  fifo_fwft #(.DATA_WIDTH(32), .DEPTH_WIDTH(10)) u_camera_fifo (
+      .clk   (clk_sys),
+      .rst   (~rst_sync_n),
+      .din   (fifo_din),
+      .wr_en (fifo_wr_en),
+      .rd_en (fifo_rd_en),
+      .dout  (fifo_dout),
+      .full  (fifo_full),
+      .empty (fifo_empty)
   );
 
-  // Tie camera-side inputs low until camera interface is integrated
+  // Tie camera-side inputs low until camera interface is integrated TODO: Connect camera interface here
   assign fifo_din   = 32'h0;
   assign fifo_wr_en = 1'b0;
 
@@ -298,13 +296,12 @@ module ibex_simple_system #(
       .we    (sobel_dst_we),
       .addr  (sobel_dst_addr),
       .wdata (sobel_dst_wdata),
-      .rdata (sobel_dst_rdata)
+      .rdata ()
   );
 
   // Edge detection accelerator
   sobel_acc u_sobel_acc (
       .wb            (wbs[6]),
-      .frame_ready_i (1'b0),
 
       .fifo_empty    (fifo_empty),
       .fifo_dout     (fifo_dout),
@@ -313,8 +310,7 @@ module ibex_simple_system #(
       .dst_en    (sobel_dst_en),
       .dst_we    (sobel_dst_we),
       .dst_addr  (sobel_dst_addr),
-      .dst_wdata (sobel_dst_wdata),
-      .dst_rdata (sobel_dst_rdata)
+      .dst_wdata (sobel_dst_wdata)
   );
 
   //==================================================

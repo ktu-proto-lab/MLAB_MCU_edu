@@ -58,9 +58,10 @@
 ../../rtl/peripherals/sobel_acc.sv
 ../../rtl/peripherals/bram.sv
 
-../../fpga/IP/fifo_generator_v13_2_rfs.v
-../../fpga/IP/fifo_generator_vlog_beh.v
-../../fpga/IP/camera_fifo.v
+../../deps/camera_fifo/rtl/verilog/simple_dpram_sclk.v
+../../deps/camera_fifo/rtl/verilog/fifo.v
+../../deps/camera_fifo/rtl/verilog/fifo_fwft_adapter.v
+../../deps/camera_fifo/rtl/verilog/fifo_fwft.v
 
 ../../rtl/wb/wb_gpio.sv
 ../../rtl/wb/wb_i2c.sv

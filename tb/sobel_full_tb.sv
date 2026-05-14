@@ -26,7 +26,7 @@ module simple_system_tb;
     localparam int  FRAME_WORDS  = TOTAL_PIXELS / 4;  // 19200
     localparam real CLK_PERIOD   = 12.5;              // 80 MHz
 
-    localparam string SRC_IMAGE    = "pattern.pgm";
+    localparam string SRC_IMAGE    = "baboon.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
     localparam string OUT_IMG_PATH = "../../tb/out_images/";
 
@@ -96,7 +96,7 @@ module simple_system_tb;
     // Main test
     // -------------------------------------------------------------------------
     integer fd, errors, tmp_val;
-    integer fifo_i;           // FIFO feeder index - must be module-level (static)
+    integer fifo_i = 0;           // FIFO feeder index - must be module-level (static)
     string  hdr_str, out_path;
 
     initial begin
@@ -125,6 +125,10 @@ module simple_system_tb;
         // ------------------------------------------------------------------
         // Reset
         // ------------------------------------------------------------------
+        // Force fifo inputs to inactive (in case camera interface is already connected)
+        force dut.fifo_wr_en = 1'b0;
+        force dut.fifo_din   = 32'h0;
+
         rst_sys_n = 1'b0;
         repeat(4) @(posedge clk_sys);
         rst_sys_n = 1'b1;
@@ -137,20 +141,24 @@ module simple_system_tb;
         // fifo_din and fifo_wr_en are tied to constants in RTL; override
         // them with force so the Xilinx FIFO model sees real data.
         // ------------------------------------------------------------------
-        fifo_i = 0;
-        force dut.fifo_wr_en = 1'b0;
-        force dut.fifo_din   = 32'h0;
+        // Write first entry
+        force dut.fifo_din   = src_mem[fifo_i];
+        force dut.fifo_wr_en = 1'b1;
+        @(posedge clk_sys);
+
         while (fifo_i < FRAME_WORDS) begin
-            @(posedge clk_sys);
+            
             if (!dut.fifo_full) begin
                 force dut.fifo_din   = src_mem[fifo_i];
                 force dut.fifo_wr_en = 1'b1;
+                @(posedge clk_sys);
                 fifo_i++;
             end else begin
                 force dut.fifo_wr_en = 1'b0;
+                @(posedge clk_sys);
             end
         end
-        @(posedge clk_sys);
+        @(posedge clk_sys); #1;  // latch last word before releasing
         force dut.fifo_wr_en = 1'b0;
         release dut.fifo_wr_en;
         release dut.fifo_din;
@@ -158,11 +166,10 @@ module simple_system_tb;
 
         // ------------------------------------------------------------------
         // Wait for CPU to raise GPIO0 (gpio_oe[0]=1 AND gpio_o[0]=1).
-        // gpio_o is a registered signal updated via NBA, so the iff clause
-        // correctly samples it post-NBA after the CPU's write takes effect.
         // ------------------------------------------------------------------
-        @(posedge clk_sys iff (gpio_oe[0] && gpio_o[0]));
+        wait (gpio_oe[0] && gpio_o[0]);
         $display("[TB] CPU signaled done at %0t ns.", $time);
+        @(posedge clk_sys); // To see the GPIO change in wave
 
         // ------------------------------------------------------------------
         // Verify Frame BRAM B contents against bitwise-inverted source

@@ -15,7 +15,7 @@ int main() {
     GPIO_OE  = 0x1;
     GPIO_OUT = 0x0;
 
-    // Set Start bit in accelerator (algo_sel=0: pixel inversion)
+    // Set auto_start bit in accelerator (algo_sel=0: pixel inversion)
     SOBEL_CTRL = 0x1;
 
     // Poll STATUS.done (bit 1)
