@@ -11,8 +11,8 @@
     *   0x00  CTRL        R/W  bit[0]: auto_start  - start automatically when FIFO is non-empty
     *                          bit[1]: algo_sel    - 0: inversion (default)  1: Sobel (student impl)
     *   0x04  STATUS      RO   bit[0]: busy
-    *                          bit[1]: done        - held until next CTRL write
-    *                          bit[2]: error
+    *                          bit[1]: done        - High for one cycle after a frame is finished being processed
+    *                          bit[2]: error       - Currently unused
     *   0x08  FRAME_COUNT RO   increments each completed frame; wraps at 2^32
     *
     *   Each 32-bit word (4 pixels) costs 2 cycles (one FETCH + one WRITE).

@@ -103,12 +103,27 @@ Base address: `0x6000_0000`.
 | Offset | Name | Access | Description |
 |---|---|---|---|
 | `0x00` | `CTRL` | R/W | bit[0]: `auto_start` - restart automatically on `frame_ready`. bit[1]: `algo_sel` - 0: pixel inversion, 1: Sobel (student impl). |
-| `0x04` | `STATUS` | RO | bit[0]: `busy`. bit[1]: `done` - held until next CTRL write. bit[2]: `frame_ready` - latched from camera IF; cleared on start. bit[3]: `error`. |
+| `0x04` | `STATUS` | RO | bit[0]: `busy`. bit[1]: `done` - held for one cycle. bit[2]: `error` - currently unused, should be assigned during development for recovery. |
 | `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². Read to verify pipeline liveness. |
 
-The `done` bit remains set until CTRL is written again. The CPU may poll STATUS or wait for an interrupt (interrupt support is optional).
+The CPU may poll FRAME_COUNT or wait for an interrupt (interrupt support is not currently setup).
 
-### 3.2 Frame BRAM B Port Interface
+### 3.2 FIFO Port Interface
+
+The Input FIFO (`fifo_fwft`, `DATA_WIDTH=32`, `DEPTH_WIDTH=10`) is a First Word Fall-Through FIFO. Data is available on `dout` without asserting `rd_en` first; `rd_en` advances to the next word on the following cycle.
+
+| Signal | Direction | Width | Description |
+|---|---|---|---|
+| `clk` | Input | 1 | System clock |
+| `rst` | Input | 1 | Synchronous reset, active-high |
+| `din` | Input | 32 | Write data (4 pixels, little-endian) |
+| `wr_en` | Input | 1 | Write enable. Data is pushed when `wr_en=1` and `full=0`. |
+| `full` | Output | 1 | FIFO full. Do not assert `wr_en` when high. |
+| `dout` | Output | 32 | Read data. Valid whenever `empty=0` (FWFT - no read strobe needed to present first word). |
+| `rd_en` | Input | 1 | Read advance. Assert for one cycle to consume the current word and present the next. |
+| `empty` | Output | 1 | FIFO empty. `dout` is not valid when high. |
+
+### 3.3 Frame BRAM B Port Interface
 
 Frame BRAM B is 32-bit wide and word-addressed. Four pixels are packed into each word, little-endian (pixel N in bits [7:0], pixel N+1 in bits [15:8], etc.).
 

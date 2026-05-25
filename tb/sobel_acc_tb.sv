@@ -87,19 +87,25 @@ module sobel_acc_tb;
     end
 
     // -------------------------------------------------------------------------
+    // Simulation timeout watchdog
+    // -------------------------------------------------------------------------
+    initial begin
+        #10_000_000; // 10 ms @ 100 MHz - far more than one frame needs
+        $fatal(1, "[TB] Simulation timeout at %0t ns", $time);
+    end
+
+    // -------------------------------------------------------------------------
     // DUT
     // -------------------------------------------------------------------------
     sobel_acc u_dut (
-        .wb            (wb),
-        .frame_ready_i (1'b0),
-        .fifo_empty    (fifo_empty),
-        .fifo_dout     (fifo_dout),
-        .fifo_rd_en    (fifo_rd_en),
-        .dst_en        (dst_en),
-        .dst_we        (dst_we),
-        .dst_addr      (dst_addr),
-        .dst_wdata     (dst_wdata),
-        .dst_rdata     (dst_rdata)
+        .wb         (wb),
+        .fifo_empty (fifo_empty),
+        .fifo_dout  (fifo_dout),
+        .fifo_rd_en (fifo_rd_en),
+        .dst_en     (dst_en),
+        .dst_we     (dst_we),
+        .dst_addr   (dst_addr),
+        .dst_wdata  (dst_wdata)
     );
 
     bram u_bram_b (
