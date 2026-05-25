@@ -46,7 +46,7 @@ module sobel_acc (
     logic        csr_done,        csr_done_next;
     logic        csr_error,       csr_error_next;
     logic [31:0] csr_frame_count, csr_frame_count_next;
-    logic        wb_wr, do_start;
+    logic        wb_wr;
 
     // -------------------------------------------------------------------------
     // Wishbone protocol
@@ -180,13 +180,14 @@ module sobel_acc (
 
             // -----------------------------------------------------------------
             DONE: begin
-                if (do_start) begin
+                // If auto_start jump straight into RUN state for the next frame
+                if (ctrl_auto_start && !fifo_empty) begin
                     csr_done_next        = 1'b0;
                     csr_error_next       = 1'b0;
                     csr_busy_next        = 1'b1;
                     wr_ptr_next          = 32'h0;
                     state_next           = RUN;
-                end else if (wb_wr && wb.adr[3:2] == 2'h0) begin
+                end else begin
                     state_next = IDLE;
                 end
             end

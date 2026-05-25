@@ -5,7 +5,7 @@
 |---|---|
 | **Platform** | MLAB_MCU (Ibex RISC-V) on PYNQ-Z2 (Xilinx Zynq XC7Z020) |
 | **Target** | Real-time edge-detected video streamed to PC |
-| **Student Groups** | Two groups of 2-5 students each |
+| **Student Groups** | Two groups of 2-3 students each |
 
 ---
 
@@ -60,7 +60,7 @@ The Ibex CPU acts as the control plane. It does not sit in the data path during 
 5. Compression accelerator reads from Frame BRAM B, compresses the data, and streams output into the TX FIFO.
 6. The FTDI sync FIFO interface drains the TX FIFO and sends data to the PC over USB.
 
-The pipeline is self-sustaining in steady state once configured. The CPU role is boot-time configuration, mode switching (`algo_sel`), error recovery, and liveness monitoring via `FRAME_COUNT`.
+The pipeline is self-sustaining in steady state once configured. The CPU role is boot-time configuration, error recovery, and liveness monitoring via `FRAME_COUNT`.
 
 ### 2.3 Hardware Platform
 
@@ -68,20 +68,17 @@ The pipeline is self-sustaining in steady state once configured. The CPU role is
 |---|---|---|
 | FPGA Board | PYNQ-Z2 | Xilinx Zynq XC7Z020 - 4.9 Mb BRAM, PL only (ARM core not used) |
 | Camera | OV7670 (no FIFO) | 8-bit parallel DVP, 640×480 @ 30 fps, Y channel only for grayscale |
-| USB Bridge | FT2232H | Channel A: sync FIFO data stream. Channel B: UART debug |
-| MCU Core | Ibex RISC-V (RV32IMC) | Provided as MLAB_MCU SoC |
+| USB Bridge | FT2232H | Sync FIFO data stream to PC. Could use channel B for UART debug |
 
 ### 2.4 Pixel Format
 
 All pixel data flowing between BRAMs and accelerators is defined as follows. Both teams must adhere to this specification:
 
-- 8-bit grayscale (luminance / Y channel from OV7670 YUV422 output)
+- 8-bit grayscale (probably use YUV422 output format from OV7670)
 - Row-major order: pixels stored left-to-right, top-to-bottom
 - No padding between rows
-- Frame dimensions: 320×240 pixels (QVGA)
-- Total frame size: 76,800 bytes
-
-> **Note on BRAM sizing:** two frames at 320×240 = 150 KB. The XC7Z020 has 4.9 Mb (612 KB) of BRAM, giving comfortable headroom for both frame buffers and the TX FIFO.
+- Initial frame dimensions: 320×240 pixels(QVGA). Can be pushed to 480×360 or 640x480, the camera module can be setup to output in different resolutions.
+- Total frame size: 320×240=76,800 bytes
 
 ---
 
@@ -90,8 +87,8 @@ All pixel data flowing between BRAMs and accelerators is defined as follows. Bot
 The following components are provided complete and are not student deliverables. Students should understand their interfaces but do not need to implement them.
 
 - MLAB_MCU SoC with Ibex core, memory, and Wishbone interconnect
-- OV7670 camera capture interface (DVP → Input FIFO)
-- Input FIFO (1024×32-bit FWFT, Vivado FIFO Generator IP)
+- OV7670 camera capture interface (DVP -> Input FIFO)
+- Input FIFO (1024×32-bit FWFT, can be found in `deps/camera_fifo`)
 - Frame BRAM B instantiation with fixed port definition
 - FTDI FT2232H sync FIFO interface (TX FIFO to USB)
 - Wishbone slave wrapper with CSR register map skeleton (students fill in the logic)
@@ -105,7 +102,7 @@ Base address: `0x6000_0000`.
 
 | Offset | Name | Access | Description |
 |---|---|---|---|
-| `0x00` | `CTRL` | R/W | bit[0]: `start` - manual trigger, self-clears. bit[1]: `auto_start` - restart automatically on `frame_ready`. bit[2]: `algo_sel` - 0: pixel inversion, 1: Sobel (student impl). |
+| `0x00` | `CTRL` | R/W | bit[0]: `auto_start` - restart automatically on `frame_ready`. bit[1]: `algo_sel` - 0: pixel inversion, 1: Sobel (student impl). |
 | `0x04` | `STATUS` | RO | bit[0]: `busy`. bit[1]: `done` - held until next CTRL write. bit[2]: `frame_ready` - latched from camera IF; cleared on start. bit[3]: `error`. |
 | `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². Read to verify pipeline liveness. |
 
