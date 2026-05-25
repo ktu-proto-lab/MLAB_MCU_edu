@@ -180,7 +180,7 @@ The accelerator processes one 32-bit word (4 pixels) per clock cycle when the FI
 
 The accelerator therefore spends most of its time stalled waiting for the camera. The Input FIFO absorbs timing differences between the camera and the accelerator.
 
-### 4.4 Design Hints (HIDDEN FROM STUDENTS - reveal if they struggle)
+### 4.4 Design Hints 
 
 - Data arrives as a stream from a FIFO, 4 pixels per 32-bit word. The Sobel kernel needs three rows simultaneously - you will need internal line buffers to hold rows N-1 and N while row N+1 streams in.
 - A pipelined datapath can produce one output pixel per cycle once the pipeline is filled, even if each individual computation takes multiple stages.

@@ -74,3 +74,8 @@ Run the command below if you want to analyse FIFO behaviour yourself.
 ### Next
 - Usage guide for students.
 - Compression accelerator.
+
+## 2026-05-25
+### Did
+- Guide for developing edge detection for students in `doc/edge_detection.md`
+
