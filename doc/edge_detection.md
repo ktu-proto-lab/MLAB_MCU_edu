@@ -16,7 +16,7 @@ The image processing accelerator streams 32-bit words (4 pixels packed) from the
 
 The CPU configures and starts the accelerator via the Wishbone CSR interface. In `auto_start` mode the pipeline runs frame-after-frame without CPU involvement after initial setup.
 
-A reference implementation is provided that performs pixel inversion (`output = ~input`, `algo_sel=0`). **Your task is to replace this with Sobel edge detection by implementing the `algo_sel=1` branch.**
+A reference implementation is provided that performs pixel inversion (`output = ~input`, `algo_sel=0`). **Your task is to replace this with Sobel edge detection by implementing the `algo_sel=1` branch in `rtl/peripherals/sobel_acc.sv`**
 
 The accelerator sits between the Input FIFO and Frame BRAM B. It reads from the FIFO and writes to BRAM B. The CPU only touches the CSR registers.
 
@@ -56,8 +56,8 @@ Base address: `0x6000_0000`.
 
 | Offset | Name | Access | Description |
 |---|---|---|---|
-| `0x00` | `CTRL` | R/W | bit[0]: `auto_start` - restart automatically on `frame_ready`. bit[1]: `algo_sel` - 0: pixel inversion (reference), 1: Sobel (student impl). |
-| `0x04` | `STATUS` | RO | bit[0]: `busy`. bit[1]: `done` - high for one cycle after a frame completes. bit[2]: `error` - unused; assign during development for recovery. |
+| `0x00` | `CTRL` | R/W | bit[0]: `auto_start` - restart automatically on `frame_ready`.<br>bit[1]: `algo_sel` - 0: pixel inversion (reference), 1: Sobel (student impl). |
+| `0x04` | `STATUS` | RO | bit[0]: `busy`.<br>bit[1]: `done` - high for one cycle after a frame completes.<br>bit[2]: `error` - unused; assign during development for recovery. |
 | `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². Poll to verify pipeline liveness. |
 
 ### 3.2 FIFO Port Interface
@@ -92,7 +92,7 @@ All 32-bit words carry 4 grayscale pixels, little-endian:
   bits [31:24] → pixel N+3    (rightmost in the group)
 ```
 
-Frame layout is row-major, 320 pixels wide, 240 rows. Word address = (row × 320 + col) / 4.
+<!-- Frame layout is row-major, 320 pixels wide, 240 rows. Word address = (row × 320 + col) / 4. -->
 
 ---
 

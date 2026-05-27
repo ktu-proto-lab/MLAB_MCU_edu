@@ -79,3 +79,12 @@ Run the command below if you want to analyse FIFO behaviour yourself.
 ### Did
 - Guide for developing edge detection for students in `doc/edge_detection.md`
 
+## 2026-05-27
+### Did
+- Add a top-level README
+- Add `doc/compression.md` with initial ideas
+
+### Next
+- Expand the description in `doc/compression.md`
+- Implement the framework for the compression part
+- Look at interfacing options for Compression ACC -> FTDI converter

@@ -1,8 +1,8 @@
-# Minimal RISC-V Microcontroller
+# Camera Data Streaming with Preprocessing using the MLAB MCU
 
-Simple microcontroller based on the [Ibex core](https://github.com/lowRISC/ibex)
+The MLAB_MCU is a simple microcontroller based on the [Ibex core](https://github.com/lowRISC/ibex). In the diagram below, blocks comprising the MLAB_MCU are highlighted in yellow, with `ibex_simple_system.sv` as the top-level of the design. Blocks in gray are devices external to the FPGA (EEPROM is the boot memory). Blocks in purple are components provided as part of the framework. Blocks in blue are the ones you will be implementing.
 <p align="center">
-  <img src="doc/figures/structure_diagram_wb_V3.drawio.png" alt="MCU Block Diagram" width="700">
+  <img src="doc/figures/camera_stream_bd.png" alt="MCU Block Diagram" width="700">
 </p>
 
 ---
@@ -67,7 +67,7 @@ Start simulation by executing `xrun_sim_run.sh` script in the terminal:
 ```
 Restore waveform configuration with File -> Source Command Script -> Select `restore.tcl.svcf`.
 
-If any RTL source files changed or processor software is recompiled – reload simulator (Simulation -> Reinvoke Simulator).
+If any RTL source files changed or processor software is recompiled - reload simulator (Simulation -> Reinvoke Simulator).
 <!--
 #### Verilator + gtkWave
 
@@ -82,7 +82,7 @@ Start simulation by executing `run_sim_verilator.sh` script in the terminal:
 ```
 Check simulation waveforms by opening `gtkWave.gtkw` or `output.vcd` files using a waveform viewer such as GTKWave.
 
-If any RTL source files changed or processor software is recompiled – rerun simulation script and reload GTKWave waveforms (File -> Reload Waveform or Ctrl+Shift+R).
+If any RTL source files changed or processor software is recompiled - rerun simulation script and reload GTKWave waveforms (File -> Reload Waveform or Ctrl+Shift+R).
 
 ##### Windows
 

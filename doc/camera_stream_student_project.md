@@ -155,9 +155,9 @@ For each pixel at position (x, y), two 3×3 convolution kernels are applied:
 ```
         Gx (horizontal)        Gy (vertical)
 
-       -1   0  +1            -1  -2  -1
-       -2   0  +2             0   0   0
        -1   0  +1            +1  +2  +1
+       -2   0  +2             0   0   0
+       -1   0  +1            -1  -2  -1
 ```
 
 Each kernel is applied to the 3×3 neighbourhood of pixels surrounding (x, y). The results are combined to give the gradient magnitude:
