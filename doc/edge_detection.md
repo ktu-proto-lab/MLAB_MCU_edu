@@ -60,39 +60,25 @@ Base address: `0x6000_0000`.
 | `0x04` | `STATUS` | RO | bit[0]: `busy`.<br>bit[1]: `done` - high for one cycle after a frame completes.<br>bit[2]: `error` - unused; assign during development for recovery. |
 | `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². Poll to verify pipeline liveness. |
 
-### 3.2 FIFO Port Interface
+### 3.2 Camera FIFO Port Interface
 
-The Input FIFO (`fifo_fwft`, `DATA_WIDTH=32`, `DEPTH_WIDTH=10`) is a First Word Fall-Through FIFO. Data is available on `fifo_dout` without asserting `fifo_rd_en` first; `fifo_rd_en` advances to the next word on the following cycle.
+The camera FIFO (`fifo_fwft`, `DATA_WIDTH=8`, `DEPTH_WIDTH=10`) carries one grayscale pixel per word. The OV7670 delivers pixels one byte at a time, so this matches the camera's native output directly. The FIFO is First Word Fall-Through: `fifo_dout` is valid as soon as `fifo_empty=0`, with no read strobe required to present the first byte. Asserting `fifo_rd_en` advances to the next pixel on the following cycle.
 
 | Signal | Direction | Width | Description |
 |---|---|---|---|
 | `fifo_empty` | Input | 1 | FIFO empty. `fifo_dout` is not valid when high. Stall the datapath. |
-| `fifo_dout` | Input | 32 | Read data. Valid whenever `fifo_empty=0`. |
-| `fifo_rd_en` | Output | 1 | Read advance. Assert for one cycle to consume the current word and present the next. |
+| `fifo_dout` | Input | 8 | One grayscale pixel. Valid whenever `fifo_empty=0`. |
+| `fifo_rd_en` | Output | 1 | Read advance. Assert for one cycle to consume the current pixel and present the next. |
 
-### 3.4 Frame BRAM B Port Interface
+### 3.4 Intermediate FIFO Port Interface
 
-Frame BRAM B is 32-bit wide and word-addressed. Four pixels are packed into each word, little-endian (pixel N in bits [7:0], pixel N+1 in bits [15:8], etc.).
+Processed pixels are written one byte at a time to the intermediate FIFO, which feeds the compression accelerator downstream. The accelerator must stall both reads and writes when `out_full` is asserted.
 
 | Signal | Direction | Width | Description |
 |---|---|---|---|
-| `dst_en` | Output | 1 | Enable |
-| `dst_we` | Output | 1 | Write enable |
-| `dst_addr` | Output | 15 | Word address. 0 to 19,199 for a 320×240 frame. |
-| `dst_wdata` | Output | 32 | Write data (4 pixels) |
-
-### 3.5 Pixel Packing
-
-All 32-bit words carry 4 grayscale pixels, little-endian:
-
-```
-  bits [7:0]   → pixel N       (leftmost in the group)
-  bits [15:8]  → pixel N+1
-  bits [23:16] → pixel N+2
-  bits [31:24] → pixel N+3    (rightmost in the group)
-```
-
-<!-- Frame layout is row-major, 320 pixels wide, 240 rows. Word address = (row × 320 + col) / 4. -->
+| `out_wr_en` | Output | 1 | Write enable. Assert for one cycle to push one processed pixel. |
+| `out_din` | Output | 8 | One processed grayscale pixel. Must be valid when `out_wr_en=1`. |
+| `out_full` | Input | 1 | Intermediate FIFO full. Do not assert `out_wr_en` when high; also stop consuming from the camera FIFO. |
 
 ---
 
@@ -102,7 +88,7 @@ All 32-bit words carry 4 grayscale pixels, little-endian:
 
 When you first start developing the edge detection algorithm inside the `sobel_acc` accelerator you will want to test in in isolation. For this reason `tb/sobel_acc_tb.sv` is provided.
 
-The testbench emulates the FWFT FIFO directly, drives the Wishbone CSR interface, and shadows all BRAM B writes into an array for verification. After the frame completes, the array is written out as a P2 ASCII PGM to `tb/out_images/` for visual inspection.
+The testbench emulates both FIFOs: it feeds the camera FIFO one pixel (byte) at a time and captures every write to the intermediate FIFO output into a shadow array. After the frame completes the shadow is verified against the golden model and written out as a P2 ASCII PGM to `tb/out_images/`.
 
 **Workflow:**
 1. Set `SRC_IMAGE` in `tb/sobel_acc_tb.sv` to one of the PGMs in `tb/src_images/`.
@@ -115,7 +101,7 @@ The testbench emulates the FWFT FIFO directly, drives the Wishbone CSR interface
 
 ### 5.2 Full System Testbench (`sobel_full_tb`)
 
-Instantiates the complete `ibex_simple_system` SoC. The CPU firmware (`sw/ibex/test/sobel_acc/`) runs on the Ibex core - it writes `SOBEL_CTRL=1`, polls `FRAME_COUNT`, then raises GPIO0 to signal completion. The testbench forces `fifo_din`/`fifo_wr_en` (tied off in RTL) to inject pixel words into the camera FIFO. On GPIO0 going high, the testbench reads Frame BRAM B, verifies output against a golden model (for inversion), and writes a PGM.
+Instantiates the complete `ibex_simple_system` SoC. The CPU firmware (`sw/ibex/test/sobel_acc/`) runs on the Ibex core — it writes `SOBEL_CTRL=1`, polls `FRAME_COUNT`, then raises GPIO0 to signal completion. The testbench forces `fifo_din`/`fifo_wr_en` (tied off in RTL) to inject one pixel byte at a time into the camera FIFO. Output pixels are captured by shadowing `dut.inter_wr_en`/`dut.inter_din` as sobel_acc writes to the intermediate FIFO. On GPIO0 going high the testbench verifies the shadow against the golden model and writes a PGM.
 
 **Workflow:**
 1. Build the firmware:
@@ -158,10 +144,10 @@ make clean && make all
 
 ## 7. Design Hints
 
-- Data arrives as a stream, 4 pixels per 32-bit word. The Sobel kernel needs three rows simultaneously - you need internal **line buffers** to hold rows N-1 and N while row N+1 streams in.
+- Data arrives one pixel (8 bits) per clock cycle from the camera FIFO. The Sobel kernel needs three rows simultaneously — you need internal **line buffers** (one per row) to hold rows N-1 and N while row N+1 streams in. Each line buffer is 320 bytes.
 - A pipelined datapath can produce one output pixel per cycle once the pipeline is filled, even if each individual computation takes multiple stages.
 - The Sobel kernel values are only ±1 and ±2, so all multiplications reduce to additions and a single left shift.
-- Consider image borders carefully - your design must handle boundary pixels without reading out-of-bounds addresses. Mirror the outermost row/column in the line buffers.
-- Output pixels must be packed back into 32-bit words in the same little-endian order as the input before writing to BRAM B.
+- Consider image borders carefully — your design must handle boundary pixels without reading out-of-bounds addresses. Mirror the outermost row/column in the line buffers.
+- Output is also one byte per cycle via `out_wr_en`/`out_din` — no packing into wider words is required. Stall the entire pipeline (both input and output) when `out_full` is asserted.
 
 ---

@@ -34,7 +34,7 @@ Each subproject team works independently against a well-defined interface. Integ
 │                                     │                 │
 │                             [ImgProc Accel]    ◄── WB │
 │                                     │                 │
-│                              [Frame BRAM B*]          │
+│                                [Int FIFO*]            │
 │                                     │                 │
 │                            [Compression Accel] ◄── WB │
 │                                     │                 │
@@ -54,10 +54,9 @@ Each subproject team works independently against a well-defined interface. Integ
 The Ibex CPU acts as the control plane. It does not sit in the data path during normal operation - it configures the accelerators, starts transfers, and monitors status registers. The data path is:
 
 1. Camera interface writes pixel data into the Input FIFO (32-bit words, 4 pixels packed).
-2. Image processing accelerator streams words from the FIFO as they arrive, processes them, and writes the result to Frame BRAM B. It asserts `done` and pulses `frame_ready_i` when a full frame is complete.
-3. With `auto_start` set, the accelerator restarts automatically on the next `frame_ready_i` pulse with no CPU involvement.
-4. CPU configures the compression accelerator and asserts its start bit (or the compression accelerator also operates in auto-start mode).
-5. Compression accelerator reads from Frame BRAM B, compresses the data, and streams output into the TX FIFO.
+2. Image processing accelerator reads pixels from the camera FIFO one byte at a time, processes them, and writes the result one byte at a time to the intermediate FIFO (Int FIFO). It increments `FRAME_COUNT` when a full frame is complete.
+3. With `auto_start` set, the accelerator restarts automatically on the next frame with no CPU involvement.
+4. Compression accelerator reads processed pixels from the intermediate FIFO, compresses the data, and streams output into the TX FIFO. Both accelerators run concurrently — there is no full-frame wait between stages.
 6. The FTDI sync FIFO interface drains the TX FIFO and sends data to the PC over USB.
 
 The pipeline is self-sustaining in steady state once configured. The CPU role is boot-time configuration, error recovery, and liveness monitoring via `FRAME_COUNT`.
@@ -88,8 +87,8 @@ The following components are provided complete and are not student deliverables.
 
 - MLAB_MCU SoC with Ibex core, memory, and Wishbone interconnect
 - OV7670 camera capture interface (DVP -> Input FIFO)
-- Input FIFO (1024×32-bit FWFT, can be found in `deps/camera_fifo`)
-- Frame BRAM B instantiation with fixed port definition
+- Camera FIFO (1024×8-bit FWFT, one pixel per word, can be found in `deps/camera_fifo`)
+- Intermediate FIFO - same as Camera FIFO (1024×8-bit FWFT) between the two accelerators
 - FTDI FT2232H sync FIFO interface (TX FIFO to USB)
 - Wishbone slave wrapper with CSR register map skeleton (students fill in the logic)
 - Simulation testbenches with a synthetic image streamed through the FIFO
@@ -108,33 +107,35 @@ Base address: `0x6000_0000`.
 
 The CPU may poll FRAME_COUNT or wait for an interrupt (interrupt support is not currently setup).
 
-### 3.2 FIFO Port Interface
+### 3.2 Camera FIFO Port Interface
 
-The Input FIFO (`fifo_fwft`, `DATA_WIDTH=32`, `DEPTH_WIDTH=10`) is a First Word Fall-Through FIFO. Data is available on `dout` without asserting `rd_en` first; `rd_en` advances to the next word on the following cycle.
+The camera FIFO (`fifo_fwft`, `DATA_WIDTH=8`, `DEPTH_WIDTH=10`) carries one grayscale pixel per word. The OV7670 delivers pixels one byte at a time, and this FIFO accepts them directly. It is First Word Fall-Through: `dout` is valid without asserting `rd_en` first.
 
 | Signal | Direction | Width | Description |
 |---|---|---|---|
 | `clk` | Input | 1 | System clock |
 | `rst` | Input | 1 | Synchronous reset, active-high |
-| `din` | Input | 32 | Write data (4 pixels, little-endian) |
+| `din` | Input | 8 | One pixel (camera side writes) |
 | `wr_en` | Input | 1 | Write enable. Data is pushed when `wr_en=1` and `full=0`. |
 | `full` | Output | 1 | FIFO full. Do not assert `wr_en` when high. |
-| `dout` | Output | 32 | Read data. Valid whenever `empty=0` (FWFT - no read strobe needed to present first word). |
-| `rd_en` | Input | 1 | Read advance. Assert for one cycle to consume the current word and present the next. |
+| `dout` | Output | 8 | One pixel. Valid whenever `empty=0`. |
+| `rd_en` | Input | 1 | Read advance. Assert for one cycle to consume the current pixel and present the next. |
 | `empty` | Output | 1 | FIFO empty. `dout` is not valid when high. |
 
-### 3.3 Frame BRAM B Port Interface
+### 3.3 Intermediate FIFO Port Interface
 
-Frame BRAM B is 32-bit wide and word-addressed. Four pixels are packed into each word, little-endian (pixel N in bits [7:0], pixel N+1 in bits [15:8], etc.).
+The intermediate FIFO (`fifo_fwft`, `DATA_WIDTH=8`, `DEPTH_WIDTH=11`) sits between the two accelerators. `sobel_acc` writes one processed pixel per cycle; `compress_acc` reads one pixel per cycle. Using a FIFO here (rather than a frame buffer) allows both accelerators to run concurrently.
 
 | Signal | Direction | Width | Description |
 |---|---|---|---|
 | `clk` | Input | 1 | System clock |
-| `en` | Input | 1 | Enable |
-| `we` | Input | 1 | Write enable |
-| `addr` | Input | 15 | Word address. 0 to 19,199 for a 320×240 frame. |
-| `wdata` | Input | 32 | Write data (4 pixels) |
-| `rdata` | Output | 32 | Read data. Valid one cycle after `en=1, we=0`. |
+| `rst` | Input | 1 | Synchronous reset, active-high |
+| `din` | Input | 8 | One processed pixel (sobel_acc writes) |
+| `wr_en` | Input | 1 | Write enable. |
+| `full` | Output | 1 | Full. `sobel_acc` must stall when high. |
+| `dout` | Output | 8 | One processed pixel. Valid whenever `empty=0`. |
+| `rd_en` | Input | 1 | Read advance (compress_acc drives this). |
+| `empty` | Output | 1 | Empty. `compress_acc` must stall when high. |
 
 ---
 
@@ -142,7 +143,7 @@ Frame BRAM B is 32-bit wide and word-addressed. Four pixels are packed into each
 
 ### 4.1 Overview
 
-The image processing accelerator streams 32-bit words (4 pixels) from the Input FIFO, processes them, and writes results to Frame BRAM B. Processing begins as pixels arrive - no full-frame buffering on the input side. The CPU configures and starts the accelerator via the Wishbone CSR interface; in `auto_start` mode the pipeline runs without CPU involvement after initial setup.
+The image processing accelerator reads one pixel (8 bits) per clock cycle from the camera FIFO, processes it, and writes the result one pixel at a time to the intermediate FIFO. Processing begins as pixels arrive — no full-frame buffering anywhere in the pipeline. The CPU configures and starts the accelerator via the Wishbone CSR interface; in `auto_start` mode the pipeline runs without CPU involvement after initial setup.
 
 The reference implementation provided to students performs pixel inversion (`output = ~input`). Students replace this with Sobel edge detection by implementing the `algo_sel=1` branch in the accelerator.
 
@@ -170,22 +171,23 @@ The output pixel is G clamped to [0, 255]. Pixels on the image border where the 
 
 ### 4.3 Performance Requirement
 
-The accelerator processes one 32-bit word (4 pixels) per clock cycle when the FIFO is not empty. At 50 MHz this gives:
+The accelerator processes one pixel per clock cycle when neither FIFO is stalling. At 50 MHz this gives:
 
 ```
-   320 × 240 pixels / 4 pixels per cycle / 50 MHz = 384 µs per frame
-   Camera frame period at 30 fps                  = 33.3 ms
-   → Accelerator has ~86× headroom vs camera rate
+   320 × 240 pixels / 1 pixel per cycle / 50 MHz = 1.54 ms per frame
+   Camera frame period at 30 fps                 = 33.3 ms
+   → Accelerator has ~21× headroom vs camera rate
 ```
 
-The accelerator therefore spends most of its time stalled waiting for the camera. The Input FIFO absorbs timing differences between the camera and the accelerator.
+The accelerator therefore spends most of its time stalled waiting for the camera. The camera FIFO absorbs timing differences between the camera and the accelerator.
 
 ### 4.4 Design Hints 
 
-- Data arrives as a stream from a FIFO, 4 pixels per 32-bit word. The Sobel kernel needs three rows simultaneously - you will need internal line buffers to hold rows N-1 and N while row N+1 streams in.
+- Data arrives one pixel (8 bits) per clock cycle from the camera FIFO. The Sobel kernel needs three rows simultaneously — you will need internal line buffers (one per row, 320 bytes each) to hold rows N-1 and N while row N+1 streams in.
 - A pipelined datapath can produce one output pixel per cycle once the pipeline is filled, even if each individual computation takes multiple stages.
 - The Sobel kernel values are only ±1 and ±2, so all multiplications reduce to additions and a single left shift.
-- Consider what happens at image borders - your design must handle boundary pixels without reading out-of-bounds addresses.
+- Consider what happens at image borders — your design must handle boundary pixels without reading out-of-bounds addresses.
+- Output is also one byte per cycle via `out_wr_en`/`out_din`. Stall the whole pipeline (stop consuming from camera FIFO too) when `out_full` is asserted.
 
 
 

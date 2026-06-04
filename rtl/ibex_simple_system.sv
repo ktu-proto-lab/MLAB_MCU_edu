@@ -263,18 +263,18 @@ module ibex_simple_system #(
       .pit_irq_o  (pit_irq)
   );
 
-  // Camera FIFO signals
-  logic        fifo_wr_en, fifo_rd_en;
-  logic        fifo_full,  fifo_empty;
-  logic [31:0] fifo_din,   fifo_dout;
+  // Camera FIFO signals (8-bit: one pixel per word)
+  logic       fifo_wr_en, fifo_rd_en;
+  logic       fifo_full,  fifo_empty;
+  logic [7:0] fifo_din,   fifo_dout;
 
-  // Frame BRAM B port wires
-  logic        sobel_dst_en, sobel_dst_we;
-  logic [14:0] sobel_dst_addr;
-  logic [31:0] sobel_dst_wdata, sobel_dst_rdata;
+  // Intermediate FIFO signals (sobel_acc output → compress_acc input, 8-bit)
+  logic       inter_wr_en, inter_rd_en;
+  logic       inter_full,  inter_empty;
+  logic [7:0] inter_din,   inter_dout;
 
-  // Input FIFO: camera interface writes, sobel_acc reads
-  fifo_fwft #(.DATA_WIDTH(32), .DEPTH_WIDTH(10)) u_camera_fifo (
+  // Camera FIFO: camera interface writes one pixel at a time, sobel_acc reads
+  fifo_fwft #(.DATA_WIDTH(8), .DEPTH_WIDTH(10)) u_camera_fifo (
       .clk   (clk_sys),
       .rst   (~rst_sync_n),
       .din   (fifo_din),
@@ -286,31 +286,35 @@ module ibex_simple_system #(
   );
 
   // Tie camera-side inputs low until camera interface is integrated TODO: Connect camera interface here
-  assign fifo_din   = 32'h0;
+  assign fifo_din   = 8'h0;
   assign fifo_wr_en = 1'b0;
 
-  // Frame BRAM B - processed frame (destination for edge detection)
-  bram u_frame_bram_b (
+  // Intermediate FIFO: sobel_acc writes processed pixels, compress_acc reads
+  fifo_fwft #(.DATA_WIDTH(8), .DEPTH_WIDTH(10)) u_inter_fifo (
       .clk   (clk_sys),
-      .en    (sobel_dst_en),
-      .we    (sobel_dst_we),
-      .addr  (sobel_dst_addr),
-      .wdata (sobel_dst_wdata),
-      .rdata ()
+      .rst   (~rst_sync_n),
+      .din   (inter_din),
+      .wr_en (inter_wr_en),
+      .rd_en (inter_rd_en),
+      .dout  (inter_dout),
+      .full  (inter_full),
+      .empty (inter_empty)
   );
+
+  // Tie compress_acc read side low until compress_acc is instantiated TODO: instantiate compress_acc
+  assign inter_rd_en = 1'b0;
 
   // Edge detection accelerator
   sobel_acc u_sobel_acc (
-      .wb            (wbs[6]),
+      .wb         (wbs[6]),
 
-      .fifo_empty    (fifo_empty),
-      .fifo_dout     (fifo_dout),
-      .fifo_rd_en    (fifo_rd_en),
+      .fifo_empty (fifo_empty),
+      .fifo_dout  (fifo_dout),
+      .fifo_rd_en (fifo_rd_en),
 
-      .dst_en    (sobel_dst_en),
-      .dst_we    (sobel_dst_we),
-      .dst_addr  (sobel_dst_addr),
-      .dst_wdata (sobel_dst_wdata)
+      .out_wr_en  (inter_wr_en),
+      .out_din    (inter_din),
+      .out_full   (inter_full)
   );
 
   //==================================================

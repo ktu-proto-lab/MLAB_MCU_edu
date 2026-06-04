@@ -9,9 +9,9 @@
     *   2. Run this testbench.
     *   3. Open the matching file in out_images/ for visual verification.
     *
-    * The testbench emulates the FWFT FIFO directly
-    * All writes to BRAM B are shadowed into an array; the array
-    * is used for verification and written out as a P2 ASCII PGM.
+    * Camera FIFO is emulated as an 8-bit FWFT model (one pixel per word).
+    * Output pixels are captured from the intermediate FIFO write port and
+    * written out as a P2 ASCII PGM.
     *
     * Input images must be P2 ASCII PGM, 320x240, with exactly one
     * comment line after the magic number (matching the src_images/ files).
@@ -24,7 +24,6 @@ module sobel_acc_tb;
     localparam int  FRAME_W      = 320;
     localparam int  FRAME_H      = 240;
     localparam int  TOTAL_PIXELS = FRAME_W * FRAME_H;
-    localparam int  FRAME_WORDS  = TOTAL_PIXELS / 4; // 19200
     localparam real CLK_PERIOD   = 10.0;
 
     localparam string SRC_IMAGE    = "baboon.pgm";
@@ -53,17 +52,17 @@ module sobel_acc_tb;
     end
 
     // -------------------------------------------------------------------------
-    // FIFO emulation (FWFT: dout valid whenever empty=0, no read latency)
+    // Camera FIFO emulation (FWFT, 8-bit: dout valid whenever empty=0)
     // -------------------------------------------------------------------------
-    logic [31:0] src_mem [0:FRAME_WORDS-1];
-    int          fifo_ptr;
+    logic [7:0] src_mem [0:TOTAL_PIXELS-1];
+    int         fifo_ptr;
 
-    logic        fifo_empty;
-    logic [31:0] fifo_dout;
-    logic        fifo_rd_en; // driven by DUT
+    logic       fifo_empty;
+    logic [7:0] fifo_dout;
+    logic       fifo_rd_en; // driven by DUT
 
-    assign fifo_empty = (fifo_ptr >= FRAME_WORDS);
-    assign fifo_dout  = fifo_empty ? 32'h0 : src_mem[fifo_ptr];
+    assign fifo_empty = (fifo_ptr >= TOTAL_PIXELS);
+    assign fifo_dout  = fifo_empty ? 8'h0 : src_mem[fifo_ptr];
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
@@ -73,17 +72,25 @@ module sobel_acc_tb;
     end
 
     // -------------------------------------------------------------------------
-    // BRAM B signals (driven by DUT)
+    // Intermediate FIFO emulation (receives output from DUT)
+    // Capture every write into a shadow array for verification and PGM output.
     // -------------------------------------------------------------------------
-    logic        dst_en, dst_we;
-    logic [14:0] dst_addr;
-    logic [31:0] dst_wdata, dst_rdata;
+    logic       out_wr_en; // driven by DUT
+    logic [7:0] out_din;   // driven by DUT
+    logic       out_full;  // driven by TB (never full - infinite sink)
 
-    // Shadow: capture every write - used for verify + PGM output
-    logic [31:0] shadow [0:FRAME_WORDS-1];
-    always_ff @(posedge clk) begin
-        if (dst_en && dst_we)
-            shadow[dst_addr] <= dst_wdata;
+    assign out_full = 1'b0;
+
+    logic [7:0] shadow [0:TOTAL_PIXELS-1];
+    int         shadow_ptr;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            shadow_ptr <= 0;
+        end else if (out_wr_en) begin
+            shadow[shadow_ptr] <= out_din;
+            shadow_ptr         <= shadow_ptr + 1;
+        end
     end
 
     // -------------------------------------------------------------------------
@@ -102,19 +109,9 @@ module sobel_acc_tb;
         .fifo_empty (fifo_empty),
         .fifo_dout  (fifo_dout),
         .fifo_rd_en (fifo_rd_en),
-        .dst_en     (dst_en),
-        .dst_we     (dst_we),
-        .dst_addr   (dst_addr),
-        .dst_wdata  (dst_wdata)
-    );
-
-    bram u_bram_b (
-        .clk   (clk),
-        .en    (dst_en),
-        .we    (dst_we),
-        .addr  (dst_addr),
-        .wdata (dst_wdata),
-        .rdata (dst_rdata)
+        .out_wr_en  (out_wr_en),
+        .out_din    (out_din),
+        .out_full   (out_full)
     );
 
     // -------------------------------------------------------------------------
@@ -150,8 +147,6 @@ module sobel_acc_tb;
     // -------------------------------------------------------------------------
     integer      fd, errors, tmp_val;
     string       hdr_str, out_path;
-    logic [7:0]  pixels_in  [0:TOTAL_PIXELS-1];
-    logic [7:0]  pixels_out [0:TOTAL_PIXELS-1];
     logic [31:0] status, frame_count;
 
     initial begin
@@ -168,15 +163,10 @@ module sobel_acc_tb;
         void'($fgets(hdr_str, fd)); // maxval
         for (int i = 0; i < TOTAL_PIXELS; i++) begin
             void'($fscanf(fd, "%d", tmp_val));
-            pixels_in[i] = tmp_val[7:0];
+            src_mem[i] = tmp_val[7:0];
         end
         $fclose(fd);
-        $display("[TB] Loaded %s%s", SRC_IMG_PATH, SRC_IMAGE);
-
-        // Pack pixels into 32-bit words (4 pixels/word, LSB = first pixel)
-        for (int i = 0; i < FRAME_WORDS; i++)
-            src_mem[i] = {pixels_in[i*4+3], pixels_in[i*4+2],
-                          pixels_in[i*4+1], pixels_in[i*4+0]};
+        $display("[TB] Loaded %s%s (%0d pixels)", SRC_IMG_PATH, SRC_IMAGE, TOTAL_PIXELS);
 
         // ------------------------------------------------------------------
         // Release reset
@@ -185,7 +175,7 @@ module sobel_acc_tb;
         rst_n = 1'b1;
         repeat(4) @(posedge clk);
 
-        // Start (algo_sel=0: pixel inversion)
+        // Start with auto_start=1, algo_sel=0 (pixel inversion reference)
         wb_write(`SOBEL_BASE_ADDR, 32'h1);
         $display("[TB] Started - polling for done...");
 
@@ -194,35 +184,26 @@ module sobel_acc_tb;
         while (!(status & 32'h2));
 
         wb_read(`SOBEL_BASE_ADDR + 32'h8, frame_count);
-        $display("[TB] Done. STATUS=%08h  FRAME_COUNT=%0d", status, frame_count);
+        $display("[TB] Done. STATUS=%08h  FRAME_COUNT=%0d  shadow_ptr=%0d",
+                 status, frame_count, shadow_ptr);
 
         // ------------------------------------------------------------------
         // Verify against golden reference (pixel inversion)
         // ------------------------------------------------------------------
         errors = 0;
-        for (int i = 0; i < FRAME_WORDS; i++) begin
+        for (int i = 0; i < TOTAL_PIXELS; i++) begin
             if (shadow[i] !== ~src_mem[i]) begin
                 if (errors < 8)
-                    $display("[FAIL] word %0d: expected %08h  got %08h",
+                    $display("[FAIL] pixel %0d: expected %02h  got %02h",
                              i, ~src_mem[i], shadow[i]);
                 errors++;
             end
         end
 
         if (errors == 0)
-            $display("[PASS] All %0d words match.", FRAME_WORDS);
+            $display("[PASS] All %0d pixels match.", TOTAL_PIXELS);
         else
-            $display("[FAIL] %0d / %0d words mismatched.", errors, FRAME_WORDS);
-
-        // ------------------------------------------------------------------
-        // Unpack shadow into pixel array
-        // ------------------------------------------------------------------
-        for (int i = 0; i < FRAME_WORDS; i++) begin
-            pixels_out[i*4+0] = shadow[i][ 7: 0];
-            pixels_out[i*4+1] = shadow[i][15: 8];
-            pixels_out[i*4+2] = shadow[i][23:16];
-            pixels_out[i*4+3] = shadow[i][31:24];
-        end
+            $display("[FAIL] %0d / %0d pixels mismatched.", errors, TOTAL_PIXELS);
 
         // ------------------------------------------------------------------
         // Write output PGM (P2 ASCII)
@@ -234,7 +215,7 @@ module sobel_acc_tb;
         end else begin
             $fwrite(fd, "P2\n# Output\n%0d %0d\n255\n", FRAME_W, FRAME_H);
             for (int i = 0; i < TOTAL_PIXELS; i++)
-                $fwrite(fd, "%0d\n", pixels_out[i]);
+                $fwrite(fd, "%0d\n", shadow[i]);
             $fclose(fd);
             $display("[TB] Output written to %s", out_path);
         end
