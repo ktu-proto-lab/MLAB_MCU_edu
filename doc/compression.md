@@ -50,9 +50,9 @@ The compression accelerator is the final stage of the on-chip image pipeline. It
                   (Ibex CPU)                          (Ibex CPU)
 ```
 
-Using a FIFO between the two accelerators instead of Frame BRAM B means both stages run concurrently: `sobel_acc` produces words as the camera streams in, and `compress_acc` consumes and compresses them at the same time. There is no full-frame wait between stages.
+Using a FIFO between the two accelerators means both stages run concurrently: `sobel_acc` produces words as the camera streams in, and `compress_acc` consumes and compresses them at the same time. There is no full-frame wait between stages.
 
-A skeleton module is provided in `rtl/peripherals/compress_acc.sv`. It already handles Wishbone CSR decoding, the streaming read loop, and TX FIFO write with backpressure. The pass-through assignment `tx_din = fifo_dout` is the only line that changes — everything around it stays unless your algorithm requires additional state.
+A skeleton module is provided in `rtl/peripherals/compress_acc.sv`. It already handles Wishbone CSR decoding, the streaming read loop, and TX FIFO write with backpressure. The pass-through assignment `tx_din = fifo_dout` is the only line that changes - everything around it stays unless your algorithm requires additional state.
 
 **Your task:** replace the pass-through with a lossless compression algorithm of your choice and add a `COMPRESSED_SIZE` register that reports how many bytes were written to the TX FIFO.
 
@@ -60,7 +60,9 @@ A skeleton module is provided in `rtl/peripherals/compress_acc.sv`. It already h
 
 ## 2. Motivation
 
-QVGA video (320×240 @ 30 fps, 1 byte/pixel) produces ~2.3 MB/s, well within the 40 MB/s FTDI budget. Compression is therefore not strictly necessary at this resolution - but it is the right engineering approach once resolution increases, and Sobel-processed images compress exceptionally well:
+QVGA video (320×240 @ 30 fps, 1 byte/pixel) produces ~2.3 MB/s, well within the 40 MB/s FTDI budget. Compression is therefore not strictly necessary at this resolution - but it is fun to see how much bandwidth we could save. Also we might move to a bigger resolution camera which will push the FTDI controller's bandwidth budget.
+
+Sobel-processed images compress exceptionally well:
 
 - Sobel highlights edges; the background is zero-valued pixels
 - A typical Sobel output is 80-95% zeros
@@ -80,7 +82,7 @@ Base address: `0x7000_0000`.
 |---|---|---|---|
 | `0x00` | `CTRL` | R/W | bit[0]: `auto_start` - keep compressing frames continuously; write 0 to stop after the current frame completes. Any CTRL write also clears `done`. |
 | `0x04` | `STATUS` | RO | bit[0]: `busy`. bit[1]: `done` - stays high after a frame completes until the next CTRL write. |
-| `0x08` | `COMPRESSED_SIZE` | RO | Number of bytes written to the TX FIFO in the last completed frame. Updated atomically when `done` is asserted. Students must implement this register. |
+| `0x08` | `COMPRESSED_SIZE` | RO | Number of bytes written to the TX FIFO in the last completed frame. Updated atomically when `done` is asserted. **Students must implement this register**. |
 
 **Workflow:** CPU writes `CTRL[0]=1` → accelerator runs continuously frame-after-frame → to capture a result, write `CTRL[0]=0` to stop after the current frame → poll `STATUS[1]` (done) → read `COMPRESSED_SIZE`.
 
@@ -123,7 +125,7 @@ If the total compressed payload is not a multiple of 4 bytes, the last word is z
 
 The number of 32-bit words written to the TX FIFO is `⌈COMPRESSED_SIZE / 4⌉`.
 
-**Framing note:** during system integration, the FTDI interface will prepend a 4-byte packet header (2-byte magic marker + 2-byte compressed length) to each frame, derived from the `COMPRESSED_SIZE` CSR. For this assignment you do not need to implement the header - outputting the raw compressed payload plus a correct `COMPRESSED_SIZE` value is sufficient.
+**Framing note:** during system integration, the FTDI interface will prepend a 4-byte packet header (2-byte magic marker + 2-byte compressed length) to each frame, derived from the `COMPRESSED_SIZE` CSR. This is required so that the PC-side receiver can detect frame boundaries in the raw byte data stream.
 
 ---
 
@@ -132,7 +134,8 @@ The number of 32-bit words written to the TX FIFO is `⌈COMPRESSED_SIZE / 4⌉`
 1. **Lossless** - decompressing the output must reproduce the original frame byte-for-byte. There must be a matching software decompressor for your chosen algorithm.
 2. **Backpressure** - the accelerator must stall when `tx_full` is high. No data may be dropped.
 3. **`COMPRESSED_SIZE`** - the accelerator must count every byte it writes to the TX FIFO and expose the count in the `COMPRESSED_SIZE` CSR when `done` is asserted.
-4. **Algorithm is the student's choice** - any lossless algorithm is accepted. Run-Length Encoding is the simplest starting point. A C software reference implementing byte-level RLE is provided in `sw/ibex/test/compress_acc/` and serves as both a benchmark and an algorithmic guide.
+
+**Algorithm is your choice** - any lossless algorithm is accepted. Run-Length Encoding is the simplest starting point. You may develop a software reference first for testing and understanding.
 
 The sections below describe the candidate algorithms in increasing order of complexity.
 
@@ -160,8 +163,6 @@ Output: 04 00 01 FF 02 00
 
 **Hardware note:** the algorithm is naturally streaming. For each output byte your logic decides: does the new input byte continue the current run? If yes, increment the count register. If no, emit the previous `(count, value)` pair and start a new run. You will need to delay one output pair to handle the end-of-run decision.
 
-A provided C reference in `sw/ibex/test/compress_acc/` implements this algorithm. Run it first; understand its output; then translate to RTL.
-
 ### 6.2 Delta + Rice Coding
 
 Store the difference between adjacent pixels (delta encoding) and apply Rice/Golomb coding to exploit the fact that differences cluster near zero for smooth images.
@@ -182,38 +183,24 @@ This algorithm is a suitable choice if your goal is to explore a more challengin
 
 ---
 
-## 7. Performance Requirement
-
-The accelerator must achieve an average throughput of at least **1 input byte per clock cycle** when the TX FIFO is not full. At 50 MHz and a 76,800-byte frame, this gives:
-
-```
-  76,800 bytes / 50 MHz = 1.54 ms per frame
-  Camera frame period at 30 fps = 33.3 ms
-  → accelerator has ~21× headroom vs camera frame rate
-```
-
-The requirement is deliberately relaxed. Focus on correctness first; optimise throughput only if the testbench reports you are bottlenecked.
-
----
-
 ## 8. Simulation
 
 ### 8.1 Isolated Testbench (`compress_acc_tb`)
 
 `tb/compress_acc_tb.sv` exercises the compression accelerator in isolation, without the full SoC. It:
 
-- Pre-loads Frame BRAM B with a synthetic 320×240 test image (a Sobel-processed PGM stored in `tb/src_images/`)
+- Loads the intermediate FIFO with an image (a Sobel-processed PGM stored in `tb/src_images/` ending with `*_edge`)
 - Drives the Wishbone CSR interface to assert `start`
-- Receives data from the TX FIFO and writes it to a file in `tb/out_images/`
-- Reports elapsed clock cycles, `COMPRESSED_SIZE`, and compression ratio
+- Receives data from the TX FIFO and writes it to a file in `tb/out2_images/`
+- Reports elapsed clock cycles (so you can later compare with your `COMPRESSED_SIZE` implementation)
 
 **Workflow:**
 1. Select the test image by editing `SRC_IMAGE` in `tb/compress_acc_tb.sv`.
 2. Run the testbench:
 ```bash
-./script/xrun_sim_run.sh -t compress_acc
+./script/xrun_sim_compress.sh 
 ```
-3. Decompress the output file using the matching C decompressor and verify it matches the original.
+3. Decompress the output file using the matching software decompressor and verify it matches the original.
 4. Inspect elapsed cycles and COMPRESSED_SIZE in the transcript.
 
 ### 8.2 Full System Testbench (`compress_full_tb`)
@@ -241,7 +228,7 @@ cd sw/ibex/test/compress_acc && make clean && make all
 The firmware in `sw/ibex/test/compress_acc/core/src/main.c` demonstrates the full sequence:
 
 1. Configure and start the Sobel accelerator; wait for a completed frame (`FRAME_COUNT` increments).
-2. Write `COMPRESS_CTRL = 0x1` to set `auto_start` — the accelerator begins immediately and restarts after each frame.
+2. Write `COMPRESS_CTRL = 0x1` to set `auto_start` - the accelerator begins immediately and restarts after each frame.
 3. Poll `COMPRESS_STATUS` until `done` is set.
 4. Read `COMPRESSED_SIZE`.
 5. Raise GPIO0 to signal the testbench that results are ready.
@@ -257,21 +244,7 @@ Measure and report the following for your chosen algorithm:
 | Metric | How to measure |
 |---|---|
 | Compression ratio | `COMPRESSED_SIZE` / 76,800 on the test image |
-| Software throughput (bytes/cycle) | Ibex cycle counter around the C reference |
+| Software throughput (bytes/cycle) | If you develop a C reference on the Ibex |
 | Hardware throughput (bytes/cycle) | Testbench: input bytes / clock cycles elapsed |
-| Latency (first FIFO write) | Simulation: cycles from `start` assertion to first `tx_wr_en` |
-| FPGA resource usage | Vivado synthesis report: LUTs, FFs, BRAM slices |
-
-Include a comparison with the software baseline (RLE in C on Ibex) to quantify the speedup your hardware achieves.
 
 ---
-
-## 11. Design Hints
-
-- **Start in software.** Run the provided C reference on the test image first. Understand what the output byte stream looks like before writing any RTL.
-- **Byte unpacking.** The skeleton operates on 32-bit BRAM words, but most compression algorithms are byte-oriented. You will need to unpack each 32-bit read into 4 individual bytes. A shift register or index into the word (`src_rdata[8*i +: 8]`) both work.
-- **Byte packing for output.** Compressed bytes must be reassembled into 32-bit words before writing to `tx_din`. Maintain a 4-byte assembly buffer and a 2-bit byte-position counter; flush the partial word when the frame ends (zero-pad upper bytes).
-- **Count every byte.** Increment `COMPRESSED_SIZE` by 1 for every byte committed to the assembly buffer. Write the final count to the CSR when `done` is asserted.
-- **Backpressure.** Stall the entire datapath when `tx_full` is high - do not consume new BRAM data until the FIFO has space. The skeleton already stalls in the WRITE state; extend this stall backwards through any internal pipeline stages you add.
-- **Worst-case sizing.** RLE can expand the data (alternating bytes → 2× size). Your output logic must handle `COMPRESSED_SIZE > 76,800`. The TX FIFO depth covers many frames' worth of data, but do not assume your output will always be smaller than the input.
-- **Verify with the decompressor.** Write a C decompressor (or use the provided one for RLE) and check that decompressing the RTL output reproduces the original image byte-for-byte. A compressed-size match alone is not sufficient verification.
