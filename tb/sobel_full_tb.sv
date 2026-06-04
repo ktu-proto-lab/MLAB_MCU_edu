@@ -84,22 +84,18 @@ module simple_system_tb;
 
     // -------------------------------------------------------------------------
     // Capture intermediate FIFO writes (sobel_acc output) into shadow array.
-    // inter_wr_en and inter_din are module-level wires in ibex_simple_system.
     // -------------------------------------------------------------------------
     always_ff @(posedge clk_sys) begin
-        if (dut.inter_wr_en) begin
+        if (!rst_sys_n) begin
+            shadow_ptr <= 0;
+        end else if (dut.inter_wr_en) begin
             shadow[shadow_ptr] <= dut.inter_din;
             shadow_ptr         <= shadow_ptr + 1;
         end
     end
-
-    // -------------------------------------------------------------------------
-    // Simulation timeout watchdog
-    // -------------------------------------------------------------------------
-    initial begin
-        #50_000_000; // 50 ms @ 80 MHz = 4 M cycles - far more than needed
-        $fatal(1, "[TB] Simulation timeout at %0t ns", $time);
-    end
+    // Drain the intermediate FIFO 
+    always @(posedge clk_sys)
+        force dut.inter_rd_en = !dut.inter_empty;
 
     // -------------------------------------------------------------------------
     // Main test
@@ -109,8 +105,6 @@ module simple_system_tb;
     string  hdr_str, out_path;
 
     initial begin
-        shadow_ptr = 0;
-
         // ------------------------------------------------------------------
         // Load source PGM (P2 ASCII, one comment line)
         // ------------------------------------------------------------------
@@ -211,4 +205,12 @@ module simple_system_tb;
         $finish;
     end
 
+    // -------------------------------------------------------------------------
+    // Simulation timeout watchdog
+    // -------------------------------------------------------------------------
+    initial begin
+        #50_000_000; // 50 ms @ 80 MHz = 4 M cycles - far more than needed
+        $fatal(1, "[TB] Simulation timeout at %0t ns", $time);
+    end
+    
 endmodule
