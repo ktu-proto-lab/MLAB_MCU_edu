@@ -38,7 +38,7 @@ Each subproject team works independently against a well-defined interface. Integ
 │                                     │                 │
 │                            [Compression Accel] ◄── WB │
 │                                     │                 │
-│                                [TX FIFO]              │
+│                                [TX FIFO*]             │
 │                                     │                 │
 │              [FTDI Sync FIFO IF*] ◄─┘                 │
 │                       │                               │

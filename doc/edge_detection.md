@@ -38,13 +38,28 @@ For each pixel at position (x, y), two 3×3 convolution kernels are applied:
        -1   0  +1            -1  -2  -1
 ```
 
-Each kernel is applied to the 3×3 neighbourhood of pixels surrounding (x, y). The results are combined to give the gradient magnitude:
-
+**Calculation example**
+Each kernel is applied to the 3×3 neighbourhood of pixels surrounding (x, y).
+If pixels are enumerated in the following order:
+```
+   s11 s12 s13
+   s21 s22 s23
+   s31 s32 s33
+```
+Then to find horizontal edges:
+```
+|Gx| = -1*s11 + 1*s13 - 2*s21 + 2*s23 - 1*s31 +1*s33
+```
+To find vertical edges:
+```
+|Gy| = 1*s11 + 2*s12 + 1*s13 - 1*s31 - 2*s32 - 1*s33
+```
+The results are combined to give the gradient magnitude:
 ```
    G = |Gx| + |Gy|
 ```
 
-The output pixel is G clamped to [0, 255]. Pixels on the image border where the full 3×3 neighbourhood is not available should use **mirroring** of the boundary pixels (e.g. the pixel one step outside the left edge mirrors the pixel one step inside).
+The output pixel G should be clamped to [0, 255]. Pixels on the image border where the full 3×3 neighbourhood is not available should use **mirroring** of the boundary pixels (e.g. the pixel one step outside the left edge mirrors the pixel one step inside).
 
 ---
 
