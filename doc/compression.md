@@ -86,7 +86,7 @@ Sobel-processed images compress exceptionally well:
 
 `tb/compress_acc_tb.sv` exercises the compression accelerator in isolation, without the full SoC.
 
-- Loads the intermediate FIFO with an image (a Sobel-processed PGM stored in `tb/src_images/`)
+- Loads the intermediate FIFO with an image (a Sobel-processed PGM (**P**ortable **G**raymap image **F**ormat) stored in `tb/src_images/`)
 - Drives the Wishbone CSR interface to assert `start`
 - Receives data from the TX FIFO and writes it to a file in `tb/out2_images/`
 - Reports elapsed clock cycles (so you can later compare with your `COMPRESSED_SIZE` implementation)
