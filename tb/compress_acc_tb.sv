@@ -15,15 +15,13 @@
     * TX FIFO writes are captured into a shadow array; after the frame
     * completes the raw bytes are written to a binary file.
     *
-    * TX words are written to the output file little-endian
-    * ([7:0] first, [31:24] last).  The pass-through skeleton writes one
-    * pixel per 32-bit word so the output is 4 * TOTAL_PIXELS bytes with
-    * zeros in the upper three bytes of each word.  A real compression
-    * implementation packs up to 4 bytes per word and reduces this.
+    * TX bytes are written to the output file one byte at a time.
+    * The pass-through skeleton emits one byte per pixel so the output
+    * is TOTAL_PIXELS bytes uncompressed.  A real RLE implementation
+    * will reduce this.
     *
     * NOTE: COMPRESSED_SIZE is a student TODO - until it is implemented
-    *       the TB cannot trim padding from the last word.  All captured
-    *       words are written verbatim.
+    *       the TB reports 0 for the compression ratio.
 */
 `include "project_defs.svh"
 
@@ -33,7 +31,7 @@ module compress_acc_tb;
     localparam int  FRAME_W      = 320;
     localparam int  FRAME_H      = 240;
     localparam int  TOTAL_PIXELS = FRAME_W * FRAME_H;
-    localparam int  TX_MAX_WORDS = TOTAL_PIXELS * 2; // worst-case RLE 2x expansion
+    localparam int  TX_MAX_BYTES = TOTAL_PIXELS * 2; // worst-case RLE 2x expansion
     localparam real CLK_PERIOD   = 10.0;
 
     localparam string SRC_IMAGE    = "baboon_edge.pgm";
@@ -90,12 +88,12 @@ module compress_acc_tb;
     // TX FIFO emulation (32-bit, infinite sink: never asserts full)
     // Capture every write into tx_shadow for file output.
     // -------------------------------------------------------------------------
-    logic [31:0] tx_shadow [0:TX_MAX_WORDS-1];
-    int          tx_ptr;
+    logic [7:0] tx_shadow [0:TX_MAX_BYTES-1];
+    int         tx_ptr;
 
-    logic        tx_wr_en; // driven by DUT
-    logic [31:0] tx_din;   // driven by DUT
-    logic        tx_full;  // driven by TB
+    logic       tx_wr_en; // driven by DUT
+    logic [7:0] tx_din;   // driven by DUT
+    logic       tx_full;  // driven by TB
 
     assign tx_full = 1'b0;
 
@@ -213,7 +211,7 @@ module compress_acc_tb;
         while (!(status & 32'h2));
 
         wb_read(COMPRESS_SIZE, compressed_size);
-        $display("[TB] Done. STATUS=%08h  COMPRESSED_SIZE=%0d  tx_words=%0d  elapsed=%0d cycles",
+        $display("[TB] Done. STATUS=%08h  COMPRESSED_SIZE=%0d  tx_bytes=%0d  elapsed=%0d cycles",
                  status, compressed_size, tx_ptr, cycle_count - start_cycle);
         $display("[TB] Throughput: %.2f input bytes/cycle",
                  real'(TOTAL_PIXELS) / real'(cycle_count - start_cycle));
@@ -233,14 +231,9 @@ module compress_acc_tb;
             $display("[TB] Cannot open output file %s", out_path);
         end else begin
             for (int i = 0; i < tx_ptr; i++)
-                $fwrite(fd, "%c%c%c%c",
-                    tx_shadow[i][ 7: 0],
-                    tx_shadow[i][15: 8],
-                    tx_shadow[i][23:16],
-                    tx_shadow[i][31:24]);
+                $fwrite(fd, "%c", tx_shadow[i]);
             $fclose(fd);
-            $display("[TB] Output written to %s (%0d words, %0d raw bytes)",
-                     out_path, tx_ptr, tx_ptr * 4);
+            $display("[TB] Output written to %s (%0d bytes)", out_path, tx_ptr);
         end
 
         $finish;

@@ -12,15 +12,19 @@
 
 ## 1. Overview
 
-The image processing accelerator streams 32-bit words (4 pixels packed) from the Input FIFO, processes them, and writes results to Frame BRAM B. Processing begins as pixels arrive - no full-frame buffering on the input side.
+The image processing accelerator reads bytes from the Input FIFO, processes them, and writes results to the Intermediate FIFO. Processing begins as pixels arrive, meaning you shouldn't buffer a full frame.
+
+The pixels of an image are streamed from the top-left corner of an image in rows from left to right (see ilustration below)
+
+<p align="center">
+  <img src="figures/frame_layout.png" alt="Frame layout">
+</p>
 
 The CPU configures and starts the accelerator via the Wishbone CSR interface. In `auto_start` mode the pipeline runs frame-after-frame without CPU involvement after initial setup.
 
 A reference implementation is provided that performs pixel inversion (`output = ~input`, `algo_sel=0`). **Your task is to replace this with Sobel edge detection by implementing the `algo_sel=1` branch in `rtl/peripherals/sobel_acc.sv`**
 
 The accelerator sits between the Input FIFO and Frame BRAM B. It reads from the FIFO and writes to BRAM B. The CPU only touches the CSR registers.
-
-To reach the BRAM write bottleneck the accelerator should process one 32-bit word (4 pixels) per clock cycle when the FIFO is not empty. As a 32-bit word can be written to the BRAM each cycle.
 
 ---
 
@@ -39,7 +43,7 @@ For each pixel at position (x, y), two 3×3 convolution kernels are applied:
 ```
 
 **Calculation example**
-Each kernel is applied to the 3×3 neighbourhood of pixels surrounding (x, y).
+Each kernel is applied to the 3×3 neighbourhood of pixels surrounding (x, y). 
 If pixels are enumerated in the following order:
 ```
    s11 s12 s13
@@ -59,13 +63,28 @@ The results are combined to give the gradient magnitude:
    G = |Gx| + |Gy|
 ```
 
-The output pixel G should be clamped to [0, 255]. Pixels on the image border where the full 3×3 neighbourhood is not available should use **mirroring** of the boundary pixels (e.g. the pixel one step outside the left edge mirrors the pixel one step inside).
+The output pixel G should be clamped to [0, 255]. You may look into how the edge-detection algorithm works but for the hardware implementation you only need to think how to implement the above three equations in hardware. 
+
+A problem you may realize soon is that you do not have the required 3x3 kernel for the pixels on the border of the frame such as pix(0,0), pix(0,1). For the initial implementation you don't have to care about it but once you have it running consider **mirroring** for these border pixels - the pixel one step outside the left edge mirrors the pixel one step inside.
 
 ---
 
-## 3. Accelerator Interface
+## 3. Architecture consideration
+Before writing any RTL code, you need a design. You need
+to understand the problem and consider possible implementations.
 
-### 3.1 Wishbone CSR Register Map
+- How much data will the hardware accelerator buffer internally?
+- How fast does your accelerator have to process pixels so that the FIFOs don't start blocking?
+- How many states does the FSM in your accelerator need?
+
+...
+
+Draw a block diagram showing the datapath you have designed and develop an FSM diagram for your accelerator.
+
+
+## 4. Accelerator Interface
+
+### 4.1 Wishbone CSR Register Map
 
 Base address: `0x6000_0000`.
 
@@ -73,9 +92,9 @@ Base address: `0x6000_0000`.
 |---|---|---|---|
 | `0x00` | `CTRL` | R/W | bit[0]: `auto_start` - restart automatically on `frame_ready`.<br>bit[1]: `algo_sel` - 0: pixel inversion (reference), 1: Sobel (student impl). |
 | `0x04` | `STATUS` | RO | bit[0]: `busy`.<br>bit[1]: `done` - high for one cycle after a frame completes.<br>bit[2]: `error` - unused; assign during development for recovery. |
-| `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². Poll to verify pipeline liveness. |
+| `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². CPU polls to verify pipeline liveness. |
 
-### 3.2 Camera FIFO Port Interface
+### 4.2 Camera FIFO Port Interface
 
 The camera FIFO (`fifo_fwft`, `DATA_WIDTH=8`, `DEPTH_WIDTH=10`) carries one grayscale pixel per word. The OV7670 delivers pixels one byte at a time, so this matches the camera's native output directly. The FIFO is First Word Fall-Through: `fifo_dout` is valid as soon as `fifo_empty=0`, with no read strobe required to present the first byte. Asserting `fifo_rd_en` advances to the next pixel on the following cycle.
 
@@ -85,7 +104,7 @@ The camera FIFO (`fifo_fwft`, `DATA_WIDTH=8`, `DEPTH_WIDTH=10`) carries one gray
 | `fifo_dout` | Input | 8 | One grayscale pixel. Valid whenever `fifo_empty=0`. |
 | `fifo_rd_en` | Output | 1 | Read advance. Assert for one cycle to consume the current pixel and present the next. |
 
-### 3.4 Intermediate FIFO Port Interface
+### 4.4 Intermediate FIFO Port Interface
 
 Processed pixels are written one byte at a time to the intermediate FIFO, which feeds the compression accelerator downstream. The accelerator must stall both reads and writes when `out_full` is asserted.
 
