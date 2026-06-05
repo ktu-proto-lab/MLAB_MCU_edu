@@ -33,6 +33,8 @@ The compression accelerator is the final stage of the on-chip image pipeline. It
                   (Ibex CPU)                          (Ibex CPU)
 ```
 
+The **FTDI interface** (FT2232H chip on the board) is the hardware bridge between the FPGA and the PC. The FPGA cannot connect to USB natively, so pixel data is routed from the TX FIFO into the FTDI chip, which presents itself to the PC as a high-speed USB serial device. The PC-side Python script reads the byte stream from this USB port and reconstructs the frames. The FTDI chip has a maximum sustained throughput of around 40 MB/s; the TX FIFO decouples the bursty on-chip datapath from the USB transfer rate.
+
 Using a FIFO between the two accelerators means both stages run concurrently: `sobel_acc` produces words as the camera streams in, and `compress_acc` consumes and compresses them at the same time. There is no full-frame buffering between stages.
 
 A skeleton module is provided in `rtl/peripherals/compress_acc.sv`. It already handles Wishbone CSR decoding, the streaming read loop, and TX FIFO write with backpressure. The pass-through assignment `tx_din = fifo_dout` is the only line that changes - everything around it stays.
@@ -97,7 +99,7 @@ Sobel-processed images compress exceptionally well:
 ```
 3. Decompress the output file using your software decoder and verify it matches the original.
 
-### 4.1 Full Testbench (`compress_full_tb`)
+### 4.2 Full Testbench (`compress_full_tb`)
 
 WIP
 

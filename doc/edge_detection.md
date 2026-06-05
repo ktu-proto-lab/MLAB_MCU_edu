@@ -24,7 +24,7 @@ The CPU configures and starts the accelerator via the Wishbone CSR interface. In
 
 A reference implementation is provided that performs pixel inversion (`output = ~input`, `algo_sel=0`). **Your task is to replace this with Sobel edge detection by implementing the `algo_sel=1` branch in `rtl/peripherals/sobel_acc.sv`**
 
-The accelerator sits between the Input FIFO and Frame BRAM B. It reads from the FIFO and writes to BRAM B. The CPU only touches the CSR registers.
+The accelerator sits between the Input FIFO and the intermediate FIFO. It reads from the FIFO, applies processing and writes to the intermediate FIFO. The CPU only touches the CSR registers.
 
 ---
 
@@ -176,7 +176,7 @@ The camera FIFO (`fifo_fwft`, `DATA_WIDTH=8`, `DEPTH_WIDTH=10`) carries one gray
 | `fifo_dout` | Input | 8 | One grayscale pixel. Valid whenever `fifo_empty=0`. |
 | `fifo_rd_en` | Output | 1 | Read advance. Assert for one cycle to consume the current pixel and present the next. |
 
-### 7.4 Intermediate FIFO Port Interface
+### 7.3 Intermediate FIFO Port Interface
 
 Processed pixels are written one byte at a time to the intermediate FIFO, which feeds the compression accelerator downstream. The accelerator must stall both reads and writes when `out_full` is asserted.
 
