@@ -28,7 +28,7 @@ module sobel_acc_tb;
 
     localparam string SRC_IMAGE    = "baboon.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
-    localparam string OUT_IMG_PATH = "../../tb/out_images/";
+    localparam string OUT_IMG_PATH = "../../tb/out1_images/";
 
     // -------------------------------------------------------------------------
     // Clock and reset

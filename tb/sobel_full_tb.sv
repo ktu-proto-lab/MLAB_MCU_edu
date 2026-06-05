@@ -26,7 +26,7 @@ module simple_system_tb;
 
     localparam string SRC_IMAGE    = "baboon.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
-    localparam string OUT_IMG_PATH = "../../tb/out_images/";
+    localparam string OUT_IMG_PATH = "../../tb/out1_images/";
 
     parameter string program_folder  = "test/sobel_acc";
     parameter string IMEM_1_InitFile = {"../../sw/ibex/", program_folder, "/build/instr_hex_1.mem"};

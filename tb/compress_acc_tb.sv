@@ -85,7 +85,7 @@ module compress_acc_tb;
     end
 
     // -------------------------------------------------------------------------
-    // TX FIFO emulation (32-bit, infinite sink: never asserts full)
+    // TX FIFO emulation (8-bit, infinite sink: never asserts full)
     // Capture every write into tx_shadow for file output.
     // -------------------------------------------------------------------------
     logic [7:0] tx_shadow [0:TX_MAX_BYTES-1];
@@ -208,6 +208,7 @@ module compress_acc_tb;
         // Poll STATUS.done (bit 1)
         // ------------------------------------------------------------------
         do wb_read(COMPRESS_STATUS, status);
+        // Wait for ACC to assert done
         while (!(status & 32'h2));
 
         wb_read(COMPRESS_SIZE, compressed_size);
@@ -215,10 +216,6 @@ module compress_acc_tb;
                  status, compressed_size, tx_ptr, cycle_count - start_cycle);
         $display("[TB] Throughput: %.2f input bytes/cycle",
                  real'(TOTAL_PIXELS) / real'(cycle_count - start_cycle));
-        if (compressed_size > 0)
-            $display("[TB] Compression ratio: %.3f  (%0d -> %0d bytes)",
-                     real'(compressed_size) / real'(TOTAL_PIXELS),
-                     TOTAL_PIXELS, compressed_size);
 
         // ------------------------------------------------------------------
         // Write compressed output as raw binary (little-endian word bytes)

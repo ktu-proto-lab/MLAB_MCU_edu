@@ -56,7 +56,7 @@
 ../../rtl/peripherals/pit_wb_bus.v
 ../../rtl/peripherals/uart.sv
 ../../rtl/peripherals/sobel_acc.sv
-../../rtl/peripherals/bram.sv
+../../rtl/peripherals/compress_acc.sv
 
 ../../deps/camera_fifo/rtl/verilog/simple_dpram_sclk.v
 ../../deps/camera_fifo/rtl/verilog/fifo.v

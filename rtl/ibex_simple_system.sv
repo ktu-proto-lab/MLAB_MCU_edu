@@ -70,7 +70,7 @@ module ibex_simple_system #(
   //==================================================
 
   localparam int NUM_MASTERS        = 3;
-  localparam int NUM_SLAVES         = 7;
+  localparam int NUM_SLAVES         = 8;
 
   //==================================================
   // Memory mapped device base addresses
@@ -99,8 +99,11 @@ module ibex_simple_system #(
   localparam [31:0] pit_base_addr   = `PIT_BASE_ADDR;
   localparam [31:0] pit_size        = 'h10; // CTRL, MOD and CNT regs
 
-  localparam [31:0] sobel_base_addr = `SOBEL_BASE_ADDR;
-  localparam [31:0] sobel_size      = 'h0C; // CTRL, STATUS, FRAME_COUNT
+  localparam [31:0] sobel_base_addr    = `SOBEL_BASE_ADDR;
+  localparam [31:0] sobel_size         = 'h0C; // CTRL, STATUS, FRAME_COUNT
+
+  localparam [31:0] compress_base_addr = `COMPRESS_BASE_ADDR;
+  localparam [31:0] compress_size      = 'h0C; // CTRL, STATUS, COMPRESSED_SIZE
 
   //==================================================
   // Instantiate modules
@@ -263,15 +266,20 @@ module ibex_simple_system #(
       .pit_irq_o  (pit_irq)
   );
 
-  // Camera FIFO signals (8-bit: one pixel per word)
+  // Camera FIFO signals 
   logic       fifo_wr_en, fifo_rd_en;
   logic       fifo_full,  fifo_empty;
   logic [7:0] fifo_din,   fifo_dout;
 
-  // Intermediate FIFO signals (sobel_acc output → compress_acc input, 8-bit)
+  // Intermediate FIFO signals
   logic       inter_wr_en, inter_rd_en;
   logic       inter_full,  inter_empty;
   logic [7:0] inter_din,   inter_dout;
+
+  // TX FIFO signals
+  logic       tx_wr_en,  tx_rd_en;
+  logic       tx_full,   tx_empty;
+  logic [7:0] tx_din,    tx_dout;
 
   // Camera FIFO: camera interface writes one pixel at a time, sobel_acc reads
   fifo_fwft #(.DATA_WIDTH(8), .DEPTH_WIDTH(10)) u_camera_fifo (
@@ -301,8 +309,33 @@ module ibex_simple_system #(
       .empty (inter_empty)
   );
 
-  // Tie compress_acc read side low until compress_acc is instantiated TODO: instantiate compress_acc
-  assign inter_rd_en = 1'b0;
+  // TX FIFO: compress_acc writes compressed bytes, FTDI reads
+  fifo_fwft #(.DATA_WIDTH(8), .DEPTH_WIDTH(10)) u_tx_fifo (
+      .clk   (clk_sys),
+      .rst   (~rst_sync_n),
+      .din   (tx_din),
+      .wr_en (tx_wr_en),
+      .rd_en (tx_rd_en),
+      .dout  (tx_dout),
+      .full  (tx_full),
+      .empty (tx_empty)
+  );
+
+  // TX FIFO read side: tied low until FTDI interface is integrated TODO: connect FTDI
+  assign tx_rd_en = 1'b0;
+
+  // Compression accelerator
+  compress_acc u_compress_acc (
+      .wb         (wbs[7]),
+
+      .fifo_empty (inter_empty),
+      .fifo_dout  (inter_dout),
+      .fifo_rd_en (inter_rd_en),
+
+      .tx_wr_en   (tx_wr_en),
+      .tx_din     (tx_din),
+      .tx_full    (tx_full)
+  );
 
   // Edge detection accelerator
   sobel_acc u_sobel_acc (
@@ -324,8 +357,8 @@ module ibex_simple_system #(
        wb_interconnect_sharedbus
          #(.numm      (NUM_MASTERS),
            .nums      (NUM_SLAVES),
-           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, sobel_base_addr}),
-           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, sobel_size}))
+           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, sobel_base_addr, compress_base_addr}),
+           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, sobel_size, compress_size}))
        u_wb_interconnect
          (.wbm, .wbs);
 endmodule

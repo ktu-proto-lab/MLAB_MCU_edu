@@ -82,43 +82,10 @@ to understand the problem and consider possible implementations.
 Draw a block diagram showing the datapath you have designed and develop an FSM diagram for your accelerator.
 
 
-## 4. Accelerator Interface
 
-### 4.1 Wishbone CSR Register Map
+## 4. Simulation
 
-Base address: `0x6000_0000`.
-
-| Offset | Name | Access | Description |
-|---|---|---|---|
-| `0x00` | `CTRL` | R/W | bit[0]: `auto_start` - restart automatically on `frame_ready`.<br>bit[1]: `algo_sel` - 0: pixel inversion (reference), 1: Sobel (student impl). |
-| `0x04` | `STATUS` | RO | bit[0]: `busy`.<br>bit[1]: `done` - high for one cycle after a frame completes.<br>bit[2]: `error` - unused; assign during development for recovery. |
-| `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². CPU polls to verify pipeline liveness. |
-
-### 4.2 Camera FIFO Port Interface
-
-The camera FIFO (`fifo_fwft`, `DATA_WIDTH=8`, `DEPTH_WIDTH=10`) carries one grayscale pixel per word. The OV7670 delivers pixels one byte at a time, so this matches the camera's native output directly. The FIFO is First Word Fall-Through: `fifo_dout` is valid as soon as `fifo_empty=0`, with no read strobe required to present the first byte. Asserting `fifo_rd_en` advances to the next pixel on the following cycle.
-
-| Signal | Direction | Width | Description |
-|---|---|---|---|
-| `fifo_empty` | Input | 1 | FIFO empty. `fifo_dout` is not valid when high. Stall the datapath. |
-| `fifo_dout` | Input | 8 | One grayscale pixel. Valid whenever `fifo_empty=0`. |
-| `fifo_rd_en` | Output | 1 | Read advance. Assert for one cycle to consume the current pixel and present the next. |
-
-### 4.4 Intermediate FIFO Port Interface
-
-Processed pixels are written one byte at a time to the intermediate FIFO, which feeds the compression accelerator downstream. The accelerator must stall both reads and writes when `out_full` is asserted.
-
-| Signal | Direction | Width | Description |
-|---|---|---|---|
-| `out_wr_en` | Output | 1 | Write enable. Assert for one cycle to push one processed pixel. |
-| `out_din` | Output | 8 | One processed grayscale pixel. Must be valid when `out_wr_en=1`. |
-| `out_full` | Input | 1 | Intermediate FIFO full. Do not assert `out_wr_en` when high; also stop consuming from the camera FIFO. |
-
----
-
-## 5. Simulation
-
-### 5.1 Isolated Testbench (`sobel_acc_tb`)
+### 4.1 Isolated Testbench (`sobel_acc_tb`)
 
 When you first start developing the edge detection algorithm inside the `sobel_acc` accelerator you will want to test in in isolation. For this reason `tb/sobel_acc_tb.sv` is provided.
 
@@ -133,9 +100,9 @@ The testbench emulates both FIFOs: it feeds the camera FIFO one pixel (byte) at 
 ./script/xrun_sim_sobel.sh
 ```
 
-### 5.2 Full System Testbench (`sobel_full_tb`)
+### 4.2 Full System Testbench (`sobel_full_tb`)
 
-Instantiates the complete `ibex_simple_system` SoC. The CPU firmware (`sw/ibex/test/sobel_acc/`) runs on the Ibex core — it writes `SOBEL_CTRL=1`, polls `FRAME_COUNT`, then raises GPIO0 to signal completion. The testbench forces `fifo_din`/`fifo_wr_en` (tied off in RTL) to inject one pixel byte at a time into the camera FIFO. Output pixels are captured by shadowing `dut.inter_wr_en`/`dut.inter_din` as sobel_acc writes to the intermediate FIFO. On GPIO0 going high the testbench verifies the shadow against the golden model and writes a PGM.
+Instantiates the complete `ibex_simple_system` SoC. The CPU firmware (`sw/ibex/test/sobel_acc/`) runs on the Ibex core - it writes `SOBEL_CTRL=1`, polls `FRAME_COUNT`, then raises GPIO0 to signal completion. The testbench forces `fifo_din`/`fifo_wr_en` (tied off in RTL) to inject one pixel byte at a time into the camera FIFO. Output pixels are captured by shadowing `dut.inter_wr_en`/`dut.inter_din` as sobel_acc writes to the intermediate FIFO. On GPIO0 going high the testbench verifies the shadow against the golden model and writes a PGM.
 
 **Workflow:**
 1. Build the firmware:
@@ -156,7 +123,7 @@ You can also run it with GUI for visual debugging:
 
 ---
 
-## 6. Firmware (CPU Side)
+## 5. Firmware (CPU Side)
 
 The CPU program is in `sw/ibex/test/sobel_acc/core/src/main.c`. It:
 
@@ -176,12 +143,47 @@ make clean && make all
 
 ---
 
-## 7. Design Hints
+## 6. Design Hints
 
-- Data arrives one pixel (8 bits) per clock cycle from the camera FIFO. The Sobel kernel needs three rows simultaneously — you need internal **line buffers** (one per row) to hold rows N-1 and N while row N+1 streams in. Each line buffer is 320 bytes.
+- Data arrives one pixel (8 bits) per clock cycle from the camera FIFO. The Sobel kernel needs three rows simultaneously - you need internal **line buffers** (one per row) to hold rows N-1 and N while row N+1 streams in. Each line buffer is 320 bytes.
 - A pipelined datapath can produce one output pixel per cycle once the pipeline is filled, even if each individual computation takes multiple stages.
 - The Sobel kernel values are only ±1 and ±2, so all multiplications reduce to additions and a single left shift.
-- Consider image borders carefully — your design must handle boundary pixels without reading out-of-bounds addresses. Mirror the outermost row/column in the line buffers.
-- Output is also one byte per cycle via `out_wr_en`/`out_din` — no packing into wider words is required. Stall the entire pipeline (both input and output) when `out_full` is asserted.
+- Consider image borders carefully - your design must handle boundary pixels without reading out-of-bounds addresses. Mirror the outermost row/column in the line buffers.
+- Output is also one byte per cycle via `out_wr_en`/`out_din` - no packing into wider words is required. Stall the entire pipeline (both input and output) when `out_full` is asserted.
+
+---
+
+
+## 7. Accelerator Interface
+
+### 7.1 Wishbone CSR Register Map
+
+Base address: `0x6000_0000`.
+
+| Offset | Name | Access | Description |
+|---|---|---|---|
+| `0x00` | `CTRL` | R/W | bit[0]: `auto_start` - restart automatically on `frame_ready`.<br>bit[1]: `algo_sel` - 0: pixel inversion (reference), 1: Sobel (student impl). |
+| `0x04` | `STATUS` | RO | bit[0]: `busy`.<br>bit[1]: `done` - high for one cycle after a frame completes.<br>bit[2]: `error` - unused; assign during development for recovery. |
+| `0x08` | `FRAME_COUNT` | RO | Completed frame counter, wraps at 2³². CPU polls to verify pipeline liveness. |
+
+### 7.2 Camera FIFO Port Interface
+
+The camera FIFO (`fifo_fwft`, `DATA_WIDTH=8`, `DEPTH_WIDTH=10`) carries one grayscale pixel per word. The OV7670 delivers pixels one byte at a time, so this matches the camera's native output directly. The FIFO is First Word Fall-Through: `fifo_dout` is valid as soon as `fifo_empty=0`, with no read strobe required to present the first byte. Asserting `fifo_rd_en` advances to the next pixel on the following cycle.
+
+| Signal | Direction | Width | Description |
+|---|---|---|---|
+| `fifo_empty` | Input | 1 | FIFO empty. `fifo_dout` is not valid when high. Stall the datapath. |
+| `fifo_dout` | Input | 8 | One grayscale pixel. Valid whenever `fifo_empty=0`. |
+| `fifo_rd_en` | Output | 1 | Read advance. Assert for one cycle to consume the current pixel and present the next. |
+
+### 7.4 Intermediate FIFO Port Interface
+
+Processed pixels are written one byte at a time to the intermediate FIFO, which feeds the compression accelerator downstream. The accelerator must stall both reads and writes when `out_full` is asserted.
+
+| Signal | Direction | Width | Description |
+|---|---|---|---|
+| `out_wr_en` | Output | 1 | Write enable. Assert for one cycle to push one processed pixel. |
+| `out_din` | Output | 8 | One processed grayscale pixel. Must be valid when `out_wr_en=1`. |
+| `out_full` | Input | 1 | Intermediate FIFO full. Do not assert `out_wr_en` when high; also stop consuming from the camera FIFO. |
 
 ---
