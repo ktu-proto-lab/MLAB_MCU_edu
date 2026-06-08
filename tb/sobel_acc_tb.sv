@@ -37,6 +37,11 @@ module sobel_acc_tb;
     logic rst_n = 1'b0;
     always #(CLK_PERIOD / 2) clk = ~clk;
 
+    initial begin
+        $dumpfile("output.vcd");
+        $dumpvars(0,sobel_acc_tb);
+    end
+
     // -------------------------------------------------------------------------
     // Wishbone interface
     // -------------------------------------------------------------------------
