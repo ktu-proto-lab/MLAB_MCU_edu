@@ -56,6 +56,10 @@ module sobel_acc (
     // -------------------------------------------------------------------------
     logic [31:0] wb_wdata;
     logic [31:0] wb_rdata;
+    reg [7:0] rows [0:2][0:319]; //bitu memory triju eiliu
+    logic [11:0] Gx;
+    logic [11:0] Gy;
+    logic unsigned [15:0] kiekis;
 
 `ifdef NO_MODPORT_EXPRESSIONS
     assign wb_wdata = wb.dat_m;
@@ -121,6 +125,22 @@ module sobel_acc (
         end
     end
 
+
+
+    always_ff @(posedge wb.clk or negedge wb.rst) begin
+        if (!wb.rst) begin
+            kiekis <= 0;
+        end else if(!fifo_empty && !out_full) begin
+            if(kiekis != 960) begin
+                rows[kiekis/320][kiekis % 320] <= fifo_dout;
+                kiekis <= kiekis + 1;
+            end
+        end
+ 
+    end
+
+
+   
     // -------------------------------------------------------------------------
     // FSM combinational
     // -------------------------------------------------------------------------
@@ -138,7 +158,7 @@ module sobel_acc (
         // Combinational output defaults
         out_wr_en = 1'b0;
         out_din   = 8'h0;
-
+        
         // CPU write to CTRL register: update config bits, clear done
         if (wb_wr && wb.adr[3:2] == 2'h0) begin
             ctrl_auto_start_next = wb_wdata[0];
@@ -163,9 +183,30 @@ module sobel_acc (
             // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
                 if (!fifo_empty && !out_full) begin
-                    out_wr_en = 1'b1;
+                    out_wr_en = 1'b0;
                     // algo_sel=0: inversion   algo_sel=1: STUDENT SOBEL HERE
-                    out_din = ctrl_algo_sel ? fifo_dout : ~fifo_dout;
+                    
+                    if(ctrl_algo_sel) begin //Sobelio algoritmas
+
+                        //if(kiekis != 960)begin //ziurim ar trys eilutes uzpildyto
+                            //rows[kiekis/320][kiekis % 320] = fifo_dout;
+                            //kiekis = kiekis + 1;
+                        //end else
+                        if(kiekis%320 > 1 && kiekis%320 < 319) begin //Pats sobelio skaiciavimas
+                            Gx = rows[0][kiekis%320+1] + rows[1][kiekis%320+1]*2 + rows[2][kiekis%320+1] - rows[0][kiekis%320-1] - rows[1][kiekis%320-1]*2 - rows[2][kiekis%320-1];
+                            Gy = rows[0][kiekis%320-1] + rows[0][kiekis%320]*2 + rows[0][kiekis%320+1] - rows[2][kiekis%320-1] - rows[2][kiekis%320]*2 - rows[2][kiekis%320+1];
+                            out_din = Gx+Gy;
+                            out_wr_en = 1'b1;
+                            rows[0][kiekis%320-1] = rows[1][kiekis%320-1]; //keiciam pikselius vviena stulpeli po kito
+                            rows[1][kiekis%320-1] = rows[2][kiekis%320-1];
+                            rows[2][kiekis%320-1] = fifo_dout;
+                            //kiekis = kiekis + 1;
+                        end
+
+                    end else begin 
+                        out_din = fifo_dout;
+                    end
+
 
                     wr_ptr_next = wr_ptr + 32'h1;
 
