@@ -1,3 +1,7 @@
 [submodule "deps/camera_fifo"]
 	path = deps/camera_fifo
 	url = https://github.com/olofk/fifo.git
+
+[submodule "deps/ftdi_controller"]
+	path = deps/ftdi_controller
+	url = https://github.com/WangXuan95/FPGA-ftdi245fifo

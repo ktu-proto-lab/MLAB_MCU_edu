@@ -1,4 +1,4 @@
-## Journal for tracking progress of the edge detection assignment development
+## Journal for tracking progress of the edge detection and compression assignment development
 
 ## Notes
 <!-- [risk] [decision] [revisit] - tag freely -->
@@ -11,6 +11,8 @@
 [decision] Input side uses a 1024×32-bit FWFT FIFO instead of a full frame buffer. The accelerator begins processing pixels as they arrive. FIFO depth covers ~3 lines, enough for Sobel line buffer fill latency. BRAM B is kept as a full frame buffer for the compression accelerator.
 
 [decision] 32-bit wide data path (4 pixels/word) throughout, matching Xilinx BRAM/FIFO primitive widths.
+
+# Edge detection
 
 ## Register Map (base: 0x6000_0000, sobel_size = 0x0C)
 
@@ -50,6 +52,7 @@ Run the command below if you want to analyse FIFO behaviour yourself.
 4. (DONE) Develop a testbench that exercises the subsystem in isolation
 5. (DONE) Develop full system testbench that exercises the subsystem
 6. Write guide how to simulate, explain the system (what is in sobel_acc, FIFO caveats, sw for MCU)
+7. Write interface to read from OV7670 and test with a real module.
 
 ## 2026-05-10
 ### Did
@@ -79,6 +82,8 @@ Run the command below if you want to analyse FIFO behaviour yourself.
 ### Did
 - Guide for developing edge detection for students in `doc/edge_detection.md`
 
+# Compression accelerator
+
 ## 2026-05-27
 ### Did
 - Add a top-level README
@@ -88,3 +93,16 @@ Run the command below if you want to analyse FIFO behaviour yourself.
 - Expand the description in `doc/compression.md`
 - Implement the framework for the compression part
 - Look at interfacing options for Compression ACC -> FTDI converter
+
+## 2026-06-04
+
+### Did
+- Found ftdi controller with AXI interface
+- `fpga\rtl\ft2232h_tx.v`: Claude generated wrapper for simple FIFO interface to `ftdi_245fifo_top.v` instead of AXI 
+- `fpga\rtl\ft2232h_tx_usage_example.v`: Claude generated instantiation example with required XDC constraints (commented text)
+- Changed data bus widths to be 8-bit instead of 32-bit throughout the system. Because that's the bus width from the camera interface and for the FTDI controller.
+- Isolated testbench for the compression accelerator. Generated edge-detected images with a python script. They sit in `tb/src_images` with the file name ending `*_edge`. Result is written in binary format - let the students decompress on their own.
+
+### Next
+- Complete compression testbench
+- Software for Ibex for complete testbench

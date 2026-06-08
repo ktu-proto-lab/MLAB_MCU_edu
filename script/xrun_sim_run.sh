@@ -4,7 +4,8 @@ readonly PROJECT_ROOT="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/nu
 
 cd "$PROJECT_ROOT/sim/rtl" || exit
 
-mkdir -p ../../tb/out_images
+mkdir -p ../../tb/out1_images
+mkdir -p ../../tb/out2_images
 
 testbench="simple_system"
 access="-access +rw "

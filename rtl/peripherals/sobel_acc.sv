@@ -4,8 +4,9 @@
     *
     * Image Processing Accelerator - Wishbone Slave
   Description:
-    * Wishbone-mapped accelerator that reads pixels from Frame BRAM A, processes
-    * them, and writes results to Frame BRAM B.
+    * Wishbone-mapped accelerator that reads pixels one byte at a time from the
+    * camera FIFO, processes them, and writes the result one byte at a time to
+    * an intermediate FIFO consumed by the compression accelerator.
     *
     * Register map (word-aligned, byte offsets):
     *   0x00  CTRL        R/W  bit[0]: auto_start  - start automatically when FIFO is non-empty
@@ -15,22 +16,24 @@
     *                          bit[2]: error       - Currently unused
     *   0x08  FRAME_COUNT RO   increments each completed frame; wraps at 2^32
     *
-    *   Each 32-bit word (4 pixels) costs 2 cycles (one FETCH + one WRITE).
+    *   One pixel (1 byte) is consumed from the input FIFO and one processed pixel
+    *   is written to the output FIFO per clock cycle when both FIFOs are ready.
 */
 module sobel_acc (
     wb_if.slave  wb,
 
-    input  logic        fifo_empty,
-    input  logic [31:0] fifo_dout,
-    output logic        fifo_rd_en,
+    // Camera FIFO - source (FWFT, 8-bit, one pixel per word)
+    input  logic       fifo_empty,
+    input  logic [7:0] fifo_dout,
+    output logic       fifo_rd_en,
 
-    output logic        dst_en,
-    output logic        dst_we,
-    output logic [14:0] dst_addr,
-    output logic [31:0] dst_wdata
+    // Intermediate FIFO - destination (8-bit, one pixel per word)
+    output logic       out_wr_en,
+    output logic [7:0] out_din,
+    input  logic       out_full
     );
 
-    localparam int FRAME_WORDS = 19200;
+    localparam int TOTAL_PIXELS = 76800; // 320 x 240
 
     typedef enum logic [1:0] {
         IDLE = 2'b00,
@@ -78,7 +81,8 @@ module sobel_acc (
 
     assign wb_wr = wb.cyc & wb.stb & wb.we & ~wb.stall;
 
-    assign fifo_rd_en = (state == RUN) && !fifo_empty;
+    // Consume from input FIFO only when we can simultaneously write to output FIFO.
+    assign fifo_rd_en = (state == RUN) && !fifo_empty && !out_full;
 
     // -------------------------------------------------------------------------
     // Wishbone read mux (purely combinational)
@@ -118,7 +122,7 @@ module sobel_acc (
     end
 
     // -------------------------------------------------------------------------
-    // FSM registers
+    // FSM combinational
     // -------------------------------------------------------------------------
     always_comb begin
         // Defaults
@@ -132,10 +136,8 @@ module sobel_acc (
         csr_frame_count_next = csr_frame_count;
 
         // Combinational output defaults
-        dst_en    = 1'b0;
-        dst_we    = 1'b0;
-        dst_addr  = 15'h0;
-        dst_wdata = 32'h0;
+        out_wr_en = 1'b0;
+        out_din   = 8'h0;
 
         // CPU write to CTRL register: update config bits, clear done
         if (wb_wr && wb.adr[3:2] == 2'h0) begin
@@ -158,18 +160,16 @@ module sobel_acc (
 
             // -----------------------------------------------------------------
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
-            // Consume one word per cycle; stall naturally when FIFO is empty.
+            // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
-                if (!fifo_empty) begin
-                    dst_en    = 1'b1;
-                    dst_we    = 1'b1;
-                    dst_addr  = wr_ptr[14:0];
+                if (!fifo_empty && !out_full) begin
+                    out_wr_en = 1'b1;
                     // algo_sel=0: inversion   algo_sel=1: STUDENT SOBEL HERE
-                    dst_wdata = ctrl_algo_sel ? fifo_dout : ~fifo_dout;
+                    out_din = ctrl_algo_sel ? fifo_dout : ~fifo_dout;
 
                     wr_ptr_next = wr_ptr + 32'h1;
 
-                    if (wr_ptr + 32'h1 >= FRAME_WORDS) begin
+                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS) begin
                         csr_busy_next        = 1'b0;
                         csr_done_next        = 1'b1;
                         csr_frame_count_next = csr_frame_count + 32'h1;
