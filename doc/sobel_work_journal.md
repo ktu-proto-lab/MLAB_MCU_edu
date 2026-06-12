@@ -100,8 +100,9 @@ Run the command below if you want to analyse FIFO behaviour yourself.
 - Found ftdi controller with AXI interface
 - `fpga\rtl\ft2232h_tx.v`: Claude generated wrapper for simple FIFO interface to `ftdi_245fifo_top.v` instead of AXI 
 - `fpga\rtl\ft2232h_tx_usage_example.v`: Claude generated instantiation example with required XDC constraints (commented text)
+- Changed data bus widths to be 8-bit instead of 32-bit throughout the system. Because that's the bus width from the camera interface and for the FTDI controller.
+- Isolated testbench for the compression accelerator. Generated edge-detected images with a python script. They sit in `tb/src_images` with the file name ending `*_edge`. Result is written in binary format - let the students decompress on their own.
 
-
-
-How does the camera give away data? One byte at a time? Should we transform its output bytes into words?
-How does the FTDI-2-USB converter take data in? What is its input FIFO?
+### Next
+- Complete compression testbench
+- Software for Ibex for complete testbench

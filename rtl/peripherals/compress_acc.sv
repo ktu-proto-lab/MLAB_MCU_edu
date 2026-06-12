@@ -4,7 +4,7 @@
   Description:
     * Compression Accelerator
     *
-    * Reads 32-bit words from an intermediate FIFO (written by sobel_acc) and
+    * Reads 8-bit words from an intermediate FIFO (written by sobel_acc) and
     * streams compressed output into the TX FIFO. 
     *
     * The current implementation acts as pass-through which simply copies the words unmodified
@@ -29,9 +29,9 @@ module compress_acc (
     output logic       fifo_rd_en,
 
     // TX FIFO - destination
-    output logic        tx_wr_en,
-    output logic [31:0] tx_din,
-    input  logic        tx_full
+    output logic       tx_wr_en,
+    output logic [7:0] tx_din,
+    input  logic       tx_full
 );
 
     localparam int TOTAL_PIXELS = 76800; // 320 x 240
@@ -114,7 +114,7 @@ module compress_acc (
         csr_done_next        = csr_done;
 
         tx_wr_en = 1'b0;
-        tx_din   = 32'h0;
+        tx_din   = 8'h0;
 
         if (wb_wr && wb.adr[3:2] == 2'h0) begin
             ctrl_auto_start_next = wb_wdata[0];
@@ -138,7 +138,7 @@ module compress_acc (
             RUN: begin
                 if (!fifo_empty && !tx_full) begin
                     tx_wr_en = 1'b1;
-                    tx_din   = {24'h0, fifo_dout}; // TODO: replace with compression; pack 4 bytes per word
+                    tx_din   = fifo_dout; // TODO: replace with compression
 
                     rd_ptr_next = rd_ptr + 32'h1;
 
