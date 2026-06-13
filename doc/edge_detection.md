@@ -89,12 +89,12 @@ Draw a block diagram showing the datapath you have designed and develop an FSM d
 
 When you first start developing the edge detection algorithm inside the `sobel_acc` accelerator you will want to test in in isolation. For this reason `tb/sobel_acc_tb.sv` is provided.
 
-The testbench emulates both FIFOs: it feeds the camera FIFO one pixel (byte) at a time and captures every write to the intermediate FIFO output into a shadow array. After the frame completes the shadow is verified against the golden model and written out as a P2 ASCII PGM to `tb/out_images/`.
+The testbench emulates both FIFOs: it feeds the camera FIFO one pixel (byte) at a time and captures every write to the intermediate FIFO output into a shadow array. After the frame completes the shadow is verified against the golden model and written out as a P2 ASCII PGM to `tb/out1_images/`.
 
 **Workflow:**
 1. Set `SRC_IMAGE` in `tb/sobel_acc_tb.sv` to one of the PGMs in `tb/src_images/`.
 2. Run the testbench (command below).
-3. Open the matching file in `tb/out_images/` for visual verification.
+3. Open the matching file in `tb/out1_images/` for visual verification.
 
 ```bash
 ./script/xrun_sim_sobel.sh
@@ -110,7 +110,7 @@ Instantiates the complete `ibex_simple_system` SoC. The CPU firmware (`sw/ibex/t
 cd sw/ibex/test/sobel_acc && make clean && make all
 ```
 2. Run the full system testbench (command below).
-3. Inspect the output PGM in `tb/out_images/`.
+3. Inspect the output PGM in `tb/out1_images/`.
 
 ```bash
 ./script/xrun_sim_run.sh -t sobel_full

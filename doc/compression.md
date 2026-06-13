@@ -86,13 +86,13 @@ Sobel-processed images compress exceptionally well:
 
 `tb/compress_acc_tb.sv` exercises the compression accelerator in isolation, without the full SoC.
 
-- Loads the intermediate FIFO with an image (a Sobel-processed PGM (**P**ortable **G**raymap image **F**ormat) stored in `tb/src_images/`)
+- Loads the intermediate FIFO with an image (a Sobel-processed PGM stored in `tb/src_images/`)
 - Drives the Wishbone CSR interface to assert `start`
 - Receives data from the TX FIFO and writes it to a file in `tb/out2_images/`
 - Reports elapsed clock cycles (so you can later compare with your `COMPRESSED_SIZE` implementation)
 
 **Workflow:**
-1. Select the test image by editing `SRC_IMAGE` in `tb/compress_acc_tb.sv`.
+1. Select the test image by editing `SRC_IMAGE` in `tb/compress_acc_tb.sv`. Using an edge processed examples by default.
 2. Run the testbench:
 ```bash
 ./script/xrun_sim_compress.sh 
@@ -101,7 +101,32 @@ Sobel-processed images compress exceptionally well:
 
 ### 4.2 Full Testbench (`compress_full_tb`)
 
-WIP
+Instantiates the complete `ibex_simple_system` SoC. The CPU firmware (`sw/ibex/test/compress_acc/`) runs on the Ibex core - it writes `COMPRESS_CTRL = 0x1`, polls the `done` bit in `COMPRESS_STATUS`, then raises GPIO0 to signal completion. 
+
+The testbench forces `fifo_din`/`fifo_wr_en` (tied off in RTL) to inject one pixel byte at a time into the intermediate FIFO. Output pixels are captured by shadowing `dut.inter_wr_en`/`dut.inter_din` as compress_acc writes to the TX FIFO. On GPIO0 going high the testbench verifies the shadow against the golden model and writes a PGM.
+
+**Workflow:**
+1. Build the firmware:
+```bash
+cd sw/ibex/test/compress_acc && make clean && make all
+```
+2. Run the full system testbench:
+
+```bash
+./script/xrun_sim_run.sh -t compress_full
+```
+
+You can also run it with GUI for visual debugging:
+```bash
+./script/xrun_sim_run.sh -t compress_full -gui
+```
+
+3. For the test example use `script/bin2pgm.py` to convert from .bin to .pgm for visual verification. To run it from project root:
+```
+python3 script/bin2pgm.py tb/out2_images/baboon_edge_compressed.bin 
+```
+
+4. Inspect the output PGM in `tb/out2_images/`.
 
 ---
 

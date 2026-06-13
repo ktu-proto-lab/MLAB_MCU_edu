@@ -1,10 +1,10 @@
-# SimVision Command Script (Mon May 25 03:40:05 PM EEST 2026)
+# SimVision Command Script (Sat Jun 13 05:43:47 PM EEST 2026)
 #
 # Version 25.03.s006
 #
 # You can restore this configuration with:
 #
-#      xrun -sv -access +rw +gui -timescale 1ns/1ns -clean +define+RANDOM_NUMBER=230 -define FUNCTIONAL -f files.f ../../tb/sobel_full_tb.sv -s -input /home/la_v9/mlab/MLAB_MCU_edu/sim/rtl/restore.tcl
+#      xrun -sv -access +rw +gui -timescale 1ns/1ns -clean +define+RANDOM_NUMBER=135 -define FUNCTIONAL -f files.f ../../tb/compress_full_tb.sv -s -input restore.tcl
 #
 
 
@@ -77,7 +77,7 @@ preferences set toolbar-sendToIndago-WaveWindow {
 # Simulator
 #
 database require simulator -hints {
-	simulator "xrun -sv -access +rw +gui -timescale 1ns/1ns -clean +define+RANDOM_NUMBER=230 -define FUNCTIONAL -f files.f ../../tb/sobel_full_tb.sv -s -input restore.tcl"
+	simulator "xrun -sv -access +rw +gui -timescale 1ns/1ns -clean +define+RANDOM_NUMBER=135 -define FUNCTIONAL -f files.f ../../tb/compress_full_tb.sv -s -input restore.tcl"
 }
 #
 # Groups
@@ -120,6 +120,9 @@ catch {group new -name bram_b -overlay 0}
 catch {group new -name camera_fifo -overlay 0}
 catch {group new -name {Group 3} -overlay 0}
 catch {group new -name sobel_acc_wb_s -overlay 0}
+catch {group new -name compress_acc -overlay 0}
+catch {group new -name {Group 4} -overlay 0}
+catch {group new -name compress_wb_s -overlay 0}
 group using TB
 group set -overlay 0
 group set -comment {}
@@ -535,11 +538,6 @@ group insert \
     [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.state[1:0]}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_done}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.csr_frame_count[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_addr[14:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_en}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_wdata[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.dst_we}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_dout[31:0]}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.fifo_empty}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc.wr_ptr[31:0]}]} ] \
     sobel_acc_wb_s
@@ -553,13 +551,7 @@ group set -overlay 0
 group set -comment {}
 group clear 0 end
 
-group insert \
-    [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.we}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.wdata[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.rdata[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.en}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.clk}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.addr[14:0]}]} ]
+
 group using camera_fifo
 group set -overlay 0
 group set -comment {}
@@ -568,10 +560,7 @@ group clear 0 end
 group insert \
     [subst  {simulator::[format {simple_system_tb.fifo_i}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.clk}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.din[31:0]}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.dout[31:0]}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.empty}]} ] \
-    [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_dout[31:0]}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_empty}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_rd_en}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.u_camera_fifo.full}]} ] \
@@ -597,6 +586,53 @@ group insert \
     [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.dat_o[31:0]}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.sel[3:0]}]} ] \
     [subst  {simulator::[format {simple_system_tb.dut.wbs[6].slave.ack}]} ]
+group using compress_acc
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.tx_wr_en}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.tx_full}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.tx_din[7:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.state_t}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.state_next[1:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.state[1:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.rd_ptr_next[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.rd_ptr[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.fifo_rd_en}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.fifo_empty}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.fifo_dout[7:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.ctrl_auto_start_next}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.ctrl_auto_start}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.csr_done_next}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.csr_done}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.csr_busy_next}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc.csr_busy}]} ] \
+    compress_wb_s
+group using {Group 4}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group using compress_wb_s
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+
+group insert \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.we}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.stb}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.stall}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.sel[3:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.rst}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.err}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.dat_o[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.dat_i[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.cyc}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.clk}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.adr[31:0]}]} ] \
+    [subst  {simulator::[format {simple_system_tb.dut.wbs[7].slave.ack}]} ]
 
 #
 # Mnemonic Maps
@@ -616,10 +652,10 @@ if {[catch {window new WatchList -name "Design Browser 1" -geometry 1046x892+512
 }
 window target "Design Browser 1" on
 browser using {Design Browser 1}
-browser set -scope [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc}]} ]
+browser set -scope [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc}]} ]
 browser set \
     -signalsort name
-browser yview see [subst  {simulator::[format {simple_system_tb.dut.u_sobel_acc}]} ]
+browser yview see [subst  {simulator::[format {simple_system_tb.dut.u_compress_acc}]} ]
 browser timecontrol set -lock 0
 
 #
@@ -637,7 +673,7 @@ waveform set \
     -signalwidth 173 \
     -units ns \
     -valuewidth 82
-waveform baseline set -time 224,156,250ps
+waveform baseline set -time 29,143ns
 
 
 set groupId0 [waveform add -groups TB]
@@ -645,7 +681,6 @@ set groupId0 [waveform add -groups TB]
 set groupId1 [waveform find -name UART_RX]
 
 set groupId1 [waveform find -name UART_TX]
-waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups IMEM]
@@ -718,6 +753,7 @@ set groupId0 [waveform add -groups GPIO]
 set groupId1 [waveform find -name GPIO_wb_s]
 waveform hierarchy collapse $groupId1
 
+waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups I2C]
@@ -747,50 +783,16 @@ set groupId1 [waveform find -name sobel_acc_wb_s]
 
 
 set groupId0 [waveform add -groups camera_fifo]
-set gpGlist0 [waveform hierarchy contents $groupId0]
-set gpID0 [lindex $gpGlist0 0]
-foreach {name attrs} [subst  {
-    {simulator::[format {simple_system_tb.fifo_i}]} {-color #0099ff}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.clk}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.din[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.dout[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.empty}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_dout[31:0]}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_empty}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.fifo_rd_en}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.full}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.rd_en}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.rst}]} {}
-    {simulator::[format {simple_system_tb.dut.u_camera_fifo.wr_en}]} {}
-}] childcmds {
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-    {}
-} {
-    set expected [ join [waveform signals -format fullpath $gpID0] ]
-    if {[string equal $name $expected] || $name == "cdivider"} {
-        if {$attrs != ""} {
-            eval waveform format $gpID0 $attrs
-        }
-        if { $childcmds != ""} {
-            eval $childcmds
-        }
-    }
-    set gpGlist0 [lrange $gpGlist0 1 end]
-    set gpID0 [lindex $gpGlist0 0]
-}
+waveform hierarchy collapse $groupId0
 
 
-waveform xview limits 0 2ns
+set groupId0 [waveform add -groups compress_acc]
+
+set groupId1 [waveform find -name compress_wb_s]
+
+
+
+waveform xview limits 0 1837701.12ns
 
 #
 # Waveform Window Links
@@ -810,13 +812,6 @@ memviewer set \
 -radix default \
 -addressradix default \
 -addressorder MSBtoLSB
-
-memviewer add [subst  {simulator::[format {simple_system_tb.src_mem[0:19199]}]} ]
-
-# Load memory viewer instances
-memviewer add -instanceonly  \
-	[subst  {simulator::[format {simple_system_tb.pixels_in[0:76799]}]} ] \
-	[subst  {simulator::[format {simple_system_tb.dut.u_frame_bram_b.mem[0:19199]}]} ]
 
 memviewer sidebar visibility partial
 

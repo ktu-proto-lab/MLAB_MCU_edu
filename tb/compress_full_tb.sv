@@ -20,7 +20,7 @@
 */
 `include "project_defs.svh"
 
-module compress_full_tb;
+module simple_system_tb;
 
     // -------------------------------------------------------------------------
     localparam int  FRAME_W      = 320;
