@@ -57,9 +57,10 @@ module sobel_acc (
     logic [31:0] wb_wdata;
     logic [31:0] wb_rdata;
     reg [7:0] rows [0:2][0:319]; //bitu memory triju eiliu
-    logic [11:0] Gx;
-    logic [11:0] Gy;
-    logic unsigned [15:0] kiekis;
+    logic signed [11:0] Gx;
+    logic signed [11:0] Gy;
+    logic unsigned [17:0] kiekis, line, width;
+    logic [3:0] top, middle, bottom;
 
 `ifdef NO_MODPORT_EXPRESSIONS
     assign wb_wdata = wb.dat_m;
@@ -130,11 +131,17 @@ module sobel_acc (
     always_ff @(posedge wb.clk or negedge wb.rst) begin
         if (!wb.rst) begin
             kiekis <= 0;
-        end else if(!fifo_empty && !out_full) begin
-            if(kiekis != 960) begin
-                rows[kiekis/320][kiekis % 320] <= fifo_dout;
-                kiekis <= kiekis + 1;
+            line <= 0;
+            width <= 0;
+        end else if(!out_full && state == RUN) begin
+             if(width == 319)begin
+                 if(line == 2)line <= 0; 
+                else line <= line + 1;
             end
+            rows[line][width] <= fifo_dout;
+            if(width == 319) width <= 0;
+            else width <= width + 1;
+            kiekis <= kiekis + 1;
         end
  
     end
@@ -156,7 +163,7 @@ module sobel_acc (
         csr_frame_count_next = csr_frame_count;
 
         // Combinational output defaults
-        out_wr_en = 1'b0;
+        //out_wr_en = 1'b0;
         out_din   = 8'h0;
         
         // CPU write to CTRL register: update config bits, clear done
@@ -182,26 +189,50 @@ module sobel_acc (
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
             // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
-                if (!fifo_empty && !out_full) begin
-                    out_wr_en = 1'b0;
-                    // algo_sel=0: inversion   algo_sel=1: STUDENT SOBEL HERE
+                if (!out_full) begin
                     
-                    if(ctrl_algo_sel) begin //Sobelio algoritmas
+                    
+                    if(1) begin //Sobelio algoritmas
 
-                        //if(kiekis != 960)begin //ziurim ar trys eilutes uzpildyto
-                            //rows[kiekis/320][kiekis % 320] = fifo_dout;
-                            //kiekis = kiekis + 1;
-                        //end else
-                        if(kiekis%320 > 1 && kiekis%320 < 319) begin //Pats sobelio skaiciavimas
-                            Gx = rows[0][kiekis%320+1] + rows[1][kiekis%320+1]*2 + rows[2][kiekis%320+1] - rows[0][kiekis%320-1] - rows[1][kiekis%320-1]*2 - rows[2][kiekis%320-1];
-                            Gy = rows[0][kiekis%320-1] + rows[0][kiekis%320]*2 + rows[0][kiekis%320+1] - rows[2][kiekis%320-1] - rows[2][kiekis%320]*2 - rows[2][kiekis%320+1];
-                            out_din = Gx+Gy;
+                        if(kiekis == 321)out_wr_en=1'b0; /// CIA GAL kiekis = 320 IDKKKKKKKKKKKKK  dar width nemanau gerai
+                        if(kiekis > 640 && width > 2) begin
                             out_wr_en = 1'b1;
-                            rows[0][kiekis%320-1] = rows[1][kiekis%320-1]; //keiciam pikselius vviena stulpeli po kito
-                            rows[1][kiekis%320-1] = rows[2][kiekis%320-1];
-                            rows[2][kiekis%320-1] = fifo_dout;
-                            //kiekis = kiekis + 1;
+                            if(line == 2) begin
+                                top = 0;
+                                middle = 1;
+                                bottom = 2;
+                            end
+                            else if(line == 0) begin
+                                top = 1;
+                                middle = 2;
+                                bottom = 0;
+                            end
+                            else begin
+                                top = 2;
+                                middle = 0;
+                                bottom = 1;
+                            end
+                            Gx = rows[top][width-1] + rows[middle][width-1]*2 + rows[bottom][width-1] - rows[top][width-3] - rows[middle][width-3]*2 - rows[bottom][width-3];
+                            Gy = rows[top][width-3] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-3] - rows[bottom][width-2]*2 - rows[bottom][width-1];
+                            out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
                         end
+                        else if (kiekis<321)begin
+                            out_din = fifo_dout;
+                            out_wr_en=1'b1;
+                        end
+                        else if (kiekis > 77120)begin
+                            out_din = rows[2][width];
+                            out_wr_en=1'b1;
+                        end
+                        else if (kiekis > 650 && width == 0)begin
+                            Gx = rows[bottom][319] + rows[top][319]*2 + rows[middle][319] - rows[bottom][317] - rows[top][317]*2 - rows[middle][317];
+                            Gy = rows[bottom][317] + rows[bottom][318]*2 + rows[bottom][319] - rows[middle][317] - rows[middle][318]*2 - rows[middle][319];
+                            out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
+                        end
+                        else if (kiekis > 650 && width == 1)begin
+                           out_din = rows[top][319];
+                        end
+                        else if(kiekis > 650 && width == 2) out_din = rows[middle][0];//out_wr_en = 1'b0;
 
                     end else begin 
                         out_din = fifo_dout;
@@ -210,7 +241,7 @@ module sobel_acc (
 
                     wr_ptr_next = wr_ptr + 32'h1;
 
-                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS) begin
+                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS+640) begin
                         csr_busy_next        = 1'b0;
                         csr_done_next        = 1'b1;
                         csr_frame_count_next = csr_frame_count + 32'h1;
