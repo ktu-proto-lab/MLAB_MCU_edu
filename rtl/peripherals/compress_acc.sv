@@ -14,7 +14,7 @@
     * Register map (word-aligned, byte offsets):
     *   0x00  CTRL    R/W  bit[0]: auto_start - keep compressing frames; write 0 to stop after current frame
     *   0x04  STATUS  RO   bit[0]: busy
-    *                      bit[1]: done  - stays high after frame completes until next CTRL write
+    *                      bit[1]: done  - stays high after a frame completes until the next jump from IDLE to RUN (!fifo_empty && !tx_full)
     *
     *   The input FIFO is FWFT: fifo_dout is valid whenever fifo_empty=0.
     *   fifo_rd_en advances to the next word on the following cycle.
@@ -153,7 +153,6 @@ module compress_acc (
             // -----------------------------------------------------------------
             DONE: begin
                 if (ctrl_auto_start && !fifo_empty) begin
-                    csr_done_next = 1'b0;
                     csr_busy_next = 1'b1;
                     rd_ptr_next   = 32'h0;
                     state_next    = RUN;
