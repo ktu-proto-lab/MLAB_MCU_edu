@@ -59,7 +59,9 @@ module sobel_acc (
     reg [7:0] rows [0:2][0:319]; //bitu memory triju eiliu
     logic [11:0] Gx;
     logic [11:0] Gy;
-    logic unsigned [15:0] kiekis;
+    logic [6:0] Gxclamp;
+    logic [6:0] Gyclamp;
+    logic [15:0] kiekis;
 
 `ifdef NO_MODPORT_EXPRESSIONS
     assign wb_wdata = wb.dat_m;
@@ -131,9 +133,16 @@ module sobel_acc (
         if (!wb.rst) begin
             kiekis <= 0;
         end else if(!fifo_empty && !out_full) begin
-            if(kiekis != 960) begin
+            if(kiekis <= 960) begin
                 rows[kiekis/320][kiekis % 320] <= fifo_dout;
                 kiekis <= kiekis + 1;
+            end else begin
+                rows[0][kiekis%320-1] <= rows[1][kiekis%320-1]; //keiciam pikselius vviena stulpeli po kito
+                rows[1][kiekis%320-1] <= rows[2][kiekis%320-1];
+                rows[2][kiekis%320-1] <= fifo_dout;
+                kiekis <= kiekis+1;
+
+
             end
         end
  
@@ -186,21 +195,31 @@ module sobel_acc (
                     out_wr_en = 1'b0;
                     // algo_sel=0: inversion   algo_sel=1: STUDENT SOBEL HERE
                     
-                    if(ctrl_algo_sel) begin //Sobelio algoritmas
+                    if(~ctrl_algo_sel) begin //Sobelio algoritmas
 
                         //if(kiekis != 960)begin //ziurim ar trys eilutes uzpildyto
                             //rows[kiekis/320][kiekis % 320] = fifo_dout;
                             //kiekis = kiekis + 1;
                         //end else
-                        if(kiekis%320 > 1 && kiekis%320 < 319) begin //Pats sobelio skaiciavimas
-                            Gx = rows[0][kiekis%320+1] + rows[1][kiekis%320+1]*2 + rows[2][kiekis%320+1] - rows[0][kiekis%320-1] - rows[1][kiekis%320-1]*2 - rows[2][kiekis%320-1];
-                            Gy = rows[0][kiekis%320-1] + rows[0][kiekis%320]*2 + rows[0][kiekis%320+1] - rows[2][kiekis%320-1] - rows[2][kiekis%320]*2 - rows[2][kiekis%320+1];
-                            out_din = Gx+Gy;
+                        if(kiekis%320 > 1 && kiekis%320 < 319 && kiekis > 961) begin //Pats sobelio skaiciavimas
+                            
+                            Gx = rows[0][kiekis%320+1] + (rows[1][kiekis%320+1]<<1) + rows[2][kiekis%320+1] - rows[0][kiekis%320-1] - (rows[1][kiekis%320-1]<<1) - rows[2][kiekis%320-1];
+                            Gy = rows[0][kiekis%320-1] + (rows[0][kiekis%320]<<1) + rows[0][kiekis%320+1] - rows[2][kiekis%320-1] - (rows[2][kiekis%320]<<1) - rows[2][kiekis%320+1];
+                            
+                            out_din = ((Gx < 1) ? -Gx : Gx) + ((Gy < 1) ? -Gy : Gy) >> 5;
+
                             out_wr_en = 1'b1;
-                            rows[0][kiekis%320-1] = rows[1][kiekis%320-1]; //keiciam pikselius vviena stulpeli po kito
-                            rows[1][kiekis%320-1] = rows[2][kiekis%320-1];
-                            rows[2][kiekis%320-1] = fifo_dout;
+                            
                             //kiekis = kiekis + 1;
+                        end else if (kiekis > 961) begin
+
+                            Gx = 0;
+                            Gy = 0;
+
+                            out_din = 0;
+                            out_wr_en = 1'b1;
+                            
+
                         end
 
                     end else begin 
