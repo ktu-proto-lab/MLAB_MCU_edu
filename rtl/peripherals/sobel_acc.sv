@@ -57,11 +57,10 @@ module sobel_acc (
     logic [31:0] wb_wdata;
     logic [31:0] wb_rdata;
     reg [7:0] rows [0:2][0:319]; //bitu memory triju eiliu
-    logic [11:0] Gx;
-    logic [11:0] Gy;
-    logic [6:0] Gxclamp;
-    logic [6:0] Gyclamp;
-    logic [15:0] kiekis;
+    logic signed [11:0] Gx;
+    logic signed [11:0] Gy;
+    logic [31:0] kiekis;
+    logic fifo_rd_en_delay;
 
 `ifdef NO_MODPORT_EXPRESSIONS
     assign wb_wdata = wb.dat_m;
@@ -132,7 +131,8 @@ module sobel_acc (
     always_ff @(posedge wb.clk or negedge wb.rst) begin
         if (!wb.rst) begin
             kiekis <= 0;
-        end else if(!fifo_empty && !out_full) begin
+            fifo_rd_en_delay <= 0;
+        end else if(fifo_rd_en) begin
             if(kiekis <= 960) begin
                 rows[kiekis/320][kiekis % 320] <= fifo_dout;
                 kiekis <= kiekis + 1;
@@ -201,22 +201,25 @@ module sobel_acc (
                             //rows[kiekis/320][kiekis % 320] = fifo_dout;
                             //kiekis = kiekis + 1;
                         //end else
-                        if(kiekis%320 > 1 && kiekis%320 < 319 && kiekis > 961) begin //Pats sobelio skaiciavimas
+                        if(kiekis%320 > 0 && kiekis%320 < 319 && kiekis > 960) begin //Pats sobelio skaiciavimas
                             
                             Gx = rows[0][kiekis%320+1] + (rows[1][kiekis%320+1]<<1) + rows[2][kiekis%320+1] - rows[0][kiekis%320-1] - (rows[1][kiekis%320-1]<<1) - rows[2][kiekis%320-1];
                             Gy = rows[0][kiekis%320-1] + (rows[0][kiekis%320]<<1) + rows[0][kiekis%320+1] - rows[2][kiekis%320-1] - (rows[2][kiekis%320]<<1) - rows[2][kiekis%320+1];
-                            
-                            out_din = ((Gx < 1) ? -Gx : Gx) + ((Gy < 1) ? -Gy : Gy) >> 5;
+
+                            // Gx = (rows[0][kiekis%320+1]>>2) + (rows[1][kiekis%320+1]>>1) + (rows[2][kiekis%320+1]>>2) - (rows[0][kiekis%320-1]>>2) - (rows[1][kiekis%320-1]>>1) - (rows[2][kiekis%320-1]>>2);
+                            // Gy = (rows[0][kiekis%320-1]>>2) + (rows[0][kiekis%320]>>1) + (rows[0][kiekis%320+1]>>2) - (rows[2][kiekis%320-1]>>2) - (rows[2][kiekis%320]>>1) - (rows[2][kiekis%320+1]>>2);
+
+                            out_din = (((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy) > 255 ? 255 : ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy));
 
                             out_wr_en = 1'b1;
                             
                             //kiekis = kiekis + 1;
-                        end else if (kiekis > 961) begin
+                        end else if (kiekis%320 == 0 || kiekis%320 == 319 || kiekis < 315) begin //for some reason turiu kompensuot 5 ciklus laikrodzio
 
-                            Gx = 0;
-                            Gy = 0;
-
-                            out_din = 0;
+                            //Gx = 0;
+                            //Gy = 0;
+                            
+                            out_din = 100;
                             out_wr_en = 1'b1;
                             
 
