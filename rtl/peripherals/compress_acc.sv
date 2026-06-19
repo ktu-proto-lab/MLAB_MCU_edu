@@ -48,6 +48,8 @@ module compress_acc (
     logic        csr_busy,        csr_busy_next;
     logic        csr_done,        csr_done_next;
     logic        wb_wr;
+    logic [31:0] run_count,      run_count_next;
+    logic [7:0]  last_value,     last_value_next;
 
     // -------------------------------------------------------------------------
     // Wishbone protocol
@@ -92,12 +94,18 @@ module compress_acc (
             ctrl_auto_start <= 1'b0;
             csr_busy        <= 1'b0;
             csr_done        <= 1'b0;
+            run_count  <= 32'h0;
+            last_value <= 8'h0;
+
         end else begin
             state           <= state_next;
             rd_ptr          <= rd_ptr_next;
             ctrl_auto_start <= ctrl_auto_start_next;
             csr_busy        <= csr_busy_next;
             csr_done        <= csr_done_next;
+            run_count  <= run_count_next;
+            last_value <= last_value_next;
+
         end
     end
 
@@ -112,6 +120,9 @@ module compress_acc (
         ctrl_auto_start_next = ctrl_auto_start;
         csr_busy_next        = csr_busy;
         csr_done_next        = csr_done;
+        run_count_next  = run_count;
+        last_value_next = last_value;
+   
 
         tx_wr_en = 1'b0;
         tx_din   = 8'h0;
@@ -139,6 +150,16 @@ module compress_acc (
                 if (!fifo_empty && !tx_full) begin
                     tx_wr_en = 1'b1;
                     tx_din   = fifo_dout; // TODO: replace with compression
+
+                    if (fifo_dout == last_value) begin
+                        run_count_next = run_count + 1;   // extend run
+                    end else begin
+                        run_count_next  = 32'd1;          // new run starts at 1
+                        last_value_next = fifo_dout;
+                    end
+ 
+
+
 
                     rd_ptr_next = rd_ptr + 32'h1;
 
