@@ -37,9 +37,10 @@ module compress_acc (
     localparam int TOTAL_PIXELS = 76800; // 320 x 240
 
     typedef enum logic [1:0] {
-        IDLE = 2'b00,
-        RUN  = 2'b01,
-        DONE = 2'b10
+        IDLE    = 2'b00,
+        RUN     = 2'b01,
+        DONE    = 2'b10,
+        END_VAL = 2'b11
     } state_t;
 
     state_t      state,           state_next;
@@ -50,7 +51,7 @@ module compress_acc (
     logic        wb_wr;
     logic [31:0] run_count,      run_count_next;
     logic [7:0]  last_value,     last_value_next;
-
+    logic       emit,           emit_next;
     // -------------------------------------------------------------------------
     // Wishbone protocol
     // -------------------------------------------------------------------------
@@ -96,6 +97,9 @@ module compress_acc (
             csr_done        <= 1'b0;
             run_count  <= 32'h0;
             last_value <= 8'h0;
+            emit         <= 1'b0;
+
+
 
         end else begin
             state           <= state_next;
@@ -105,6 +109,7 @@ module compress_acc (
             csr_done        <= csr_done_next;
             run_count  <= run_count_next;
             last_value <= last_value_next;
+            emit         <= emit_next;
 
         end
     end
@@ -112,7 +117,7 @@ module compress_acc (
     // -------------------------------------------------------------------------
     // FSM combinational
     // -------------------------------------------------------------------------
-    assign fifo_rd_en = (state == RUN) && !fifo_empty && !tx_full;
+//    assign fifo_rd_en = (state == RUN) && !fifo_empty && !tx_full;
 
     always_comb begin
         state_next           = state;
@@ -122,10 +127,11 @@ module compress_acc (
         csr_done_next        = csr_done;
         run_count_next  = run_count;
         last_value_next = last_value;
-   
+        emit_next         = emit;
 
         tx_wr_en = 1'b0;
         tx_din   = 8'h0;
+        fifo_rd_en = 1'b0;
 
         if (wb_wr && wb.adr[3:2] == 2'h0) begin
             ctrl_auto_start_next = wb_wdata[0];
@@ -138,8 +144,12 @@ module compress_acc (
                 if (ctrl_auto_start && !fifo_empty) begin
                     csr_done_next = 1'b0;
                     csr_busy_next = 1'b1;
-                    rd_ptr_next   = 32'h0;
+                    rd_ptr_next   = 32'd1;   // pixel 0 is consumed here, so count it
                     state_next    = RUN;
+                    last_value_next = fifo_dout;
+                    run_count_next  = 32'd1;
+                    fifo_rd_en      = 1'b1;   // consume pixel 0
+
                 end
             end
 
@@ -148,22 +158,68 @@ module compress_acc (
             // Stall both sides when tx_full is asserted (no data consumed or produced).
             RUN: begin
                 if (!fifo_empty && !tx_full) begin
-                    tx_wr_en = 1'b1;
-                    tx_din   = fifo_dout; // TODO: replace with compression
 
-                    if (fifo_dout == last_value) begin
-                        run_count_next = run_count + 1;   // extend run
-                    end else begin
-                        run_count_next  = 32'd1;          // new run starts at 1
+       
+                    
+
+                    //sita reik
+                    //tx_wr_en = 1'b1;
+                    //tx_din   = fifo_dout; // TODO: replace with compression
+
+
+                    //fifo_rd_en ijungti isjungti 
+                    if (emit == 0 ) begin
+
+                        if ( fifo_dout == last_value && run_count < 255) begin
+                            run_count_next = run_count + 1;   // extend run
+                            fifo_rd_en = 1'b1; // read next
+                        end else begin
+
+                            //run_count_next  = 32'd1; 
+                            //last_value_next = fifo_dout;
+                            tx_din = last_value;
+                            tx_wr_en = 1'b1;
+                            emit_next = 1;
+                            //fifo_rd_en lieka 0 nes stabdo
+
+                        end
+                    end else begin 
+                        tx_wr_en = 1'b1;
+                        tx_din = run_count;
                         last_value_next = fifo_dout;
+                        run_count_next  = 32'd1;         
+                        fifo_rd_en = 1;
+                        emit_next = 0;
+
+
                     end
- 
 
 
 
-                    rd_ptr_next = rd_ptr + 32'h1;
+                    // kai emit value 0 ciklai sukasi bet rd_ptr turi nedideti, nes pikseliai nenaudojami
+                    if (fifo_rd_en) begin
+                        rd_ptr_next = rd_ptr + 32'h1;
 
-                    if (rd_ptr + 32'h1 >= TOTAL_PIXELS) begin
+                        // Paskutiniu verciu apdorojimas.
+                        // vertes yra issiunciamos kai tik pasikeicia reiksme
+
+                        
+                        if (rd_ptr + 32'h1 >= TOTAL_PIXELS) begin
+                            state_next = END_VAL;
+                        end
+                    end
+                end
+            end
+            // kitas FSM state, kad iseitu uzfiksuoti paskutines vertes
+            END_VAL: begin
+                if (!tx_full) begin
+                    tx_wr_en = 1'b1;
+                    if (emit == 0) begin
+                        tx_din    = last_value;   // value byte
+                        emit_next = 1'b1;
+                    end else begin
+                        tx_din        = run_count; // count byte
+                        emit_next     = 1'b0;
                         csr_busy_next = 1'b0;
                         csr_done_next = 1'b1;
                         state_next    = DONE;
