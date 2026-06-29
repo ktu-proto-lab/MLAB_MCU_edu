@@ -1,6 +1,6 @@
 // =============================================================================
 // ft2232h_tx.v
-// FT2232H Mini Module — TX-only (FPGA->PC) wrapper
+// FT2232H Mini Module - TX-only (FPGA->PC) wrapper
 // =============================================================================
 //
 // PURPOSE
@@ -20,7 +20,7 @@
 //
 //   FT2232H pin  | Mini Module net | This module signal
 //   -------------|-----------------|-------------------
-//   ADBUS[7:0]   | CN2 pins 1–8    | ft_data[7:0]   (inout)
+//   ADBUS[7:0]   | CN2 pins 1-8    | ft_data[7:0]   (inout)
 //   ACBUS0 (RXF#)| CN2 pin 9       | ft_rxf_n       (input)
 //   ACBUS1 (TXE#)| CN2 pin 10      | ft_txe_n       (input)
 //   ACBUS2 (RD#) | CN2 pin 11      | ft_rd_n        (output)
@@ -50,9 +50,10 @@ module ft2232h_tx #(
     input  wire       sys_clk,    // Your FPGA system clock (e.g. 50 MHz)
     input  wire       sys_rst_n,  // Active-low synchronous reset
 
-    // Write port — push one byte per cycle when wr_en=1 and full=0
+    // Write port - push one byte per cycle when wr_en=1 and full=0
     input  wire       wr_en,      // Write enable
     input  wire [7:0] wr_data,    // Byte to send
+    input  wire       wr_last,    // Assert on the last byte of a packet/frame
     output wire       full,       // High when internal TX buffer is full
                                   // Do NOT assert wr_en when full=1
 
@@ -61,12 +62,12 @@ module ft2232h_tx #(
     // -------------------------------------------------------------------------
     input  wire       ft_clk,     // 60 MHz CLKOUT from FT2232H Channel A
     inout  wire [7:0] ft_data,    // Bidirectional data bus ADBUS[7:0]
-    input  wire       ft_rxf_n,   // RXF# — data available from PC (unused here)
-    input  wire       ft_txe_n,   // TXE# — OK to write to chip when low
-    output wire       ft_rd_n,    // RD#  — keep high (TX-only)
-    output wire       ft_wr_n,    // WR#  — controlled by IP
-    output wire       ft_oe_n,    // OE#  — controlled by IP
-    output wire       ft_siwu_n   // SIWU# — tie high per datasheet
+    input  wire       ft_rxf_n,   // RXF# - data available from PC (unused here)
+    input  wire       ft_txe_n,   // TXE# - OK to write to chip when low
+    output wire       ft_rd_n,    // RD#  - keep high (TX-only)
+    output wire       ft_wr_n,    // WR#  - controlled by IP
+    output wire       ft_oe_n,    // OE#  - controlled by IP
+    output wire       ft_siwu_n   // SIWU# - tie high per datasheet
 );
 
     // -------------------------------------------------------------------------
@@ -97,18 +98,12 @@ module ft2232h_tx #(
     // -------------------------------------------------------------------------
     // Map design-side FIFO write port onto AXI-stream TX
     //
-    // The IP's tx_tready is the "not-full" signal from AXI-stream perspective.
-    // We expose it directly as the full flag (inverted).
-    // tx_tvalid goes high when the user asserts wr_en (and the IP is ready).
-    // tx_tlast is tied high so each individual byte transfer is flushed
-    // immediately rather than waiting to fill a wider word — important for
-    // keeping latency low in a streaming pipeline.
     // -------------------------------------------------------------------------
     assign full      = ~tx_tready;
-    assign tx_tvalid = wr_en & tx_tready;  // Only commit transfer when ready
+    assign tx_tvalid = wr_en;
     assign tx_tdata  = wr_data;
     assign tx_tkeep  = 1'b1;
-    assign tx_tlast  = 1'b1;
+    assign tx_tlast  = wr_last;
 
     // -------------------------------------------------------------------------
     // Instantiate ftdi_245fifo_top from WangXuan95/FPGA-ftdi245fifo
@@ -118,7 +113,7 @@ module ft2232h_tx #(
     //   TX_EW = 0               (TX AXI-stream width: 2^0 = 1 byte)
     //   TX_EA = TX_DEPTH_EXP    (TX buffer depth: 2^TX_DEPTH_EXP)
     //   RX_EW = 0               (RX AXI-stream width: 1 byte)
-    //   RX_EA = 6               (RX buffer depth: 64 bytes — minimal, TX only)
+    //   RX_EA = 6               (RX buffer depth: 64 bytes - minimal, TX only)
     // -------------------------------------------------------------------------
     ftdi_245fifo_top #(
         .CHIP_TYPE ( "FTx232H"    ),
