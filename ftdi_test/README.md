@@ -1,6 +1,18 @@
 # FTDI TX Interface Test
 
-Tests `ft2232h_tx.v` by streaming a magic-word pattern from the FPGA to the PC over the FT2232H Mini Module in 245-sync-FIFO mode.
+Guide for testing `ft2232h_tx.v` by streaming a magic-word pattern from the FPGA to the PC over the FT2232H Mini Module in 245-sync-FIFO mode.
+
+The other test is loopback from the original WangXuan95/FPGA-ftdi245fifo repository. Refer to 
+[Getting started with FT232H](../deps/ftdi_controller/README.md#getting-started-with-ft232h) for a guide.
+
+# Status (Dovydas)
+
+1.  The loopback example does not work. Using Verilog provided in the WangXuan95/FPGA-ftdi245fifo repo, with a minimal .xdc constraint file based on their guidelines. The PC sucessfully sends data to the FPGA, however nothing comes back to the PC. With an ILA I traced that the `TXE_N` signal never goes low. This is an output of the FTDI controller signaling that it is ready to send data FPGA->PC.
+
+An example how to instantiate ILA is given in the
+[06-24 entry of the work journal](../doc/sobel_work_journal.md#2026-06-24)
+
+2. Single stream example (described below). This one sends data only FPGA->PC and it mostly works but some bytes of the payload get skipped.
 
 ## Directory Structure
 
@@ -35,7 +47,7 @@ The Python script aligns on the first magic header and verifies every payload by
 
 ### 1. Program the FT2232H Mini Module (one-time)
 
-> **Important**: Before using the FT2232H Mini Module make sure to short CN3, pin 1 to CN3, pin 3 for powering the FT2232H chip from USB. And CN2 pin 1 to pin CN2 pin 11 for powering the chip IOs. See the [FT2232H Mini Module Datasheet](https://ftdichip.com/wp-content/uploads/2020/07/DS_FT2232H_Mini_Module.pdf) for more information.
+> **Important**: Before using the FT2232H Mini Module make sure to short CN3 pin 1 to CN3 pin 3 for powering the FT2232H chip from USB. And CN2 pin 1 to CN2 pin 11 for powering the chip IOs. See the [FT2232H Mini Module Datasheet](https://ftdichip.com/wp-content/uploads/2020/07/DS_FT2232H_Mini_Module.pdf) for more information.
 
 Run **FT_Prog** (Windows) and set **Channel A** to **FT 245 FIFO** mode. The default factory mode is UART - it must be changed before any of this will work.
 
@@ -84,10 +96,10 @@ Both boards use **Pmod JA** for the 8-bit data bus and **Pmod JB** for control s
 | `ft_rd_n`     | 20 | JB3  | G16 |
 | `ft_wr_n`     | 19 | JB4  | H14 |
 | `ft_siwu_n`   | 22 | JB8  | F13 |
-| `ft_clk`      | 24 | JB9  | G13 |
+| `ft_clk`      | 24 | JB10 | H16 |
 | `ft_oe_n`     | 23 | JB7  | E16 |
 
-> **Note:** G13 (JB9) is not a clock-capable pin on the Nexys A7, so `ft_clk` (60 MHz from the FT2232H) cannot reach the global clock network cleanly. The XDC includes `CLOCK_DEDICATED_ROUTE FALSE` to allow Vivado to route it on general fabric routing - this will likely meet timing at 60 MHz but will produce a critical warning. The only free clock-capable pin on Pmod JB is **JB10 = H16 (MRCC)**; the other CC pins (JB2/F16 SRCC, JB3/G16 MRCC, JB7/E16 SRCC) are already used for `ft_txe_n`, `ft_rd_n`, and `ft_oe_n`. To fix this properly, move the `ft_clk` wire from JB9 to JB10, update the CN2 pin in the table above accordingly, and replace the `G13`/`CLOCK_DEDICATED_ROUTE` lines in the XDC with `H16`.
+> **Note:** It's a good idea to use a clock capable pin for `ft_clk`. For me the only free clock-capable pin on Pmod JB is **JB10 = H16 (MRCC)**
 
 #### PYNQ-Z2 wiring
 
@@ -192,29 +204,7 @@ echo -n '3-6:1.0' | sudo tee /sys/bus/usb/drivers/ftdi_sio/unbind
 Then run python
 ```bash
 cd ftdi_test/python
-python ftdi_rx_verify.py --frames 200
-```
-
-Optional arguments:
-
-| Argument | Default | Description |
-|----------|---------|-------------|
-| `--frames N` | 100 | Number of frames to verify |
-| `--device NAME` | `"FT2232H MiniModule A"` | D2XX device name (`"USB <-> Serial Converter"` on Windows) |
-
-### Expected output on success
-
-```
-Opening FTDI device: 'USB <-> Serial Converter'
-Successfully opened FTX232H USB device: USB <-> Serial Converter
-Device opened.  Expecting 200 frames (52000 bytes).
-Frame layout: 4-byte magic + 256-byte counter payload
-
-Received 52260 bytes in 0.013 s  (4020 kB/s)
-  Sync: skipped 3 byte(s) before first header.
-
-Results: 200/200 frames OK,  0 bad
-PASS - all frames verified correctly.
+python ftdi_rx_verify.py
 ```
 
 ### Failure modes
@@ -223,6 +213,4 @@ PASS - all frames verified correctly.
 |---------|-------------|
 | `Failed to import ftd2xx` | `pip install ftd2xx` not done, or D2XX driver not installed |
 | `Could not open FTX232H USB device` | Wrong device name; check FT_Prog. Channel A may need to be the active channel |
-| Magic header not found | FT2232H not in 245-FIFO mode, or bitstream not loaded |
-| Payload mismatches | Pin wiring error on the data bus - check bit ordering |
 | `led[3]` not blinking | FT2232H not supplying `ft_clk` - USB not connected or wrong mode |
