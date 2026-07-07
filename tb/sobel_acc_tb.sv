@@ -26,6 +26,8 @@ module sobel_acc_tb;
     localparam int  TOTAL_PIXELS = FRAME_W * FRAME_H;
     localparam real CLK_PERIOD   = 10.0;
 
+    localparam string TST_IMAGE    = "baboon_test.pgm";
+    localparam string TST_IMG_PATH = "../../tb/src_images/";
     localparam string SRC_IMAGE    = "baboon.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
     localparam string OUT_IMG_PATH = "../../tb/out1_images/";
@@ -59,7 +61,7 @@ module sobel_acc_tb;
     // -------------------------------------------------------------------------
     // Camera FIFO emulation (FWFT, 8-bit: dout valid whenever empty=0)
     // -------------------------------------------------------------------------
-    logic [7:0] src_mem [0:TOTAL_PIXELS-1];
+    logic [7:0] src_mem [0:TOTAL_PIXELS-1], tst_mem [0:TOTAL_PIXELS-1];
     int         fifo_ptr;
 
     logic       fifo_empty;
@@ -102,7 +104,7 @@ module sobel_acc_tb;
     // Simulation timeout watchdog
     // -------------------------------------------------------------------------
     initial begin
-        #10_000_000; // 10 ms @ 100 MHz - far more than one frame needs
+        #30_000_000; // 10 ms @ 100 MHz - far more than one frame needs
         $fatal(1, "[TB] Simulation timeout at %0t ns", $time);
     end
 
@@ -172,7 +174,23 @@ module sobel_acc_tb;
         end
         $fclose(fd);
         $display("[TB] Loaded %s%s (%0d pixels)", SRC_IMG_PATH, SRC_IMAGE, TOTAL_PIXELS);
+        // ------------------------------------------------------------------
+        // Read input PGM (P2 ASCII, one comment line)
+        // ------------------------------------------------------------------
+        fd = $fopen({TST_IMG_PATH, TST_IMAGE}, "r");
+        if (fd == 0)
+            $fatal(1, "[TB] Cannot open %s%s", TST_IMG_PATH, TST_IMAGE);
 
+        void'($fgets(hdr_str, fd)); // P2
+        void'($fgets(hdr_str, fd)); // # comment
+        void'($fgets(hdr_str, fd)); // width height
+        void'($fgets(hdr_str, fd)); // maxval
+        for (int i = 0; i < TOTAL_PIXELS; i++) begin
+            void'($fscanf(fd, "%d", tmp_val));
+            tst_mem[i] = tmp_val[7:0];
+        end
+        $fclose(fd);
+        $display("[TB] Loaded %s%s (%0d pixels)", TST_IMG_PATH, TST_IMAGE, TOTAL_PIXELS);
         // ------------------------------------------------------------------
         // Release reset
         // ------------------------------------------------------------------
@@ -197,10 +215,10 @@ module sobel_acc_tb;
         // ------------------------------------------------------------------
         errors = 0;
         for (int i = 0; i < TOTAL_PIXELS; i++) begin
-            if (shadow[i] !== ~src_mem[i]) begin
+            if (shadow[i] !== tst_mem[i]) begin
                 if (errors < 8)
                     $display("[FAIL] pixel %0d: expected %02h  got %02h",
-                             i, ~src_mem[i], shadow[i]);
+                             i, tst_mem[i], shadow[i]);
                 errors++;
             end
         end

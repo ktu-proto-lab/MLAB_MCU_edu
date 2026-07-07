@@ -33,7 +33,9 @@ module sobel_acc (
     input  logic       out_full
     );
 
-    localparam int TOTAL_PIXELS = 76800; // 320 x 240
+    localparam int FRAME_W      = 320;
+    localparam int FRAME_H      = 240;
+    localparam int TOTAL_PIXELS = FRAME_W * FRAME_H; // 320 x 240 = 76800
 
     typedef enum logic [1:0] {
         IDLE = 2'b00,
@@ -56,7 +58,7 @@ module sobel_acc (
     // -------------------------------------------------------------------------
     logic [31:0] wb_wdata;
     logic [31:0] wb_rdata;
-    reg [7:0] rows [0:2][0:319]; //bitu memory triju eiliu
+    reg [7:0] rows [0:2][0:FRAME_W-1]; //bitu memory triju eiliu
     logic signed [11:0] Gx;
     logic signed [11:0] Gy;
     logic unsigned [17:0] kiekis, line, width;
@@ -134,12 +136,13 @@ module sobel_acc (
             line <= 0;
             width <= 0;
         end else if(!out_full && state == RUN) begin
-             if(width == 319)begin
+             if(width == FRAME_W-1 && kiekis < TOTAL_PIXELS)begin
                  if(line == 2)line <= 0; 
                 else line <= line + 1;
+
             end
-            rows[line][width] <= fifo_dout;
-            if(width == 319) width <= 0;
+            if(kiekis < TOTAL_PIXELS)rows[line][width] <= fifo_dout;
+            if(width == FRAME_W-1) width <= 0;
             else width <= width + 1;
             kiekis <= kiekis + 1;
         end
@@ -163,7 +166,7 @@ module sobel_acc (
         csr_frame_count_next = csr_frame_count;
 
         // Combinational output defaults
-        //out_wr_en = 1'b0;
+        out_wr_en = 1'b0;
         out_din   = 8'h0;
         
         // CPU write to CTRL register: update config bits, clear done
@@ -181,6 +184,7 @@ module sobel_acc (
                     csr_error_next       = 1'b0;
                     csr_busy_next        = 1'b1;
                     wr_ptr_next          = 32'h0;
+                    //out_wr_en            = 1'b0;
                     state_next           = RUN;
                 end
             end
@@ -194,9 +198,6 @@ module sobel_acc (
                     
                     if(1) begin //Sobelio algoritmas
 
-                        if(kiekis == 321)out_wr_en=1'b0; /// CIA GAL kiekis = 320 IDKKKKKKKKKKKKK  dar width nemanau gerai
-                        if(kiekis > 640 && width > 2) begin
-                            out_wr_en = 1'b1;
                             if(line == 2) begin
                                 top = 0;
                                 middle = 1;
@@ -212,28 +213,81 @@ module sobel_acc (
                                 middle = 0;
                                 bottom = 1;
                             end
+                        
+
+                        if (kiekis > TOTAL_PIXELS + 1)begin // paskutine eilute tipo idk gal veikia gal ne
+                            out_wr_en=1'b1;
+                            top = 0;
+                            middle = 1;
+                            bottom = 2;
+                            if(kiekis == TOTAL_PIXELS + 2)begin // kiekis = total - width - width + 2
+                                Gx = rows[middle][width-1] + rows[bottom][width-1]*2 + rows[bottom][width-1] - rows[middle][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-2];
+                                Gy = rows[middle][width-2] + rows[middle][width-2]*2 + rows[middle][width-1] - rows[bottom][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-1];
+                            end
+                            else if(kiekis < TOTAL_PIXELS + FRAME_W)begin
+                                Gx = rows[middle][width-1] + rows[bottom][width-1]*2 + rows[bottom][width-1] - rows[middle][width-3] - rows[bottom][width-3]*2 - rows[bottom][width-3];
+                                Gy = rows[middle][width-3] + rows[middle][width-2]*2 + rows[middle][width-1] - rows[bottom][width-3] - rows[bottom][width-2]*2 - rows[bottom][width-1];
+                            end
+                            else if (kiekis == TOTAL_PIXELS + FRAME_W + 1)begin
+                                Gx = rows[middle][FRAME_W-1] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[bottom][FRAME_W-3]*2 - rows[bottom][FRAME_W-3];
+                                Gy = rows[middle][FRAME_W-3] + rows[middle][FRAME_W-2]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-3] - rows[bottom][FRAME_W-2]*2 - rows[bottom][FRAME_W-1];
+                            end
+                            else if (kiekis == TOTAL_PIXELS + FRAME_W + 2)begin
+                                Gx = rows[middle][FRAME_W-1] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[bottom][FRAME_W-2]*2 - rows[bottom][FRAME_W-2];
+                                Gy = rows[middle][FRAME_W-2] + rows[middle][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-2] - rows[bottom][FRAME_W-1]*2 - rows[bottom][FRAME_W-1];
+                            end
+                            out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
+                        end
+                        else if(kiekis > FRAME_W*2 && width > 2) begin // main thingy
+                            out_wr_en = 1'b1;
                             Gx = rows[top][width-1] + rows[middle][width-1]*2 + rows[bottom][width-1] - rows[top][width-3] - rows[middle][width-3]*2 - rows[bottom][width-3];
                             Gy = rows[top][width-3] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-3] - rows[bottom][width-2]*2 - rows[bottom][width-1];
                             out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
                         end
-                        else if (kiekis<321)begin
-                            out_din = fifo_dout;
+                        else if (kiekis> FRAME_W + 1 && kiekis < FRAME_W*2 + 2)begin // pirma eilute
                             out_wr_en=1'b1;
-                        end
-                        else if (kiekis > 77120)begin
-                            out_din = rows[2][width];
-                            out_wr_en=1'b1;
-                        end
-                        else if (kiekis > 650 && width == 0)begin
-                            Gx = rows[bottom][319] + rows[top][319]*2 + rows[middle][319] - rows[bottom][317] - rows[top][317]*2 - rows[middle][317];
-                            Gy = rows[bottom][317] + rows[bottom][318]*2 + rows[bottom][319] - rows[middle][317] - rows[middle][318]*2 - rows[middle][319];
+                            top = 0;
+                            middle = 1;
+                            bottom = 2;
+                            if(kiekis == FRAME_W + 2)begin
+                                Gx = rows[top][width-1] + rows[top][width-1]*2 + rows[middle][width-1] - rows[top][width-2] - rows[top][width-2]*2 - rows[middle][width-2];
+                                Gy = rows[top][width-2] + rows[top][width-2]*2 + rows[top][width-1] - rows[middle][width-2] - rows[middle][width-2]*2 - rows[middle][width-1];
+                            end
+                            else if(kiekis < FRAME_W*2)begin
+                                Gx = rows[top][width-1] + rows[top][width-1]*2 + rows[middle][width-1] - rows[top][width-3] - rows[top][width-3]*2 - rows[middle][width-3];
+                                Gy = rows[top][width-3] + rows[top][width-2]*2 + rows[top][width-1] - rows[middle][width-3] - rows[middle][width-2]*2 - rows[middle][width-1];
+                            end
+                            else if(kiekis == FRAME_W*2)begin
+                                Gx = rows[top][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[top][FRAME_W-3] - rows[top][FRAME_W-3]*2 - rows[middle][FRAME_W-3];
+                                Gy = rows[top][FRAME_W-3] + rows[top][FRAME_W-2]*2 + rows[top][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[middle][FRAME_W-2]*2 - rows[middle][FRAME_W-1];         
+                            end
+                            else if (kiekis == FRAME_W*2+1)begin
+                                Gx = rows[top][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[top][FRAME_W-2] - rows[top][FRAME_W-2]*2 - rows[middle][FRAME_W-2];
+                                Gy = rows[top][FRAME_W-2] + rows[top][FRAME_W-1]*2 + rows[top][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[middle][FRAME_W-1]*2 - rows[middle][FRAME_W-1];
+                            end
                             out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
                         end
-                        else if (kiekis > 650 && width == 1)begin
-                           out_din = rows[top][319];
+                        else if (kiekis > FRAME_W*2 && width == 0)begin // priespaskutinis eilutes pixel
+                            out_wr_en=1'b1;
+                            Gx = rows[bottom][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-3] - rows[top][FRAME_W-3]*2 - rows[middle][FRAME_W-3];
+                            Gy = rows[bottom][FRAME_W-3] + rows[bottom][FRAME_W-2]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[middle][FRAME_W-2]*2 - rows[middle][FRAME_W-1];
+                            out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
                         end
-                        else if(kiekis > 650 && width == 2) out_din = rows[middle][0];//out_wr_en = 1'b0;
+                        else if (kiekis > FRAME_W*2 && width == 1)begin // paskutinis eilutes pixel
+                            out_wr_en=1'b1;
+                            Gx = rows[bottom][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-2] - rows[top][FRAME_W-2]*2 - rows[middle][FRAME_W-2];
+                            Gy = rows[bottom][FRAME_W-2] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[middle][FRAME_W-1]*2 - rows[middle][FRAME_W-1];
+                            out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
+                        end
+                        else if(kiekis > FRAME_W*2 && width == 2) begin // pirmas eilutes pixel
+                            out_wr_en=1'b1;
+                            Gx = rows[top][width-1] + rows[middle][width-1]*2 + rows[bottom][width-1] - rows[top][width-2] - rows[middle][width-2]*2 - rows[bottom][width-2];
+                            Gy = rows[top][width-2] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-1];
+                            out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
+                        end
+                        
 
+                        end
                     end else begin 
                         out_din = fifo_dout;
                     end
@@ -241,14 +295,14 @@ module sobel_acc (
 
                     wr_ptr_next = wr_ptr + 32'h1;
 
-                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS+640) begin
+                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+3) begin
                         csr_busy_next        = 1'b0;
                         csr_done_next        = 1'b1;
                         csr_frame_count_next = csr_frame_count + 32'h1;
                         state_next           = DONE;
                     end
                 end
-            end
+            
 
             // -----------------------------------------------------------------
             DONE: begin
