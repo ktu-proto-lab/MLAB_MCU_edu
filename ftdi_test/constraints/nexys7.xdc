@@ -38,16 +38,40 @@ set_property IOSTANDARD LVCMOS33 [get_ports clk_in]
 create_clock -period 10.000 -name clk_in [get_ports clk_in]
 
 ## ---- FT2232H 60 MHz CLKOUT ----
-set_property PACKAGE_PIN G13 [get_ports ft_clk]
+## ft_clk is on Pmod JB10 = H16, which IS clock-capable (MRCC), so the 60 MHz
+## CLKOUT reaches the global clock network through a BUFG with no fabric-route
+## penalty.  (Previously on JB9 = G13, a NON-CC pin, which forced ~3.2 ns of
+## fabric routing on the clock and pushed ft_data clock-to-out past the chip's
+## 8 ns write setup (t12) -> dropped bytes.  Do NOT move it back to G13.)
+set_property PACKAGE_PIN H16 [get_ports ft_clk]
 set_property IOSTANDARD LVCMOS33 [get_ports ft_clk]
 create_clock -period 16.667 -name ft_clk [get_ports ft_clk]
-# Workaround: allow non-CC routing for prototyping
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets ft_clk_IBUF]
 
 ## ---- Async clock groups ----
 set_clock_groups -asynchronous \
     -group [get_clocks clk_in] \
     -group [get_clocks ft_clk]
+
+## ---- FT2232H write-interface output timing (AN_130 Table 2) -------------
+## The chip samples ft_data / ft_wr_n / ft_oe_n on the RISING edge of ft_clk
+## and requires t12 = 8 ns data setup and t13 = 0 ns hold.  Model this as a
+## system-synchronous source-clocked output (max = chip setup, min = -hold).
+##
+## The IP launches these outputs on the FALLING ft_clk edge
+## (CHIP_DRIVE_AT_NEGEDGE=1 for FTx232H in ftdi_245fifo_top.v), giving a half
+## period (~8.3 ns) of extra margin so clock-to-out + OBUF delay fits inside
+## the 8 ns setup.  Without negedge launch these paths violate by ~3 ns and
+## the chip drops ~1 byte/frame.
+set FT_OUT_PORTS [get_ports {ft_data[*] ft_wr_n ft_oe_n ft_rd_n}]
+set_output_delay -clock ft_clk -max  8.0 $FT_OUT_PORTS
+set_output_delay -clock ft_clk -min  0.0 $FT_OUT_PORTS
+
+## ---- FT2232H read-interface input timing (AN_130 Table 2) --------------
+## On reads the chip drives ft_data / ft_rxf_n / ft_txe_n from ft_clk; data is
+## valid t5 = 7.15 ns (max) after the edge, >= ~0 ns (min).
+set FT_IN_PORTS [get_ports {ft_data[*] ft_rxf_n ft_txe_n}]
+set_input_delay -clock ft_clk -max 7.15 $FT_IN_PORTS
+set_input_delay -clock ft_clk -min 0.0  $FT_IN_PORTS
 
 ## ---- Data bus ADBUS[7:0] - Pmod JA ----
 set_property PACKAGE_PIN C17 [get_ports {ft_data[0]}]

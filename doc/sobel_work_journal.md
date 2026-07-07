@@ -106,3 +106,69 @@ Run the command below if you want to analyse FIFO behaviour yourself.
 ### Next
 - Complete compression testbench
 - Software for Ibex for complete testbench
+
+## 2026-06-18
+
+### Testing FPGA-ftdi245fifo 
+
+Testing the Claude generated example in `ftdi_test/`
+
+RESULT: Managed to get the FPGA to send data but 1 bit would always be off
+
+## 2026-06-24
+
+### Testing FPGA-ftdi245fifo
+
+Testing the repo examples `deps/ftdi_controller/RTL/fpga_ft232h_example/fpga_top_ft232h_loopback.v` and `deps/ftdi_controller/RTL/fpga_ft232h_example/fpga_top_ft232h_tx_mass.v`
+
+Data transfer successful from the PC->FTDI->FPGA, but the FTDI MiniModule never let's the `ftdi_txe_n` signal low - never signals that it is ready to receive data for FPGA->FTDI->PC transfer
+
+### ILA generation
+
+1. Instantiate in RTL top level
+```Verilog
+ila_0 u_ila (
+    .clk     ( ftdi_clk           ),   // 100 MHz onboard oscillator - always free-running at program time
+
+    .probe0  ( ftdi_rxf_n    ),   // [0:0] RXF# : PC has data for FPGA (active low)
+    .probe1  ( ftdi_txe_n    ),   // [0:0] TXE# : FT2232H can accept TX data (active low)
+    .probe2  ( ftdi_oe_n     ),   // [0:0] OE#  : FPGA drives bus (active low)
+    .probe3  ( ftdi_rd_n     ),   // [0:0] RD#  : FPGA reading from FT2232H (active low)
+    .probe4  ( ftdi_wr_n     ),   // [0:0] WR#  : FPGA writing to FT2232H (active low)
+    .probe5  ( tdata[7:0]    ),   // [7:0] low byte of AXI-stream data (RX received / TX sending)
+    .probe6  ( tvalid        ),   // [0:0] AXI-stream valid
+    .probe7  ( tready        )    // [0:0] AXI-stream ready
+);
+```
+
+
+2. Create the IP in Vivado
+```tcl
+create_ip -name ila -vendor xilinx.com -library ip -version 6.2 -module_name ila_0
+
+set_property -dict {
+    CONFIG.C_NUM_OF_PROBES 8
+    CONFIG.C_DATA_DEPTH    1024
+    CONFIG.C_PROBE0_WIDTH  1
+    CONFIG.C_PROBE1_WIDTH  1
+    CONFIG.C_PROBE2_WIDTH  1
+    CONFIG.C_PROBE3_WIDTH  1
+    CONFIG.C_PROBE4_WIDTH  1
+    CONFIG.C_PROBE5_WIDTH  8
+    CONFIG.C_PROBE6_WIDTH  1
+    CONFIG.C_PROBE7_WIDTH  1
+} [get_ips ila_0]
+
+generate_target all [get_ips ila_0]
+```
+
+3. After uploading bitstream setup the ILA close and re-open the Hardware Manager, ILA Status, settings, trigger setup and capture setup windows should appear.
+
+## 2026-06-29
+
+TASK: Run the Claude generated example and observe the `ftdi_txe_n` signal on ILA to see it going down.
+RESULT: The Claude generated example runs but for some reason get some corrupted bytes in every transmission
+
+Going back to the `deps/ftdi_controller/RTL/fpga_ft232h_example/fpga_top_ft232h_loopback.v` example
+Through the ILA all the data can be seen on tdata[7:0] meaning PC->FPGA transmission is successful, but it never goes back.
+
