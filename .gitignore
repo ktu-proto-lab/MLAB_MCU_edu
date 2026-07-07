@@ -98,7 +98,12 @@ pnr/*
 ##################################################
 ## FPGA IGNORE FILES
 ##################################################
+
+.Xil
+
 # Vivado project folders
+ftdi_test/nexys7/
+ftdi_test/nexys7_loopback/
 vivado/MLAB_riscv_mcu/            
 !vivado/MLAB_riscv_mcu/*.xpr      
 
