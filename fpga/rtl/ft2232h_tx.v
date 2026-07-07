@@ -66,14 +66,14 @@ module ft2232h_tx #(
     input  wire       ft_txe_n,   // TXE# - OK to write to chip when low
     output wire       ft_rd_n,    // RD#  - keep high (TX-only)
     output wire       ft_wr_n,    // WR#  - controlled by IP
-    output wire       ft_oe_n,    // OE#  - controlled by IP
-    output wire       ft_siwu_n   // SIWU# - tie high per datasheet
+    output wire       ft_oe_n    // OE#  - controlled by IP
+    // output wire       ft_siwu_n   // SIWU# - tie high per datasheet
 );
 
     // -------------------------------------------------------------------------
     // Tie SIWU# high (send-immediate / wake-up, not needed here)
     // -------------------------------------------------------------------------
-    assign ft_siwu_n = 1'b1;
+    // assign ft_siwu_n = 1'b1;
 
     // -------------------------------------------------------------------------
     // AXI-Stream TX signals (design -> IP -> FT2232H -> PC)

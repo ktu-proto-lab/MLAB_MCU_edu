@@ -5,14 +5,47 @@ Guide for testing `ft2232h_tx.v` by streaming a magic-word pattern from the FPGA
 The other test is loopback from the original WangXuan95/FPGA-ftdi245fifo repository. Refer to 
 [Getting started with FT232H](../deps/ftdi_controller/README.md#getting-started-with-ft232h) for a guide.
 
-# Status (Dovydas)
+# Status (Dovydas, 2026-07-07)
 
-1.  The loopback example does not work. Using Verilog provided in the WangXuan95/FPGA-ftdi245fifo repo, with a minimal .xdc constraint file based on their guidelines. The PC sucessfully sends data to the FPGA, however nothing comes back to the PC. With an ILA I traced that the `TXE_N` signal never goes low. This is an output of the FTDI controller signaling that it is ready to send data FPGA->PC.
+Both examples are functional after tying **SIWU# high** (jumper CN2-22 ->
+CN2-21 on the Mini Module - a floating/pulled-down SIWU# blocks all FPGA->PC
+traffic, TXE# never asserts). Neither example is 100% byte-perfect; the
+residual errors are documented below.
 
-An example how to instantiate ILA is given in the
-[06-24 entry of the work journal](../doc/sobel_work_journal.md#2026-06-24)
+## 1. Loopback example
 
-2. Single stream example (described below). This one sends data only FPGA->PC and it mostly works but some bytes of the payload get skipped.
+Uses the **unmodified** `deps/ftdi_controller` repo sources
+(`fpga_top_ft232h_loopback.v`) with `ftdi_test/constraints/nexys7_loopback.xdc`.
+
+- PC->FPGA->PC loopback works; payload bytes are transferred without bit
+  errors.
+- Known artifact: the **first byte of each burst is duplicated** (send 16 B,
+  receive 17 B with byte 0 doubled), and under sustained load an occasional
+  byte is dropped/duplicated at USB packet (~512 B) boundaries.
+
+## 2. Single-direction stream (FPGA->PC) - `ftdi_test/rtl/ftdi_test_top.v`
+
+- Streams 260-byte frames (magic header + 0x00..0xFF counter) continuously;
+  verified with `python/ftdi_rx_verify.py`.
+- At **full rate** (producer faster than USB drains, so the chip TX buffer is
+  always full) exactly **one byte is dropped per 512-byte USB packet**,
+  always the first byte written after a TXE# pause.
+- **Pacing does not help**: at 6.25 MB/s the loss rate is unchanged (4 MiB
+  capture: ~8k bad bytes / 16k frames). TXE# pulses at every 512 B USB packet
+  commit regardless of data rate.
+- Root cause (ILA-verified): the FPGA logic is correct - it re-presents the
+  in-flight byte after the TXE# pulse - but only for one 16.7 ns window,
+  which misses the chip's 8 ns setup (unfixable without clock deskew; output
+  paths report ~-3..-6 ns WNS, documented in `constraints/nexys7.xdc`).
+- **Consequence**: any multi-KB frame will always be corrupted, so this must
+  be fixed before carrying camera data. Options:
+  (a) MMCM deskew + registered outputs, prototyped in
+  `rtl/fpga_top_ft232h_loopback_mmcm.v` (+ `CHIP_DRIVE_AT_NEGEDGE=1` and
+  -90 deg output phase) - full ~40 MB/s, but modifies the IP;
+  (b) switch to FT245 **async** FIFO mode - ~8 MB/s max, relaxed ~30 ns
+  timings that breadboard wiring meets easily, small self-contained TX
+  module - **recommended** for the camera stream (a few MB/s).
+
 
 ## Directory Structure
 
@@ -70,10 +103,10 @@ Use the guide from the original [ftdi245fifo repository](../deps/ftdi_controller
 | 17 | ACBUS1 | TXE#   | `ft_txe_n` |
 | 20 | ACBUS2 | RD#    | `ft_rd_n` |
 | 19 | ACBUS3 | WR#    | `ft_wr_n` |
-| 22 | ACBUS4 | SIWU#  | `ft_siwu_n` (tie high) |
 | 24 | ACBUS5 | CLKOUT | `ft_clk` (60 MHz) |
 | 23 | ACBUS6 | OE#    | `ft_oe_n` |
-| 8  | RESET# | RESET# | tie high |
+| 22 -> 21 | - | SIWU#  | tie high (to VIO) |
+
 
 > Note: ADBUS and ACBUS pins are interleaved on CN2 (odd pins are one row, even pins the other). Pin numbers are from Table 3.1 of the [FT2232H Mini Module Datasheet](https://ftdichip.com/wp-content/uploads/2020/07/DS_FT2232H_Mini_Module.pdf).
 
@@ -146,7 +179,7 @@ Add the XDC for your board:
 
 > **PYNQ Z2 XDC is AI GENERATED USE AS A STARTING TEMPLATE**
 
-In Vivado, right-click `ftdi_test_top` → **Set as Top**. If not already top
+In Vivado, right-click `ftdi_test_top` -> **Set as Top**. If not already top
 
 ---
 

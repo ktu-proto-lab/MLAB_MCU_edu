@@ -1,35 +1,5 @@
 ## =============================================================================
 ## ftdi_test - Nexys A7-100T (xc7a100tcsg324-1)
-## FT2232H Mini Module wired to Pmod JA (top row = JA1..4, bottom row = JA7..10)
-##
-## Pmod JA pin-to-FPGA mapping (Nexys A7 master XDC):
-##   JA1  = C17   JA2  = D18   JA3  = E18   JA4  = G17
-##   JA7  = D17   JA8  = E17   JA9  = F18   JA10 = G18
-##
-## FT2232H Mini Module CN2 wiring assumed:
-##   ft_data[0] → JA1  (C17)     ft_data[4] → JA7  (D17)
-##   ft_data[1] → JA2  (D18)     ft_data[5] → JA8  (E17)
-##   ft_data[2] → JA3  (E18)     ft_data[6] → JA9  (F18)
-##   ft_data[3] → JA4  (G17)     ft_data[7] → JA10 (G18)
-##
-## Control signals wired to Pmod JB (top row):
-##   JB1  = D14   ft_rxf_n
-##   JB2  = F16   ft_txe_n
-##   JB3  = G16   ft_rd_n
-##   JB4  = H14   ft_wr_n
-##   JB7  = E16   ft_oe_n
-##   JB8  = F13   ft_siwu_n
-##   JB9  = G13   ft_clk  (must be on a MRCC/SRCC-capable pin - see NOTE)
-##
-## NOTE: ft_clk (60 MHz) must reach a clock-capable input (MRCC or SRCC).
-##   On Nexys A7, Pmod JB pin 9 (G13) is not clock-capable.
-##   Use the dedicated clock input on pin E3 (sysclk) is the board osc,
-##   so instead route ft_clk to an MRCC pin.  Pmod JB pin 10 (H16) is also
-##   not CC.  The safest option is to use one of the dedicated clock
-##   pins exposed on the XADC header (J2) or accept the placement
-##   constraint warning and add CLOCK_DEDICATED_ROUTE = FALSE for
-##   prototyping only.  This file adds that workaround - remove it once
-##   you re-route to a CC pin.
 ## =============================================================================
 
 ## ---- On-board 100 MHz oscillator ----
@@ -38,11 +8,7 @@ set_property IOSTANDARD LVCMOS33 [get_ports clk_in]
 create_clock -period 10.000 -name clk_in [get_ports clk_in]
 
 ## ---- FT2232H 60 MHz CLKOUT ----
-## ft_clk is on Pmod JB10 = H16, which IS clock-capable (MRCC), so the 60 MHz
-## CLKOUT reaches the global clock network through a BUFG with no fabric-route
-## penalty.  (Previously on JB9 = G13, a NON-CC pin, which forced ~3.2 ns of
-## fabric routing on the clock and pushed ft_data clock-to-out past the chip's
-## 8 ns write setup (t12) -> dropped bytes.  Do NOT move it back to G13.)
+## ftdi_clk on Pmod JB10 = H16 (MRCC, clock-capable) 
 set_property PACKAGE_PIN H16 [get_ports ft_clk]
 set_property IOSTANDARD LVCMOS33 [get_ports ft_clk]
 create_clock -period 16.667 -name ft_clk [get_ports ft_clk]
@@ -53,22 +19,30 @@ set_clock_groups -asynchronous \
     -group [get_clocks ft_clk]
 
 ## ---- FT2232H write-interface output timing (AN_130 Table 2) -------------
-## The chip samples ft_data / ft_wr_n / ft_oe_n on the RISING edge of ft_clk
-## and requires t12 = 8 ns data setup and t13 = 0 ns hold.  Model this as a
-## system-synchronous source-clocked output (max = chip setup, min = -hold).
+## The chip samples ft_data / ft_wr_n on the RISING edge of its CLKOUT and
+## requires 8 ns setup (t12/t14), 0 ns hold (t13/t15) AT ITS PINS. The clock
+## wire delays ft_clk to the FPGA (chip edge is ~1.5 ns earlier than the port
+## edge) and the data wire adds ~1.5 ns of travel, so the port-level budget
+## is 8 + 2*1.5 = 11 ns.
 ##
-## The IP launches these outputs on the FALLING ft_clk edge
-## (CHIP_DRIVE_AT_NEGEDGE=1 for FTx232H in ftdi_245fifo_top.v), giving a half
-## period (~8.3 ns) of extra margin so clock-to-out + OBUF delay fits inside
-## the 8 ns setup.  Without negedge launch these paths violate by ~3 ns and
-## the chip drops ~1 byte/frame.
+## KNOWN ACCEPTED VIOLATION: without an MMCM to cancel the ~5 ns BUFG clock
+## insertion delay, these paths CANNOT formally close (expect WNS ~ -3..-6 ns
+## on outputs). The IP drives outputs combinationally from posedge registers
+## (CHIP_DRIVE_AT_NEGEDGE=0), which in practice lands transitions ~7-9 ns
+## before the chip's next edge. Empirical consequence of the residual miss:
+## the first byte of a write burst can be dropped when TXE# pauses at USB
+## packet boundaries (~every 512 B); the frame protocol's magic header lets
+## the receiver re-align.
 set FT_OUT_PORTS [get_ports {ft_data[*] ft_wr_n ft_oe_n ft_rd_n}]
-set_output_delay -clock ft_clk -max  8.0 $FT_OUT_PORTS
+set_output_delay -clock ft_clk -max 11.0 $FT_OUT_PORTS
 set_output_delay -clock ft_clk -min  0.0 $FT_OUT_PORTS
 
 ## ---- FT2232H read-interface input timing (AN_130 Table 2) --------------
-## On reads the chip drives ft_data / ft_rxf_n / ft_txe_n from ft_clk; data is
-## valid t5 = 7.15 ns (max) after the edge, >= ~0 ns (min).
+## The chip drives ft_data / ft_rxf_n / ft_txe_n valid t4/t5 = 1..7.15 ns
+## after its CLKOUT edge (at its pins). With ~equal clock/data wire lengths
+## the wire delays cancel on -max; -min 0.0 is slightly conservative
+## (chip min Tco is 1 ns). Hold violations reported here are fixed by the
+## router adding delay - check WHS is positive after route.
 set FT_IN_PORTS [get_ports {ft_data[*] ft_rxf_n ft_txe_n}]
 set_input_delay -clock ft_clk -max 7.15 $FT_IN_PORTS
 set_input_delay -clock ft_clk -min 0.0  $FT_IN_PORTS
@@ -90,13 +64,11 @@ set_property PACKAGE_PIN F16 [get_ports ft_txe_n]
 set_property PACKAGE_PIN G16 [get_ports ft_rd_n]
 set_property PACKAGE_PIN H14 [get_ports ft_wr_n]
 set_property PACKAGE_PIN E16 [get_ports ft_oe_n]
-set_property PACKAGE_PIN F13 [get_ports ft_siwu_n]
 set_property IOSTANDARD LVCMOS33 [get_ports ft_rxf_n]
 set_property IOSTANDARD LVCMOS33 [get_ports ft_txe_n]
 set_property IOSTANDARD LVCMOS33 [get_ports ft_rd_n]
 set_property IOSTANDARD LVCMOS33 [get_ports ft_wr_n]
 set_property IOSTANDARD LVCMOS33 [get_ports ft_oe_n]
-set_property IOSTANDARD LVCMOS33 [get_ports ft_siwu_n]
 
 ## ---- LEDs ----
 set_property PACKAGE_PIN H17 [get_ports {led[0]}]

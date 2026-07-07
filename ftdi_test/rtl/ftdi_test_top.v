@@ -16,20 +16,11 @@
     * The PC-side script (python/ftdi_rx_verify.py) receives the stream,
     * locates the magic header, and verifies each payload byte.
     *
-    * Board selection is done at synthesis time via the BOARD parameter:
-    *   BOARD = 0  →  Nexys A7 (100 MHz oscillator)
-    *   BOARD = 1  →  PYNQ-Z2  (125 MHz oscillator)
-    * The parameter only affects the clock-divider ratio for sys_clk.
-    *
     * NOTE: Channel A of the FT2232H must be programmed to 245-sync-FIFO
     *       mode with FT_Prog before loading this bitstream.
 */
 
-module ftdi_test_top #(
-    // 0 = Nexys A7 (100 MHz board clock)
-    // 1 = PYNQ-Z2  (125 MHz board clock)
-    parameter BOARD = 0
-) (
+module ftdi_test_top (
     input  wire        clk_in,      // on-board oscillator
 
     // Status LEDs
@@ -42,26 +33,14 @@ module ftdi_test_top #(
     input  wire        ft_txe_n,    // ACBUS1 / TXE#
     output wire        ft_rd_n,     // ACBUS2 / RD#
     output wire        ft_wr_n,     // ACBUS3 / WR#
-    output wire        ft_oe_n,     // ACBUS6 / OE#
-    output wire        ft_siwu_n    // ACBUS4 / SIWU#
+    output wire        ft_oe_n      // ACBUS6 / OE#
 );
 
-    // -------------------------------------------------------------------------
-    // Clock divider: produce a 50 MHz sys_clk from the board oscillator.
-    //   Nexys A7 : 100 MHz ÷ 2  (DIV = 1, toggle every cycle)
-    //   PYNQ-Z2  : 125 MHz ÷ 2.5 - not integer; use MMCM instead.
-    //              For simplicity we divide by 3 → ~41.7 MHz (well within
-    //              the 50 MHz spec and still far faster than the FTDI rate).
-    // -------------------------------------------------------------------------
-    localparam DIV_HALF = (BOARD == 0) ? 1 : 1;  // both toggle every cycle for now
-
-    // Simple clock divider (÷2) - works for both boards at these frequencies.
-    // Replace with MMCM/PLL for a tighter 50 MHz if needed.
     reg sys_clk_r = 1'b0;
     always @(posedge clk_in)
         sys_clk_r <= ~sys_clk_r;
 
-    wire sys_clk = sys_clk_r;  // 50 MHz (Nexys) or 62.5 MHz (PYNQ)
+    wire sys_clk = sys_clk_r;
 
     // -------------------------------------------------------------------------
     // Reset: hold sys_rst_n low for 256 cycles after power-on
@@ -82,8 +61,8 @@ module ftdi_test_top #(
     // ft2232h_tx wrapper
     // -------------------------------------------------------------------------
     wire       ft_full;
-    reg        wr_en   = 1'b0;
-    reg  [7:0] wr_data = 8'h00;
+    wire        wr_en;     // combinational - asserted whenever FIFO has room
+    reg  [7:0] wr_data;   // combinational - byte for the current FSM state
 
     ft2232h_tx #(
         .TX_DEPTH_EXP (10)      // 1024-byte internal TX buffer
@@ -92,6 +71,7 @@ module ftdi_test_top #(
         .sys_rst_n (sys_rst_n),
         .wr_en     (wr_en),
         .wr_data   (wr_data),
+        .wr_last   (1'b0),
         .full      (ft_full),
         .ft_clk    (ft_clk),
         .ft_data   (ft_data),
@@ -99,8 +79,7 @@ module ftdi_test_top #(
         .ft_txe_n  (ft_txe_n),
         .ft_rd_n   (ft_rd_n),
         .ft_wr_n   (ft_wr_n),
-        .ft_oe_n   (ft_oe_n),
-        .ft_siwu_n (ft_siwu_n)
+        .ft_oe_n   (ft_oe_n)
     );
 
     // -------------------------------------------------------------------------
@@ -116,7 +95,6 @@ module ftdi_test_top #(
     //   Byte259 : 0xFF  /
     //
     // State machine:
-    //   IDLE      - wait until !ft_full
     //   HDR0..3   - send the four header bytes
     //   PAYLOAD   - send 256 counter bytes, then back to IDLE
     // -------------------------------------------------------------------------
@@ -131,37 +109,56 @@ module ftdi_test_top #(
     reg [7:0]  pay_cnt    = 8'h00;   // payload byte counter
     reg [7:0]  frame_cnt  = 8'h00;   // wrapping frame counter (for LED)
 
+    // We always have a byte ready, so hold tx_tvalid (wr_en) high.  A master
+    // may keep tvalid asserted regardless of tready - that is legal.  But the
+    // FSM must only advance when the byte was actually ACCEPTED (tvalid &
+    // tready = wr_en & ~ft_full), otherwise a byte presented during a full
+    // cycle is silently skipped while the counter moves on -> dropped bytes.
+    //
+    // PACED MODE: offer 1 byte per 8 sys_clk cycles (~6.25 MB/s at 50 MHz),
+    // well below the USB drain rate (~35-42 MB/s). The chip's TX buffer then
+    // never fills, TXE# never pauses mid-stream, and the burst-restart byte
+    // drop (see README "Status") should never trigger - the link should be
+    // lossless. Replace with `assign wr_en = sys_rst_n;` for full-rate
+    // (saturating) mode.
+    reg [2:0] pace = 3'd0;
+    always @(posedge sys_clk) pace <= pace + 3'd1;
+    assign wr_en = sys_rst_n & (pace == 3'd0);
+    wire beat = wr_en & ~ft_full;   // a byte was actually accepted this cycle
+
+    always @(*) begin
+        case (state)
+            S_HDR0:    wr_data = 8'hDE;
+            S_HDR1:    wr_data = 8'hAD;
+            S_HDR2:    wr_data = 8'hBE;
+            S_HDR3:    wr_data = 8'hEF;
+            S_PAYLOAD: wr_data = pay_cnt;
+            default:   wr_data = 8'h00;
+        endcase
+    end
+
     always @(posedge sys_clk or negedge sys_rst_n) begin
         if (!sys_rst_n) begin
             state     <= S_HDR0;
             pay_cnt   <= 8'h00;
             frame_cnt <= 8'h00;
-            wr_en     <= 1'b0;
-            wr_data   <= 8'h00;
-        end else begin
-            wr_en <= 1'b0;   // default: no write
+        end else if (beat) begin
+            case (state)
+                S_HDR0: state <= S_HDR1;
+                S_HDR1: state <= S_HDR2;
+                S_HDR2: state <= S_HDR3;
+                S_HDR3: begin state <= S_PAYLOAD; pay_cnt <= 8'h00; end
 
-            if (!ft_full) begin
-                wr_en <= 1'b1;
-
-                case (state)
-                    S_HDR0: begin wr_data <= 8'hDE; state <= S_HDR1; end
-                    S_HDR1: begin wr_data <= 8'hAD; state <= S_HDR2; end
-                    S_HDR2: begin wr_data <= 8'hBE; state <= S_HDR3; end
-                    S_HDR3: begin wr_data <= 8'hEF; state <= S_PAYLOAD; pay_cnt <= 8'h00; end
-
-                    S_PAYLOAD: begin
-                        wr_data <= pay_cnt;
-                        if (pay_cnt == 8'hFF) begin
-                            state     <= S_HDR0;
-                            frame_cnt <= frame_cnt + 8'h01;
-                        end
-                        pay_cnt <= pay_cnt + 8'h01;
+                S_PAYLOAD: begin
+                    if (pay_cnt == 8'hFF) begin
+                        state     <= S_HDR0;
+                        frame_cnt <= frame_cnt + 8'h01;
                     end
+                    pay_cnt <= pay_cnt + 8'h01;
+                end
 
-                    default: state <= S_HDR0;
-                endcase
-            end
+                default: state <= S_HDR0;
+            endcase
         end
     end
 
@@ -182,5 +179,24 @@ module ftdi_test_top #(
 
     assign led[3]   = ft_clk_beat;
     assign led[2:0] = frame_cnt[2:0];
+
+
+
+// ILA - trigger on ft_wr_n=0 to confirm FPGA is writing to FT2232H
+ila_0 u_ila (
+    .clk     ( ft_clk      ),   // 60 MHz from FT2232H - all FT signals are synchronous to this
+
+    .probe0  ( ft_rxf_n    ),   // [0:0] RXF# : PC has data for FPGA (active low)
+    .probe1  ( ft_txe_n    ),   // [0:0] TXE# : FT2232H can accept TX data (active low)
+    .probe2  ( ft_oe_n     ),   // [0:0] OE#
+    .probe3  ( ft_rd_n     ),   // [0:0] RD#
+    .probe4  ( ft_wr_n     ),   // [0:0] WR#  : trigger on this going low
+    .probe5  ( ft_data     ),   // [7:0] data bus
+    .probe6  ( ft_full     ),   // [0:0] TX FIFO full (sys_clk domain, async here)
+    .probe7  ( wr_en       )    // [0:0] pattern generator write enable (sys_clk domain, async here)
+);
+
+
+
 
 endmodule

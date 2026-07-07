@@ -172,3 +172,12 @@ RESULT: The Claude generated example runs but for some reason get some corrupted
 Going back to the `deps/ftdi_controller/RTL/fpga_ft232h_example/fpga_top_ft232h_loopback.v` example
 Through the ILA all the data can be seen on tdata[7:0] meaning PC->FPGA transmission is successful, but it never goes back.
 
+## 2026-07-07
+### Did
+- Shorted CN2-21 and CN2-22 to make sure SIWU is always 1. This makes loopback work but there is always an extra 0 in the beginning. Added an extra ground wire and Fable generated I/O xdc constraints.
+- Chased the sync-245 byte errors to the end: 1 byte lost per 512 B USB packet, at ANY data rate (paced 6.25 MB/s test = same loss as full rate). ILA shows the FPGA correctly re-presents the byte after each TXE# pulse, but only for one 16.7 ns window - the chip misses it (8 ns setup can't be met without clock deskew). Full findings in `ftdi_test/README.md` Status.
+- MMCM deskew + registered-output fix prototyped (`ftdi_test/rtl/fpga_top_ft232h_loopback_mmcm.v`) but shelved to keep the teaching example and upstream repo simple/untouched.
+
+### Next
+- Decide the FPGA->PC transport for the camera stream: (a) adopt the MMCM + `CHIP_DRIVE_AT_NEGEDGE=1` + -90 deg phase fix in `fpga/rtl/ft2232h_tx.v` (~40 MB/s, modifies IP), or (b) write a small FT245 **async** FIFO TX module (~8 MB/s, relaxed timing, no 60 MHz clock domain) - leaning (b), rate is sufficient.
+- Then connect the compression accelerator output to the chosen FTDI TX path and rerun `ftdi_rx_verify.py` as the acceptance test.
