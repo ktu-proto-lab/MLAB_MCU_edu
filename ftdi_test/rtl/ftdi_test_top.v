@@ -114,16 +114,7 @@ module ftdi_test_top (
     // FSM must only advance when the byte was actually ACCEPTED (tvalid &
     // tready = wr_en & ~ft_full), otherwise a byte presented during a full
     // cycle is silently skipped while the counter moves on -> dropped bytes.
-    //
-    // PACED MODE: offer 1 byte per 8 sys_clk cycles (~6.25 MB/s at 50 MHz),
-    // well below the USB drain rate (~35-42 MB/s). The chip's TX buffer then
-    // never fills, TXE# never pauses mid-stream, and the burst-restart byte
-    // drop (see README "Status") should never trigger - the link should be
-    // lossless. Replace with `assign wr_en = sys_rst_n;` for full-rate
-    // (saturating) mode.
-    reg [2:0] pace = 3'd0;
-    always @(posedge sys_clk) pace <= pace + 3'd1;
-    assign wr_en = sys_rst_n & (pace == 3'd0);
+    assign wr_en = sys_rst_n ;
     wire beat = wr_en & ~ft_full;   // a byte was actually accepted this cycle
 
     always @(*) begin

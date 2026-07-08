@@ -24,15 +24,6 @@ set_clock_groups -asynchronous \
 ## wire delays ft_clk to the FPGA (chip edge is ~1.5 ns earlier than the port
 ## edge) and the data wire adds ~1.5 ns of travel, so the port-level budget
 ## is 8 + 2*1.5 = 11 ns.
-##
-## KNOWN ACCEPTED VIOLATION: without an MMCM to cancel the ~5 ns BUFG clock
-## insertion delay, these paths CANNOT formally close (expect WNS ~ -3..-6 ns
-## on outputs). The IP drives outputs combinationally from posedge registers
-## (CHIP_DRIVE_AT_NEGEDGE=0), which in practice lands transitions ~7-9 ns
-## before the chip's next edge. Empirical consequence of the residual miss:
-## the first byte of a write burst can be dropped when TXE# pauses at USB
-## packet boundaries (~every 512 B); the frame protocol's magic header lets
-## the receiver re-align.
 set FT_OUT_PORTS [get_ports {ft_data[*] ft_wr_n ft_oe_n ft_rd_n}]
 set_output_delay -clock ft_clk -max 11.0 $FT_OUT_PORTS
 set_output_delay -clock ft_clk -min  0.0 $FT_OUT_PORTS

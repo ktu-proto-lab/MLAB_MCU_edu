@@ -5,12 +5,11 @@ Guide for testing `ft2232h_tx.v` by streaming a magic-word pattern from the FPGA
 The other test is loopback from the original WangXuan95/FPGA-ftdi245fifo repository. Refer to 
 [Getting started with FT232H](../deps/ftdi_controller/README.md#getting-started-with-ft232h) for a guide.
 
-# Status (Dovydas, 2026-07-07)
+# Status (Dovydas, 2026-07-08)
 
 Both examples are functional after tying **SIWU# high** (jumper CN2-22 ->
 CN2-21 on the Mini Module - a floating/pulled-down SIWU# blocks all FPGA->PC
-traffic, TXE# never asserts). Neither example is 100% byte-perfect; the
-residual errors are documented below.
+traffic, TXE# never asserts). 
 
 ## 1. Loopback example
 
@@ -21,35 +20,25 @@ Uses the **unmodified** `deps/ftdi_controller` repo sources
   errors.
 - Known artifact: the **first byte of each burst is duplicated** (send 16 B,
   receive 17 B with byte 0 doubled), and under sustained load an occasional
-  byte is dropped/duplicated at USB packet (~512 B) boundaries.
+
 
 ## 2. Single-direction stream (FPGA->PC) - `ftdi_test/rtl/ftdi_test_top.v`
 
 - Streams 260-byte frames (magic header + 0x00..0xFF counter) continuously;
   verified with `python/ftdi_rx_verify.py`.
-- At **full rate** (producer faster than USB drains, so the chip TX buffer is
-  always full) exactly **one byte is dropped per 512-byte USB packet**,
-  always the first byte written after a TXE# pause.
-- **Pacing does not help**: at 6.25 MB/s the loss rate is unchanged (4 MiB
-  capture: ~8k bad bytes / 16k frames). TXE# pulses at every 512 B USB packet
-  commit regardless of data rate.
-- Root cause (ILA-verified): the FPGA logic is correct - it re-presents the
-  in-flight byte after the TXE# pulse - but only for one 16.7 ns window,
-  which misses the chip's 8 ns setup (unfixable without clock deskew; output
-  paths report ~-3..-6 ns WNS, documented in `constraints/nexys7.xdc`).
-- **Consequence**: any multi-KB frame will always be corrupted, so this must
-  be fixed before carrying camera data. Options:
-  (a) MMCM deskew + registered outputs, prototyped in
-  `rtl/fpga_top_ft232h_loopback_mmcm.v` (+ `CHIP_DRIVE_AT_NEGEDGE=1` and
-  -90 deg output phase) - full ~40 MB/s, but modifies the IP;
-  (b) switch to FT245 **async** FIFO mode - ~8 MB/s max, relaxed ~30 ns
-  timings that breadboard wiring meets easily, small self-contained TX
-  module - **recommended** for the camera stream (a few MB/s).
+- PROBLEM: One byte gets dropped per each 512-byte USB packet.
+- SOLUTION: New top instead of `deps/ftdi_controller/RTL/ftdi_245fifo/ftdi_245fifo_top.v` we have `fpga/rtl/ftdi_245fifo_top_txfix.v` which is very similar but includes an extra `ftdi_tx_unpop` module.
 
+### Last byte recovery module - *ftdi_tx_unpop*
+A small replay stage in the ftdi_clk domain sitting between the IP's last TX FIFO and its FSM. It remembers the last byte handed to the FSM; when it sees TXE# rise and a byte was popped in the immediately preceding cycle, that byte is the one the chip just rejected (your measured, deterministic one-byte overshoot), so it re-injects it ahead of the stream. Order is preserved: the doomed byte replays first, then the FSM's own re-presented head byte, then the rest. A REWIND parameter turns it into a plain pass-through if you ever need to disable it without rewiring.
 
-## Directory Structure
+## Directory Structure (relevant files)
 
 ```
+fpga/
+├── rtl/
+│   └── ft2232h_tx.v             - AXI to FIFO interface wrapper
+|   └── ftdi_245fifo_top_txfix.v - FTDI top with unpop fix
 ftdi_test/
 ├── rtl/
 │   └── ftdi_test_top.v          - FPGA top-level (pattern generator + ft2232h_tx)
@@ -167,6 +156,9 @@ For you to fill in below :)
 2. `deps/ftdi_controller/RTL/fpga_ft232h_example/clock_beat.v`
 3. `ftdi_test/rtl/ftdi_test_top.v`
 4. `fpga/rtl/ft2232h_tx.v`
+5. `fpga/rtl/ftdi_245fifo_top_txfix.v` - vendored IP top with the TX un-pop
+   fix (1 byte lost per 512 B USB packet); `ft2232h_tx.v` instantiates this
+   instead of the stock `ftdi_245fifo_top`
 
 ### Constraints file
 

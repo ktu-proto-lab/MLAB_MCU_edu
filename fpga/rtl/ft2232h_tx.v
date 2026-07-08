@@ -14,27 +14,6 @@
 //   - Check space  : sample ~full before asserting wr_en
 //   - That's it.   No clock-domain work needed on your side.
 //
-// FT2232H MINI MODULE CONNECTIONS
-//   Channel A must be programmed to 245-sync-FIFO mode using FT_Prog.
-//   See pin table below for the exact PYNQ-Z2 XDC constraints needed.
-//
-//   FT2232H pin  | Mini Module net | This module signal
-//   -------------|-----------------|-------------------
-//   ADBUS[7:0]   | CN2 pins 1-8    | ft_data[7:0]   (inout)
-//   ACBUS0 (RXF#)| CN2 pin 9       | ft_rxf_n       (input)
-//   ACBUS1 (TXE#)| CN2 pin 10      | ft_txe_n       (input)
-//   ACBUS2 (RD#) | CN2 pin 11      | ft_rd_n        (output)
-//   ACBUS3 (WR#) | CN2 pin 12      | ft_wr_n        (output)
-//   ACBUS4 (SIWU)| CN2 pin 13      | ft_siwu_n      (output, tie 1)
-//   ACBUS5 (CLK) | CN2 pin 14      | ft_clk         (input, 60 MHz)
-//   ACBUS6 (OE#) | CN2 pin 15      | ft_oe_n        (output)
-//   GND          | CN2 pin 16      | GND
-//
-// DEPENDENCY
-//   Requires all .v files from RTL/ftdi_245fifo/ in the IP repository:
-//     https://github.com/WangXuan95/FPGA-ftdi245fifo
-//   Add these files to your Vivado project alongside this wrapper.
-//
 // PARAMETERS
 //   TX_DEPTH_EXP : log2 of the internal TX buffer depth (default 10 = 1024 B)
 //                  Increase to 11 or 12 if you want a deeper buffer.
@@ -115,7 +94,10 @@ module ft2232h_tx #(
     //   RX_EW = 0               (RX AXI-stream width: 1 byte)
     //   RX_EA = 6               (RX buffer depth: 64 bytes - minimal, TX only)
     // -------------------------------------------------------------------------
-    ftdi_245fifo_top #(
+    // ftdi_245fifo_top_txfix = vendored copy of ftdi_245fifo_top with the
+    // TX un-pop stage that fixes the 1-byte-per-512 loss at USB packet
+    // boundaries. See fpga/rtl/ftdi_245fifo_top_txfix.v for details.
+    ftdi_245fifo_top_txfix #(
         .CHIP_TYPE ( "FTx232H"    ),
         .TX_EW     ( 0            ),
         .TX_EA     ( TX_DEPTH_EXP ),
