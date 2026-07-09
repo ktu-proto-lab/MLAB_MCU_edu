@@ -128,7 +128,7 @@ Both boards use **Pmod JA** for the 8-bit data bus and **Pmod JB** for control s
 For the PYNQ-Z2 board, use [PYNQ-Z2 version 1.1 manual](https://dpoauwgwqsy2x.cloudfront.net/Download/PYNQ_Z2_User_Manual_v1.1.pdf). Previous version (v.1.0) has some mistakes, regarding pinout map.
 
 <p align="center">
-  <img src="doc/figures/pynq_pinout.svg" alt="PYNQ-Z2 pinout" width="700">
+  <img src="../doc/figures/pynq_pinout.svg" alt="PYNQ-Z2 pinout" width="700">
 </p>
 
 | Signal | CN2 Pin | FT232H pin name | Pmod | FPGA Pin |
