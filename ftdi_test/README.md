@@ -125,25 +125,29 @@ Both boards use **Pmod JA** for the 8-bit data bus and **Pmod JB** for control s
 
 #### PYNQ-Z2 wiring
 
-For you to fill in below :)
+For the PYNQ-Z2 board, use [PYNQ-Z2 version 1.1 manual](https://dpoauwgwqsy2x.cloudfront.net/Download/PYNQ_Z2_User_Manual_v1.1.pdf). Previous version (v.1.0) has some mistakes, regarding pinout map.
 
-| Signal | CN2 Pin | Pmod | FPGA Pin |
-|--------|---------|------|----------|
-| `ft_data[0]`  | 7  |   |  |
-| `ft_data[1]`  | 10 |   |  |
-| `ft_data[2]`  | 9  |   |  |
-| `ft_data[3]`  | 12 |   |  |
-| `ft_data[4]`  | 14 |   |  |
-| `ft_data[5]`  | 13 |   |  |
-| `ft_data[6]`  | 16 |   |  |
-| `ft_data[7]`  | 15 |   |  |
-| `ft_rxf_n`    | 18 |   |  |
-| `ft_txe_n`    | 17 |   |  |
-| `ft_rd_n`     | 20 |   |  |
-| `ft_wr_n`     | 19 |   |  |
-| `ft_siwu_n`   | 22 |   |  |
-| `ft_clk`      | 24 |   |  |
-| `ft_oe_n`     | 23 |   |  |
+<p align="center">
+  <img src="doc/figures/pynq_pinout.svg" alt="PYNQ-Z2 pinout" width="700">
+</p>
+
+| Signal | CN2 Pin | FT232H pin name | Pmod | FPGA Pin |
+|--------|---------|-----------------|------|----------|
+| `ft_data[0]`  | 7  | ADBUS0 | Pin28  | Y17 |
+| `ft_data[1]`  | 10 | ADBUS1 | Pin29  | Y19 |
+| `ft_data[2]`  | 9  | ADBUS2 | Pin32  | B20 |
+| `ft_data[3]`  | 12 | ADBUS3 | Pin33  | W8 |
+| `ft_data[4]`  | 14 | ADBUS4 | Pin35  | Y8 |
+| `ft_data[5]`  | 13 | ADBUS5 | Pin37  | W9 |
+| `ft_data[6]`  | 16 | ADBUS6 | Pin38  | A20 |
+| `ft_data[7]`  | 15 | ADBUS7 | Pin40  | Y9 |
+| `ft_rxf_n`    | 18 | ACBUS0 | Pin21  | V10 |
+| `ft_txe_n`    | 17 | ACBUS1 | Pin24  | F19 |
+| `ft_rd_n`     | 20 | ACBUS2 | Pin23  | W10 |
+| `ft_wr_n`     | 19 | ACBUS3 | Pin22  | F20 |
+| `ft_siwu_n`   | 22 | ACBUS4 (Tie High) | –  | – |
+| `ft_clk`      | 24 | ACBUS5 | Pin18  |  Y7|
+| `ft_oe_n`     | 23 | ACBUS6 | Pin27  | Y16 |
 
 
 ---
