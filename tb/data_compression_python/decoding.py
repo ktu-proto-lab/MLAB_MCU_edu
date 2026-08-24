@@ -2,35 +2,35 @@ from PIL import Image
 import numpy as np
 import sys
 
-recreated_file = []
+WIDTH, HEIGHT = 320, 240
+INPUT_PATH = "../out2_images/baboon_edge_compressed.bin"
+OUTPUT_PATH = "output_new.pgm"
 
-data = np.loadtxt( "compression.txt", dtype=int)
+# Each byte pair is (count, value)
+raw_data = np.fromfile(INPUT_PATH, dtype=np.uint8)
 
-x = np.size(data,0)
-y = np.size(data,1)
+# An odd total length means there's one trailing byte that isn't part of a
+# complete (count, value) pair — drop it rather than letting reshape fail.
+if raw_data.size % 2 != 0:
+    print(f"Warning: odd file length, dropping trailing byte {raw_data[-1]}", file=sys.stderr)
+    raw_data = raw_data[:-1]
 
-repeat = data[:, 1]
-value = data[:, 0]
+data = raw_data.reshape(-1, 2)
+counts = data[:, 0].astype(np.int64)   # widen before repeat to avoid overflow
+values = data[:, 1].astype(np.uint8)
 
-#pixels = np.repeat(values, counts)
+# Vectorized run-length expansion
+pixels = np.repeat(values, counts)
 
-for i in range(x):
-        for k in range(repeat[i]):
+target = WIDTH * HEIGHT
+if pixels.size != target:
+    print(f"Warning: decoded {pixels.size} pixels, expected {target} "
+          f"({target - pixels.size:+d}); padding/truncating to fit.", file=sys.stderr)
+    if pixels.size < target:
+        pixels = np.pad(pixels, (0, target - pixels.size), constant_values=0)
+    else:
+        pixels = pixels[:target]
 
-            new = value[i]
-            recreated_file.append(new)
-
-
-print(recreated_file)
-
-
-img = Image.new("L", (320, 240))
-img.putdata(recreated_file)
-
-img.save("output.pgm")
-
-
-
-
-
-
+img = Image.fromarray(pixels.reshape(HEIGHT, WIDTH), mode="L")
+img.save(OUTPUT_PATH)
+print(f"Saved {OUTPUT_PATH}")

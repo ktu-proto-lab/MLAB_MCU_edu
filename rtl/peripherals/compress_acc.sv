@@ -48,9 +48,12 @@ module compress_acc (
     logic        csr_busy,        csr_busy_next;
     logic        csr_done,        csr_done_next;
     logic        wb_wr;
-    logic [31:0] run_count,      run_count_next;
-    logic [7:0]  last_value,     last_value_next;
-    logic count_printed, count_printed_next;
+
+    logic [31:0] run_count,       run_count_next;
+    logic [7:0]  last_value,      last_value_next;
+    logic [2:0]  output_phase,    output_phase_next;
+    logic [8:0]	 next_pixel, 	  next_pixel_next;
+    //logic count_printed, count_printed_next;
     logic done_pending, done_pending_next;
     logic fifo_rd_en_next;
 
@@ -99,9 +102,12 @@ module compress_acc (
             csr_done        <= 1'b0;
             run_count  <= 32'h0;
             last_value <= 8'h0;
-	    count_printed <= 1'b0;
+	    //count_printed <= 1'b0;
 	    done_pending <= 1'b0;
 	    fifo_rd_en <= 1'b0;
+
+            output_phase <= 2'b00;
+            next_pixel <= 8'b00000000;
 
         end else begin
             state           <= state_next;
@@ -111,8 +117,13 @@ module compress_acc (
             csr_done        <= csr_done_next;
             run_count  <= run_count_next;
             last_value <= last_value_next;
-	    count_printed <= count_printed_next;
-	    fifo_rd_en <= fifo_rd_en_next;
+    	    //count_printed <= count_printed_next;
+    	    done_pending <= done_pending_next;
+    	    fifo_rd_en <= fifo_rd_en_next;
+            output_phase <= output_phase_next;
+            next_pixel <= next_pixel_next;
+
+	    //$display("%b", run_count);
         end
     end
 
@@ -129,12 +140,14 @@ module compress_acc (
         csr_done_next        = csr_done;
         run_count_next  = run_count;
         last_value_next = last_value;
-	count_printed_next = count_printed;
-   
-
+	//count_printed_next = count_printed;
+	done_pending_next = done_pending;
+	fifo_rd_en_next = fifo_rd_en;
+	output_phase_next = output_phase;
+	next_pixel_next = next_pixel;
+ 
         tx_wr_en = 1'b0;
         tx_din   = 8'h0;
-	fifo_rd_en_next = 1'b0;
 
         if (wb_wr && wb.adr[3:2] == 2'h0) begin
             ctrl_auto_start_next = wb_wdata[0];
@@ -156,58 +169,87 @@ module compress_acc (
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
             // Stall both sides when tx_full is asserted (no data consumed or produced).
             RUN: begin
-                if (!fifo_empty && !tx_full) begin
-                    //tx_din   = fifo_dout; // TODO: replace with compression
+    	        if(!tx_full) begin
+    		    // Default values
+    		    fifo_rd_en_next = 0;
+    		    tx_wr_en = 0;
+    		    tx_din = 0;
 
-	 	    if(count_printed == 1) begin
-		    	tx_din = last_value;  
-			count_printed_next = 1'b0;
-			tx_wr_en = 1'b1;
 
-			run_count_next  = 32'd0;          // new run starts at 0
-                        last_value_next = fifo_dout;
-			fifo_rd_en_next = 1'b1;
-		    end
+		    // $display("%d", output_phase);
+        	    if(output_phase == 0) begin
+        	         // Read phase
+        	         if(!fifo_empty && !done_pending) begin
+				$display("%d", rd_ptr);
+            	             if (rd_ptr == 0) begin
+                                 // First pixel: store, start run
+                                 last_value_next = fifo_dout;
+                                 run_count_next  = 0;
+                                 fifo_rd_en_next = 1;
+                                 rd_ptr_next     = rd_ptr + 1;
+            	             end 
+		             else begin
+                                 // Compare current pixel with last_value
+                                 if (fifo_dout == last_value && run_count < 255) begin
+                                     run_count_next  = run_count + 1;
+                                     fifo_rd_en_next = 1;
+                                     rd_ptr_next     = rd_ptr + 1;
+                                     // Check if this is the last pixel
+                                     if (rd_ptr + 1 > TOTAL_PIXELS) begin
+                                         done_pending_next = 1;  // need to flush after reading
+                                     end
+                                 end 
+			         else begin
+                                     // Change or end of run detected
+                                     next_pixel_next = fifo_dout;
+                                     output_phase_next = 1;
+                                     // Do NOT read the new pixel yet; we will after output completes
+                                         // If we have reached end, set done_pending so we know to flush later
+                                         if (rd_ptr + 1 > TOTAL_PIXELS) begin
+                                             done_pending_next = 1;
+                                         end
+        	                 end
+			     end
+			 end
+        	    end
 
-		    //the first pixel has a run count of 0 
-		    if(run_count == 0) begin
-			    if(fifo_rd_en == 1'b0) begin
-				fifo_rd_en_next = 1'b1;
-			end else begin
-			    last_value_next = fifo_dout;
-			end
-		    end
-
-                    if (fifo_dout == last_value && run_count < 255 && !done_pending) begin
-                        run_count_next = run_count + 1;   // extend run
-			fifo_rd_en_next = 1'b1;
-                    end else begin
-			//tx_wr_en (write enable) should only be 1 when we are
-			//ready to write the data	
-			tx_din = run_count;
-			count_printed_next = 1'b1;
-			tx_wr_en = 1'b1;
-			//fifo_rd_en_next = 1'b0;
+                     // If done_pending is set and we have no pending output, we need to flush
+                     if (done_pending && output_phase == 0) begin
+                         // Start flushing the final run
+                         output_phase_next = 1;
                      end
- 
-		    if(fifo_rd_en) begin
-                        if (rd_ptr + 32'h1 >= TOTAL_PIXELS) begin
-			    done_pending_next = 1'b1;
-		    	    //fifo_rd_en_next = 1'b0;	    
-			end else begin
-                            rd_ptr_next = rd_ptr + 32'h1;
-			end
-		    end
-		
-		    if(done_pending && count_printed == 1'b0) begin
-                            csr_busy_next = 1'b0;
-                            csr_done_next = 1'b1;
-			    done_pending_next = 1'b0;
-                            state_next    = DONE;
-                    end
+                     else if (output_phase == 1) begin
+                         // Output run count
+                         tx_din          = run_count;
+                         tx_wr_en        = 1;
+                         output_phase_next = 2;   // next phase: output pixel value
+                     end
+                     else if (output_phase == 2) begin
+                         // Output pixel value
+                         tx_din          = last_value;
+                         tx_wr_en        = 1;
+                         // After output, start new run or enter finishing phase
+                         if (done_pending) begin
+			     output_phase_next = 3;
+                         end 
+			 else begin
+                             // Start new run using the saved next_pixel
+                             last_value_next = next_pixel;
+                             run_count_next  = 1;
+                             fifo_rd_en_next = 1;
+                             rd_ptr_next     = rd_ptr + 1;
+                             output_phase_next = 0;
+                         end
+                     end
+		     else if(output_phase == 3) begin
+		         csr_busy_next = 1'b0;
+                         csr_done_next = 1'b1;
+                         done_pending_next = 1'b0;
+                         state_next = DONE;
+	             end
                 end
             end
-
+	   
             // -----------------------------------------------------------------
             DONE: begin
                 if (ctrl_auto_start && !fifo_empty) begin
