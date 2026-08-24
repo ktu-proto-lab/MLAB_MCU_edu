@@ -38,8 +38,8 @@ def decode_rle(data: bytes) -> bytes:
               file=sys.stderr)
     pixels = bytearray()
     for i in range(0, len(data) - 1, 2):
-        count = data[i]
-        value = data[i + 1]
+        count = data[i+1]
+        value = data[i]
         if count == 0:
             print(f"WARNING: zero count at byte offset {i}; skipping pair.",
                   file=sys.stderr)

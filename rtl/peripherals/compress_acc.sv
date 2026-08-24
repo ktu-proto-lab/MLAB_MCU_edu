@@ -36,10 +36,12 @@ module compress_acc (
 
     localparam int TOTAL_PIXELS = 76800; // 320 x 240
 
-    typedef enum logic [1:0] {
+    typedef enum logic [2:0] {
         IDLE = 2'b00,
         RUN  = 2'b01,
-        DONE = 2'b10
+        DONE = 2'b10,
+        //pridetas
+        SEND_COUNT = 2'b11
     } state_t;
 
     state_t      state,           state_next;
@@ -48,6 +50,10 @@ module compress_acc (
     logic        csr_busy,        csr_busy_next;
     logic        csr_done,        csr_done_next;
     logic        wb_wr;
+    //pridetas
+    logic [7:0]  prev_pixel,      prev_pixel_next;
+    logic [7:0] count, count_next;
+    logic [7:0] saved_count, saved_count_next;
 
     // -------------------------------------------------------------------------
     // Wishbone protocol
@@ -92,12 +98,20 @@ module compress_acc (
             ctrl_auto_start <= 1'b0;
             csr_busy        <= 1'b0;
             csr_done        <= 1'b0;
+            //pridetas
+            prev_pixel      <= 8'h0;
+            count           <= 8'd0;
+            saved_count     <= 8'd0;
         end else begin
             state           <= state_next;
             rd_ptr          <= rd_ptr_next;
             ctrl_auto_start <= ctrl_auto_start_next;
             csr_busy        <= csr_busy_next;
             csr_done        <= csr_done_next;
+            //pridetas
+            prev_pixel      <= prev_pixel_next;
+            count           <= count_next;
+            saved_count     <= saved_count_next;
         end
     end
 
@@ -112,6 +126,10 @@ module compress_acc (
         ctrl_auto_start_next = ctrl_auto_start;
         csr_busy_next        = csr_busy;
         csr_done_next        = csr_done;
+        //pridetas
+        prev_pixel_next = prev_pixel;
+        count_next      = count;
+        saved_count_next = saved_count;
 
         tx_wr_en = 1'b0;
         tx_din   = 8'h0;
@@ -137,15 +155,62 @@ module compress_acc (
             // Stall both sides when tx_full is asserted (no data consumed or produced).
             RUN: begin
                 if (!fifo_empty && !tx_full) begin
-                    tx_wr_en = 1'b1;
-                    tx_din   = fifo_dout; // TODO: replace with compression
-
                     rd_ptr_next = rd_ptr + 32'h1;
+                    if (rd_ptr==0)begin
+                        prev_pixel_next = fifo_dout;
+                        count_next      = 1;  
+                    end
+                    else begin
+                        if(prev_pixel == fifo_dout) begin
+                            if (count==255) begin
 
-                    if (rd_ptr + 32'h1 >= TOTAL_PIXELS) begin
+                                saved_count_next = count;
+                                tx_wr_en = 1;
+                                tx_din = prev_pixel;
+                                prev_pixel_next = fifo_dout;
+                                count_next = 1;
+                                state_next = SEND_COUNT;
+                            end
+
+                            else begin
+                                count_next = count + 1;
+
+                                if (rd_ptr + 1 >= TOTAL_PIXELS) begin
+                                    saved_count_next = count + 1;
+                                    tx_wr_en = 1;
+                                    tx_din = prev_pixel;
+                                    state_next = SEND_COUNT;
+                                end
+                            end         
+                        end
+                        else begin
+                            saved_count_next = count;
+                            tx_wr_en = 1;
+                            tx_din = prev_pixel;
+                            prev_pixel_next = fifo_dout;
+                            count_next = 1;
+                            state_next = SEND_COUNT;
+                        end
+                    end
+
+                    if (rd_ptr + 1 >= TOTAL_PIXELS) begin
                         csr_busy_next = 1'b0;
                         csr_done_next = 1'b1;
-                        state_next    = DONE;
+                    end
+                end
+            end
+
+            SEND_COUNT: begin
+                if (!tx_full) begin
+                    tx_wr_en=1;
+                    tx_din = saved_count;
+
+                    if (rd_ptr >= TOTAL_PIXELS) begin
+                        tx_din = saved_count+1;
+                        state_next = DONE;
+                    end
+                    else begin
+                        state_next = RUN;
                     end
                 end
             end
