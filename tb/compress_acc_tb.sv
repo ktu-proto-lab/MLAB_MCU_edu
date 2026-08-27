@@ -34,7 +34,7 @@ module compress_acc_tb;
     localparam int  TX_MAX_BYTES = TOTAL_PIXELS * 2; // worst-case RLE 2x expansion
     localparam real CLK_PERIOD   = 10.0;
 
-    localparam string SRC_IMAGE    = "baboon_edge.pgm";
+    localparam string SRC_IMAGE    = "pattern_checkerboard.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
     localparam string OUT_IMG_PATH = "../../tb/out2_images/";
 

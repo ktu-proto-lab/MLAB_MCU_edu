@@ -29,7 +29,7 @@ module simple_system_tb;
     localparam int  TX_MAX_BYTES = TOTAL_PIXELS * 2; // worst-case RLE 2x
     localparam real CLK_PERIOD   = 12.5;             // 80 MHz
 
-    localparam string SRC_IMAGE    = "baboon_edge.pgm";
+    localparam string SRC_IMAGE    = "pattern_checkerboard.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
     localparam string OUT_IMG_PATH = "../../tb/out2_images/";
 
