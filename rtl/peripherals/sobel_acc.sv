@@ -56,7 +56,8 @@ module sobel_acc (
     // -------------------------------------------------------------------------
     logic [31:0] wb_wdata;
     logic [31:0] wb_rdata;
-    reg [7:0] rows [0:2][0:319]; //bitu memory triju eiliu
+    reg [7:0] rows [0:1][0:319]; //bitu memory triju eiliu
+    reg [7:0] running [0:2];  //running window
     logic signed [11:0] Gx;
     logic signed [11:0] Gy;
     logic [31:0] kiekis;
@@ -133,13 +134,24 @@ module sobel_acc (
             kiekis <= 0;
             fifo_rd_en_delay <= 0;
         end else if(fifo_rd_en) begin
-            if(kiekis <= 960) begin
+            if(kiekis <= 643) begin //buvo 640 su skewinta versija
                 rows[kiekis/320][kiekis % 320] <= fifo_dout;
+                running[kiekis - 641] <= fifo_dout; //bulshit bet gal veiks (sitos line nera kitoj versijoj)
                 kiekis <= kiekis + 1;
-            end else begin
+            end
+            //else if(kiekis <= 643) begin
+            //  running[kiekis - 641] <= fifo_dout;
+            //  kiekis <= kiekis + 1;
+            //end
+             else begin
                 rows[0][kiekis%320-1] <= rows[1][kiekis%320-1]; //keiciam pikselius vviena stulpeli po kito
-                rows[1][kiekis%320-1] <= rows[2][kiekis%320-1];
-                rows[2][kiekis%320-1] <= fifo_dout;
+                //rows[1][kiekis%320-1] <= rows[2][kiekis%320-1];
+                //rows[2][kiekis%320-1] <= fifo_dout;
+                
+                rows[1][kiekis%320-1] <= running[0];
+                running[0] <= running[1];
+                running[1] <= running[2];
+                running[2] <= fifo_dout;
                 kiekis <= kiekis+1;
 
 
@@ -158,7 +170,7 @@ module sobel_acc (
         state_next           = state;
         wr_ptr_next          = wr_ptr;
         ctrl_auto_start_next = ctrl_auto_start;
-        ctrl_algo_sel_next   = ctrl_algo_sel;
+        ctrl_algo_sel_next   = ctrl_algo_sel; 
         csr_busy_next        = csr_busy;
         csr_done_next        = csr_done;
         csr_error_next       = csr_error;
@@ -201,20 +213,20 @@ module sobel_acc (
                             //rows[kiekis/320][kiekis % 320] = fifo_dout;
                             //kiekis = kiekis + 1;
                         //end else
-                        if(kiekis%320 > 0 && kiekis%320 < 319 && kiekis > 960) begin //Pats sobelio skaiciavimas
+                        if(kiekis%320 > 0 && kiekis%320 < 319 && kiekis > 643) begin //Pats sobelio skaiciavimas
                             
-                            Gx = rows[0][kiekis%320+1] + (rows[1][kiekis%320+1]<<1) + rows[2][kiekis%320+1] - rows[0][kiekis%320-1] - (rows[1][kiekis%320-1]<<1) - rows[2][kiekis%320-1];
-                            Gy = rows[0][kiekis%320-1] + (rows[0][kiekis%320]<<1) + rows[0][kiekis%320+1] - rows[2][kiekis%320-1] - (rows[2][kiekis%320]<<1) - rows[2][kiekis%320+1];
+                            //Gx = rows[0][kiekis%320+1] + (rows[1][kiekis%320+1]<<1) + rows[2][kiekis%320+1] - rows[0][kiekis%320-1] - (rows[1][kiekis%320-1]<<1) - rows[2][kiekis%320-1];
+                            //Gy = rows[0][kiekis%320-1] + (rows[0][kiekis%320]<<1) + rows[0][kiekis%320+1] - rows[2][kiekis%320-1] - (rows[2][kiekis%320]<<1) - rows[2][kiekis%320+1];
 
-                            // Gx = (rows[0][kiekis%320+1]>>2) + (rows[1][kiekis%320+1]>>1) + (rows[2][kiekis%320+1]>>2) - (rows[0][kiekis%320-1]>>2) - (rows[1][kiekis%320-1]>>1) - (rows[2][kiekis%320-1]>>2);
-                            // Gy = (rows[0][kiekis%320-1]>>2) + (rows[0][kiekis%320]>>1) + (rows[0][kiekis%320+1]>>2) - (rows[2][kiekis%320-1]>>2) - (rows[2][kiekis%320]>>1) - (rows[2][kiekis%320+1]>>2);
+                            Gx = rows[0][kiekis%320+1] + (rows[1][kiekis%320+1]<<1) + running[2] - rows[0][kiekis%320-1] - (rows[1][kiekis%320-1]<<1) - running[0];
+                            Gy = rows[0][kiekis%320-1] + (rows[0][kiekis%320]<<1) + rows[0][kiekis%320+1] - running[0] - (running[1]<<1) - running[2];
 
                             out_din = (((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy) > 255 ? 255 : ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy));
 
                             out_wr_en = 1'b1;
                             
-                            //kiekis = kiekis + 1;
-                        end else if (kiekis%320 == 0 || kiekis%320 == 319 || kiekis < 315) begin //for some reason turiu kompensuot 5 ciklus laikrodzio
+
+                        end else if (kiekis%320 == 0 || kiekis%320 == 319 || kiekis < 322) begin //for some reason turiu kompensuot 5 ciklus laikrodzio
 
                             //Gx = 0;
                             //Gy = 0;
@@ -231,6 +243,8 @@ module sobel_acc (
 
 
                     wr_ptr_next = wr_ptr + 32'h1;
+
+
 
                     if (wr_ptr + 32'h1 >= TOTAL_PIXELS) begin
                         csr_busy_next        = 1'b0;
