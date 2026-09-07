@@ -3,8 +3,8 @@ import numpy as np
 import sys
 
 WIDTH, HEIGHT = 320, 240
-INPUT_PATH = "../out2_images/baboon_edge_compressed.bin"
-OUTPUT_PATH = "output_new.pgm"
+INPUT_PATH = "../out2_images/pattern_edge_compressed.bin"
+OUTPUT_PATH = "pattern_edge_reconstructed.pgm"
 
 # Each byte pair is (count, value)
 raw_data = np.fromfile(INPUT_PATH, dtype=np.uint8)

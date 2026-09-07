@@ -56,6 +56,9 @@ module compress_acc (
     //logic count_printed, count_printed_next;
     logic done_pending, done_pending_next;
     logic fifo_rd_en_next;
+    logic last_single_value_printed;
+    logic last_single_value_printed_next;
+
 
     // -------------------------------------------------------------------------
     // Wishbone protocol
@@ -108,6 +111,7 @@ module compress_acc (
 
             output_phase <= 2'b00;
             next_pixel <= 8'b00000000;
+	    last_single_value_printed <= 1'b0;
 
         end else begin
             state           <= state_next;
@@ -122,6 +126,7 @@ module compress_acc (
     	    fifo_rd_en <= fifo_rd_en_next;
             output_phase <= output_phase_next;
             next_pixel <= next_pixel_next;
+	    last_single_value_printed <= last_single_value_printed_next;
 
 	    //$display("%b", run_count);
         end
@@ -145,6 +150,7 @@ module compress_acc (
 	fifo_rd_en_next = fifo_rd_en;
 	output_phase_next = output_phase;
 	next_pixel_next = next_pixel;
+	last_single_value_printed_next = last_single_value_printed;
  
         tx_wr_en = 1'b0;
         tx_din   = 8'h0;
@@ -201,12 +207,13 @@ module compress_acc (
                                  end 
 			         else begin
                                      // Change or end of run detected
-                                     next_pixel_next = fifo_dout;
+                                     next_pixel_next = fifo_dout;				     
                                      output_phase_next = 1;
                                      // Do NOT read the new pixel yet; we will after output completes
                                          // If we have reached end, set done_pending so we know to flush later
                                          if (rd_ptr + 1 > TOTAL_PIXELS) begin
                                              done_pending_next = 1;
+
                                          end
         	                 end
 			     end
@@ -223,14 +230,20 @@ module compress_acc (
                          tx_din          = run_count;
                          tx_wr_en        = 1;
                          output_phase_next = 2;   // next phase: output pixel value
+			 if(done_pending) begin	
+			   // $display("%d", tx_din);
+			 end
                      end
                      else if (output_phase == 2) begin
                          // Output pixel value
                          tx_din          = last_value;
                          tx_wr_en        = 1;
+
                          // After output, start new run or enter finishing phase
                          if (done_pending) begin
 			     output_phase_next = 3;
+
+			   $display("%d", tx_din);
                          end 
 			 else begin
                              // Start new run using the saved next_pixel
@@ -242,11 +255,24 @@ module compress_acc (
                          end
                      end
 		     else if(output_phase == 3) begin
+			     if(run_count == 1 && !last_single_value_printed) begin
+				     last_value_next = next_pixel; //This is needed in the edge case of the last pixel being having a run of 1 
+				     last_single_value_printed_next = 1;
+				     output_phase_next = 1;
+
+
+			   $display("%d", next_pixel);
+			     end
+			     else begin 
+				     output_phase_next = 4;
+			     end
+		     end
+		     else if(output_phase == 4) begin
 		         csr_busy_next = 1'b0;
                          csr_done_next = 1'b1;
                          done_pending_next = 1'b0;
                          state_next = DONE;
-	             end
+		     end
                 end
             end
 	   
