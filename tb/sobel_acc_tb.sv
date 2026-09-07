@@ -26,11 +26,13 @@ module sobel_acc_tb;
     localparam int  TOTAL_PIXELS = FRAME_W * FRAME_H;
     localparam real CLK_PERIOD   = 10.0;
 
-    localparam string TST_IMAGE    = "baboon_test.pgm";
-    localparam string TST_IMG_PATH = "../../tb/src_images/";
-    localparam string SRC_IMAGE    = "baboon.pgm";
-    localparam string SRC_IMG_PATH = "../../tb/src_images/";
-    localparam string OUT_IMG_PATH = "../../tb/out1_images/";
+    localparam string TST_IMAGE      = "baboon_test.pgm";
+    localparam string TST_IMG_PATH   = "../../tb/src_images/";
+    localparam string SRC_IMAGE      = "baboon.pgm";
+    localparam string SRC_IMG_PATH   = "../../tb/src_images/";
+    localparam string SRC_IMAGE_2    = "pattern.pgm";
+    localparam string SRC_IMG_PATH_2 = "../../tb/src_images/";
+    localparam string OUT_IMG_PATH   = "../../tb/out1_images/";
 
     // -------------------------------------------------------------------------
     // Clock and reset
@@ -175,7 +177,25 @@ module sobel_acc_tb;
         $fclose(fd);
         $display("[TB] Loaded %s%s (%0d pixels)", SRC_IMG_PATH, SRC_IMAGE, TOTAL_PIXELS);
         // ------------------------------------------------------------------
-        // Read input PGM (P2 ASCII, one comment line)
+        // Read second input PGM (P2 ASCII, one comment line) for future use
+        // ------------------------------------------------------------------
+        /*fd = $fopen({SRC_IMG_PATH, SRC_IMAGE}, "r");
+        if (fd == 0)
+            $fatal(1, "[TB] Cannot open %s%s", SRC_IMG_PATH, SRC_IMAGE);
+
+        void'($fgets(hdr_str, fd)); // P2
+        void'($fgets(hdr_str, fd)); // # comment
+        void'($fgets(hdr_str, fd)); // width height
+        void'($fgets(hdr_str, fd)); // maxval
+        for (int i = 0; i < TOTAL_PIXELS; i++) begin
+            void'($fscanf(fd, "%d", tmp_val));
+            src_mem[i] = tmp_val[7:0];
+        end
+        $fclose(fd);
+        $display("[TB] Loaded %s%s (%0d pixels)", SRC_IMG_PATH, SRC_IMAGE, TOTAL_PIXELS);
+        */
+        // ------------------------------------------------------------------
+        // Read test PGM (P2 ASCII, one comment line)
         // ------------------------------------------------------------------
         fd = $fopen({TST_IMG_PATH, TST_IMAGE}, "r");
         if (fd == 0)

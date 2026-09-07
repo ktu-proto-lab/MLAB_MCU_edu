@@ -52,6 +52,7 @@ module sobel_acc (
     logic        csr_error,       csr_error_next;
     logic [31:0] csr_frame_count, csr_frame_count_next;
     logic        wb_wr;
+    logic        has_incoming_data;
 
     // -------------------------------------------------------------------------
     // Wishbone protocol
@@ -90,6 +91,8 @@ module sobel_acc (
 
     // Consume from input FIFO only when we can simultaneously write to output FIFO.
     assign fifo_rd_en = (state == RUN) && !fifo_empty && !out_full;
+
+    assign has_incoming_data = (!fifo_empty || (kiekis >= TOTAL_PIXELS && kiekis < TOTAL_PIXELS+FRAME_W+3)) ? 1'b1 : 1'b0; 
 
     // -------------------------------------------------------------------------
     // Wishbone read mux (purely combinational)
@@ -135,7 +138,7 @@ module sobel_acc (
             kiekis <= 0;
             line <= 0;
             width <= 0;
-        end else if(!out_full && state == RUN) begin
+        end else if(!out_full && state == RUN && has_incoming_data) begin
              if(width == FRAME_W-1 && kiekis < TOTAL_PIXELS)begin
                  if(line == 2)line <= 0; 
                 else line <= line + 1;
@@ -193,7 +196,7 @@ module sobel_acc (
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
             // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
-                if (!out_full) begin
+                if (!out_full && has_incoming_data) begin
                     
                     
                     if(1) begin //Sobelio algoritmas
