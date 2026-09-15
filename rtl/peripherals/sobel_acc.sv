@@ -30,7 +30,9 @@ module sobel_acc (
     // Intermediate FIFO - destination (8-bit, one pixel per word)
     output logic       out_wr_en,
     output logic [7:0] out_din,
-    input  logic       out_full
+    input  logic       out_full,
+
+    input  logic [31:0] shadow_ptr
     );
 
     localparam int FRAME_W      = 320;
@@ -62,7 +64,7 @@ module sobel_acc (
     reg [7:0] rows [0:2][0:FRAME_W-1]; //bitu memory triju eiliu
     logic signed [11:0] Gx;
     logic signed [11:0] Gy;
-    logic unsigned [17:0] kiekis, line, width;
+    logic unsigned [17:0] kiekis, line, width, last_frame, last_frame_next;
     logic [3:0] top, middle, bottom;
 
 `ifdef NO_MODPORT_EXPRESSIONS
@@ -119,6 +121,7 @@ module sobel_acc (
             csr_done        <= 1'b0;
             csr_error       <= 1'b0;
             csr_frame_count <= 32'h0;
+            last_frame      <= 32'h0;
         end else begin
             state           <= state_next;
             wr_ptr          <= wr_ptr_next;
@@ -128,6 +131,7 @@ module sobel_acc (
             csr_done        <= csr_done_next;
             csr_error       <= csr_error_next;
             csr_frame_count <= csr_frame_count_next;
+            last_frame      <= last_frame_next;
         end
     end
 
@@ -138,18 +142,24 @@ module sobel_acc (
             kiekis <= 0;
             line <= 0;
             width <= 0;
-        end else if(!out_full && state == RUN && has_incoming_data) begin
-             if(width == FRAME_W-1 && kiekis < TOTAL_PIXELS)begin
-                 if(line == 2)line <= 0; 
-                else line <= line + 1;
+        end 
+        else if(!out_full && state == RUN && has_incoming_data) begin
 
+            if(shadow_ptr == TOTAL_PIXELS-1)line <= 1;
+            else if(width == FRAME_W-1)begin
+                    if(line == 2)line <= 0; 
+                    else line <= line + 1;
             end
-            if(kiekis < TOTAL_PIXELS)rows[line][width] <= fifo_dout;
-            if(width == FRAME_W-1) width <= 0;
+            
+            if(shadow_ptr == TOTAL_PIXELS-1)width <= 2;
+            else if(width == FRAME_W-1) width <= 0;
             else width <= width + 1;
-            kiekis <= kiekis + 1;
+
+            if(shadow_ptr == TOTAL_PIXELS-1)kiekis <= FRAME_W + 2;
+            else kiekis <= kiekis + 1;
+
+            rows[line][width] <= fifo_dout;
         end
- 
     end
 
 
@@ -187,7 +197,7 @@ module sobel_acc (
                     csr_error_next       = 1'b0;
                     csr_busy_next        = 1'b1;
                     wr_ptr_next          = 32'h0;
-                    //out_wr_en            = 1'b0;
+                    last_frame_next      = 32'h0;
                     state_next           = RUN;
                 end
             end
@@ -197,7 +207,10 @@ module sobel_acc (
             // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
                 if (!out_full && has_incoming_data) begin
-                    
+                    if(last_frame != csr_frame_count && kiekis == FRAME_W + 5)begin
+                        csr_done_next = 1'b0;
+                        last_frame_next = csr_frame_count;
+                    end
                     
                     if(1) begin //Sobelio algoritmas
 
@@ -297,12 +310,17 @@ module sobel_acc (
 
 
                     wr_ptr_next = wr_ptr + 32'h1;
-
-                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+3) begin
-                        csr_busy_next        = 1'b0;
-                        csr_done_next        = 1'b1;
+                    
+                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+2) begin
                         csr_frame_count_next = csr_frame_count + 32'h1;
-                        state_next           = DONE;
+                        wr_ptr_next          = FRAME_W + 2;
+                        csr_done_next        = 1'b1;
+
+                        if(!ctrl_auto_start)begin 
+                            state_next      = DONE;
+                            csr_busy_next   = 1'b0;
+                            
+                        end
                     end
                 end
             
@@ -316,6 +334,7 @@ module sobel_acc (
                     csr_busy_next        = 1'b1;
                     wr_ptr_next          = 32'h0;
                     state_next           = RUN;
+
                 end else begin
                     state_next = IDLE;
                 end
