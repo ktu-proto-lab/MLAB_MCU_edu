@@ -143,7 +143,7 @@ module sobel_acc (
             line <= 0;
             width <= 0;
         end 
-        else if(!out_full && state == RUN && has_incoming_data) begin
+        else if(ctrl_algo_sel == 1 && !out_full && state == RUN && has_incoming_data) begin
 
             if(shadow_ptr == TOTAL_PIXELS-1)line <= 1;
             else if(width == FRAME_W-1)begin
@@ -206,13 +206,16 @@ module sobel_acc (
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
             // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
-                if (!out_full && has_incoming_data) begin
-                    if(last_frame != csr_frame_count && kiekis == FRAME_W + 5)begin
-                        csr_done_next = 1'b0;
-                        last_frame_next = csr_frame_count;
-                    end
+
                     
-                    if(1) begin //Sobelio algoritmas
+                    if(ctrl_algo_sel == 1) begin //Sobelio algoritmas
+
+                        if (!out_full && has_incoming_data) begin
+                            if(last_frame != csr_frame_count && kiekis == FRAME_W + 5)begin
+                                csr_done_next = 1'b0;
+                                last_frame_next = csr_frame_count;
+                            end
+                        end
 
                             if(line == 2) begin
                                 top = 0;
@@ -231,7 +234,7 @@ module sobel_acc (
                             end
                         
 
-                        if (kiekis > TOTAL_PIXELS + 1)begin // paskutine eilute tipo idk gal veikia gal ne
+                        if (kiekis > TOTAL_PIXELS + 1)begin // paskutine eilute
                             out_wr_en=1'b1;
                             top = 0;
                             middle = 1;
@@ -303,23 +306,32 @@ module sobel_acc (
                         end
                         
 
-                        end
                     end else begin 
-                        out_din = fifo_dout;
+                        out_wr_en = 1'b1;
+                        out_din = ~fifo_dout;
                     end
 
 
                     wr_ptr_next = wr_ptr + 32'h1;
-                    
-                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+2) begin
-                        csr_frame_count_next = csr_frame_count + 32'h1;
-                        wr_ptr_next          = FRAME_W + 2;
-                        csr_done_next        = 1'b1;
+                        
+                    if(ctrl_algo_sel == 1) begin
+                        if (wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+2) begin
+                            csr_frame_count_next = csr_frame_count + 32'h1;
+                            wr_ptr_next          = FRAME_W + 2;
+                            csr_done_next        = 1'b1;
 
-                        if(!ctrl_auto_start)begin 
-                            state_next      = DONE;
-                            csr_busy_next   = 1'b0;
-                            
+                            if(!ctrl_auto_start)begin 
+                                state_next      = DONE;
+                                csr_busy_next   = 1'b0;
+
+                            end
+                        end
+                    end else begin
+                        if (wr_ptr + 32'h1 >= TOTAL_PIXELS) begin
+                        csr_busy_next        = 1'b0;
+                        csr_done_next        = 1'b1;
+                        csr_frame_count_next = csr_frame_count + 32'h1;
+                        state_next           = DONE;
                         end
                     end
                 end

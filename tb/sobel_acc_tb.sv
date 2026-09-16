@@ -80,7 +80,7 @@ module sobel_acc_tb;
 
 
     always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n || shadow_ptr == TOTAL_PIXELS-FRAME_W-3)
+        if (!rst_n || fifo_ptr == TOTAL_PIXELS - 1)
             fifo_ptr <= 0;
         else if (fifo_rd_en && !fifo_empty)
             fifo_ptr <= fifo_ptr + 1;
@@ -185,7 +185,7 @@ module sobel_acc_tb;
         repeat(4) @(posedge clk);
 
         // Start with auto_start=1, algo_sel=0 (pixel inversion reference)
-        wb_write(`SOBEL_BASE_ADDR, 32'h1);
+        wb_write(`SOBEL_BASE_ADDR, 32'h3);
         $display("[TB] Started - polling for done...");
             
         for (int framex = 0; framex < frame_max; framex = framex + 1)begin

@@ -17,7 +17,7 @@ int main() {
     GPIO_OUT = 0x0;
 
     // Set auto_start bit in accelerator (algo_sel=0: pixel inversion)
-    SOBEL_CTRL = 0x1;
+    SOBEL_CTRL = 0x3;
 
     // Poll SOBEL_FRAME_COUNT 
     while ((SOBEL_FRAME_COUNT) == 0);
