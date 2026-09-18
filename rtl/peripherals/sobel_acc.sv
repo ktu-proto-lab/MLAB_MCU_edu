@@ -206,8 +206,6 @@ module sobel_acc (
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
             // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
-
-                    
                     if(ctrl_algo_sel == 1) begin //Sobelio algoritmas
 
                         if (!out_full && has_incoming_data) begin
@@ -215,7 +213,7 @@ module sobel_acc (
                                 csr_done_next = 1'b0;
                                 last_frame_next = csr_frame_count;
                             end
-                        end
+                        
 
                             if(line == 2) begin
                                 top = 0;
@@ -303,6 +301,7 @@ module sobel_acc (
                             Gx = rows[top][width-1] + rows[middle][width-1]*2 + rows[bottom][width-1] - rows[top][width-2] - rows[middle][width-2]*2 - rows[bottom][width-2];
                             Gy = rows[top][width-2] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-1];
                             out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
+                        end
                         end
                         
 

@@ -175,7 +175,7 @@ module sobel_acc_tb;
     string       hdr_str, out_path;
     logic [31:0] status, frame_count, frame_max;
 
-    assign frame_max = 10;
+    assign frame_max = 1;
 
     initial begin
 
