@@ -27,7 +27,7 @@ int main(void) {
     GPIO_OUT = 0x0;
 
     // Set auto_start bit in accelerator
-    COMPRESS_CTRL = 0x1;
+    COMPRESS_CTRL = 0x3;
 
     while (!(COMPRESS_STATUS & 0x2));
 
