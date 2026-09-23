@@ -26,7 +26,7 @@ int main() {
     COMPRESS_CTRL = 0x3;
 
     // Poll SOBEL_FRAME_COUNT 
-    while ((SOBEL_FRAME_COUNT) == 0);
+    while ((SOBEL_FRAME_COUNT) < 2);
 
     while (!(COMPRESS_STATUS & 0x2));
 

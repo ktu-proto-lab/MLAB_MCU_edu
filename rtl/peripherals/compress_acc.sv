@@ -154,16 +154,37 @@ module compress_acc (
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
             // Stall both sides when tx_full is asserted (no data consumed or produced).
             RUN: begin
-                if (!fifo_empty && !tx_full) begin
-                    rd_ptr_next = rd_ptr + 32'h1;
-                    if (rd_ptr==0)begin
-                        prev_pixel_next = fifo_dout;
-                        count_next      = 1;  
-                    end
-                    else begin
-                        if(prev_pixel == fifo_dout) begin
-                            if (count==255) begin
+                if(ctrl_auto_start) begin
+                    if (!tx_full && fifo_rd_en) begin
+                        rd_ptr_next = rd_ptr + 32'h1;
+                        if (rd_ptr==0)begin
+                            prev_pixel_next = fifo_dout;
+                            count_next      = 1;  
+                        end
+                        else begin
+                            if(prev_pixel == fifo_dout) begin
+                                if (count==255) begin
 
+                                    saved_count_next = count;
+                                    tx_wr_en = 1;
+                                    tx_din = prev_pixel;
+                                    prev_pixel_next = fifo_dout;
+                                    count_next = 1;
+                                    state_next = SEND_COUNT;
+                                end
+
+                                else begin
+                                    count_next = count + 1;
+
+                                    if (rd_ptr + 1 >= TOTAL_PIXELS) begin
+                                        saved_count_next = count + 1;
+                                        tx_wr_en = 1;
+                                        tx_din = prev_pixel;
+                                        state_next = SEND_COUNT;
+                                    end
+                                end         
+                            end
+                            else begin
                                 saved_count_next = count;
                                 tx_wr_en = 1;
                                 tx_din = prev_pixel;
@@ -171,59 +192,38 @@ module compress_acc (
                                 count_next = 1;
                                 state_next = SEND_COUNT;
                             end
-
-                            else begin
-                                count_next = count + 1;
-
-                                if (rd_ptr + 1 >= TOTAL_PIXELS) begin
-                                    saved_count_next = count + 1;
-                                    tx_wr_en = 1;
-                                    tx_din = prev_pixel;
-                                    state_next = SEND_COUNT;
-                                end
-                            end         
-                        end
-                        else begin
-                            saved_count_next = count;
-                            tx_wr_en = 1;
-                            tx_din = prev_pixel;
-                            prev_pixel_next = fifo_dout;
-                            count_next = 1;
-                            state_next = SEND_COUNT;
                         end
                     end
-
-                    if (rd_ptr + 1 >= TOTAL_PIXELS) begin
-                        csr_busy_next = 1'b0;
-                        csr_done_next = 1'b1;
+                    else if (fifo_empty) begin
+                        saved_count_next = count;
+                        tx_wr_en = 1;
+                        tx_din = prev_pixel;
+                        count_next = 1;
+                        state_next = SEND_COUNT;
                     end
-                end
+                end 
             end
 
             SEND_COUNT: begin
                 if (!tx_full) begin
                     tx_wr_en=1;
-                    tx_din = saved_count;
 
-                    if (rd_ptr >= TOTAL_PIXELS) begin
-                        tx_din = saved_count+1;
-                        state_next = DONE;
+                    if (rd_ptr + 1 >= TOTAL_PIXELS) begin
+                        tx_din = saved_count;
+                        rd_ptr_next = 32'h0;
                     end
-                    else begin
-                        state_next = RUN;
-                    end
+                    else tx_din = saved_count;
+
+                    if(ctrl_auto_start && !fifo_empty) state_next = RUN;
+                    else state_next = DONE;
                 end
             end
 
             // -----------------------------------------------------------------
             DONE: begin
-                if (ctrl_auto_start && !fifo_empty) begin
-                    csr_busy_next = 1'b1;
-                    rd_ptr_next   = 32'h0;
-                    state_next    = RUN;
-                end else begin
-                    state_next = IDLE;
-                end
+                csr_busy_next = 1'b0;
+                csr_done_next = 1'b1;
+                state_next = IDLE;
             end
 
             default: state_next = IDLE;

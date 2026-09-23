@@ -29,9 +29,9 @@ module simple_system_tb;
     localparam int  TX_MAX_BYTES = TOTAL_PIXELS * 2; // worst-case RLE 2x
     localparam real CLK_PERIOD   = 12.5;             // 80 MHz
 
-    localparam string SRC_IMAGE    = "baboon_edge.pgm";
+    localparam string SRC_IMAGE    = "baboon_test.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
-    localparam string OUT_IMG_PATH = "../../tb/out2_images/";
+    localparam string OUT_IMG_PATH = "../../tb/compress_multi/";
 
     parameter string program_folder  = "test/compress_acc";
     parameter string IMEM_1_InitFile = {"../../sw/ibex/", program_folder, "/build/instr_hex_1.mem"};
@@ -39,6 +39,8 @@ module simple_system_tb;
     parameter string DMEM_InitFile   = {"../../sw/ibex/", program_folder, "/build/data_hex.mem"};
 
     parameter MEMInitFile = {"../../sw/ibex/", program_folder, "/build/verilog_hex.v"};
+
+    localparam int FRAME_MAX = 3;
 
     // -------------------------------------------------------------------------
     // Clock / reset
@@ -83,7 +85,7 @@ module simple_system_tb;
     // -------------------------------------------------------------------------
     // TX shadow: capture bytes as they leave the TX FIFO
     // -------------------------------------------------------------------------
-    logic [7:0] tx_shadow [0:TX_MAX_BYTES-1];
+    logic [31:0] tx_shadow [0:FRAME_MAX*TX_MAX_BYTES-1];
     int         tx_ptr;
 
     always_ff @(posedge clk_sys) begin
@@ -106,6 +108,7 @@ module simple_system_tb;
     integer     fd, tmp_val;
     integer     fifo_i = 0;
     string      hdr_str, out_path;
+    int frames = 0;
 
     initial begin
         // ------------------------------------------------------------------
@@ -138,22 +141,34 @@ module simple_system_tb;
         // Allow CPU to boot and reach main()
         #200_000;
 
+        repeat(4) @(posedge clk_sys);
+
         // ------------------------------------------------------------------
         // Inject pixels into the intermediate FIFO one byte at a time,
         // honouring inter_full (backpressure from the FIFO).
         // ------------------------------------------------------------------
-        while (fifo_i < TOTAL_PIXELS) begin
-            if (!dut.inter_full) begin
-                force dut.inter_din   = src_mem[fifo_i];
-                force dut.inter_wr_en = 1'b1;
-                @(posedge clk_sys);
-                fifo_i++;
-            end else begin
-                force dut.inter_wr_en = 1'b0;
-                @(posedge clk_sys);
+        
+
+            while (frames < FRAME_MAX) begin
+                if (!dut.inter_full) begin
+                    force dut.inter_din   = src_mem[fifo_i];
+                    force dut.inter_wr_en = 1'b1;
+                    @(posedge clk_sys);
+                    fifo_i++;
+                end else begin
+                    force dut.inter_wr_en = 1'b0;
+                    @(posedge clk_sys);
+                end
+                if(fifo_i == TOTAL_PIXELS) begin
+                    fifo_i = 0;
+                    frames++;
+                end
             end
-        end
-        @(posedge clk_sys); #1;
+
+        
+        //repeat(4) @(posedge clk_sys);
+
+
         force dut.inter_wr_en = 1'b0;
         release dut.inter_wr_en;
         release dut.inter_din;

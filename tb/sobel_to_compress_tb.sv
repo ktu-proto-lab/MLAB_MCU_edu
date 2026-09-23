@@ -27,12 +27,14 @@ module simple_system_tb;
 
     localparam string SRC_IMAGE    = "baboon.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
-    localparam string OUT_IMG_PATH = "../../tb/out2_images/";
+    localparam string OUT_IMG_PATH = "../../tb/compress_multi/";
 
     parameter string program_folder  = "test/sobel_compress_acc";
     parameter string IMEM_1_InitFile = {"../../sw/ibex/", program_folder, "/build/instr_hex_1.mem"};
     parameter string IMEM_2_InitFile = {"../../sw/ibex/", program_folder, "/build/instr_hex_2.mem"};
     parameter string DMEM_InitFile   = {"../../sw/ibex/", program_folder, "/build/data_hex.mem"};
+
+    localparam int FRAME_MAX = 3;
 
     // BELOW IS ONLY FOR WARNING. Need to either remove M24CS512 from file list or initialize (the later is chosen)
     parameter MEMInitFile = {"../../sw/ibex/",program_folder,"/build/verilog_hex.v"};
@@ -82,7 +84,7 @@ module simple_system_tb;
     logic [7:0] src_mem    [0:TOTAL_PIXELS-1];
     logic [7:0] shadow     [0:TOTAL_PIXELS-1];
     int         shadow_ptr;
-    logic [7:0] tx_shadow [0:TX_MAX_BYTES-1];
+    logic [7:0] tx_shadow [0:FRAME_MAX*TX_MAX_BYTES-1];
     int         tx_ptr;
 
     // -------------------------------------------------------------------------
@@ -110,6 +112,8 @@ module simple_system_tb;
     integer fd, errors, tmp_val;
     integer fifo_i = 0;           // FIFO feeder index - must be module-level (static)
     string  hdr_str, out_path;
+    int frames = 0;
+
 
     initial begin
         // ------------------------------------------------------------------
@@ -146,6 +150,8 @@ module simple_system_tb;
         // Allow startup code (~200 µs = 16 000 cycles) to reach main()
         #200_000;
 
+        repeat(4) @(posedge clk_sys);
+
         // ------------------------------------------------------------------
         // Feed camera FIFO one pixel (byte) at a time, honouring fifo_full.
         // fifo_din and fifo_wr_en are tied to constants in RTL; override
@@ -154,26 +160,23 @@ module simple_system_tb;
         force dut.fifo_din   = src_mem[fifo_i];
         force dut.fifo_wr_en = 1'b1;
         //force dut.inter_wr_en = 1'b1;
-        @(posedge clk_sys);
 
-        while (fifo_i < TOTAL_PIXELS) begin
+        while (frames < FRAME_MAX) begin
             if (!dut.fifo_full && !dut.inter_full) begin
                 force dut.fifo_din   = src_mem[fifo_i];
                 force dut.fifo_wr_en = 1'b1;
-
-
-
                 @(posedge clk_sys);
                 fifo_i++;
             end else begin
                 force dut.fifo_wr_en = 1'b0;
-
-
-                
                 @(posedge clk_sys);
             end
+            if(fifo_i == TOTAL_PIXELS)begin
+                fifo_i = 0;
+                frames++;
+            end
         end
-        @(posedge clk_sys); #1;
+
         force dut.fifo_wr_en = 1'b0;
         //force dut.inter_wr_en = 1'b0;
         //release dut.inter_wr_en;

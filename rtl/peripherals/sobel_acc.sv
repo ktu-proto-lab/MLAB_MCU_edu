@@ -30,9 +30,7 @@ module sobel_acc (
     // Intermediate FIFO - destination (8-bit, one pixel per word)
     output logic       out_wr_en,
     output logic [7:0] out_din,
-    input  logic       out_full,
-
-    input  logic [31:0] shadow_ptr
+    input  logic       out_full
     );
 
     localparam int FRAME_W      = 320;
@@ -143,21 +141,23 @@ module sobel_acc (
             line <= 0;
             width <= 0;
         end 
-        else if(ctrl_algo_sel == 1 && !out_full && state == RUN && has_incoming_data) begin
+        else if(ctrl_algo_sel && !out_full && state == RUN && has_incoming_data) begin
+            if(wr_ptr + 1 == TOTAL_PIXELS + FRAME_W + 2) begin
+                line <= 1;
+                width <= 2;
+                kiekis <= FRAME_W + 2;
+            end 
+            else begin
 
-            if(shadow_ptr == TOTAL_PIXELS-1)line <= 1;
-            else if(width == FRAME_W-1)begin
+            if(width == FRAME_W-1)begin
                     if(line == 2)line <= 0; 
                     else line <= line + 1;
             end
-            
-            if(shadow_ptr == TOTAL_PIXELS-1)width <= 2;
-            else if(width == FRAME_W-1) width <= 0;
+            if(width == FRAME_W-1) width <= 0;
             else width <= width + 1;
 
-            if(shadow_ptr == TOTAL_PIXELS-1)kiekis <= FRAME_W + 2;
-            else kiekis <= kiekis + 1;
-
+            kiekis <= kiekis + 1;
+            end
             rows[line][width] <= fifo_dout;
         end
     end
@@ -206,7 +206,7 @@ module sobel_acc (
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
             // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
-                    if(ctrl_algo_sel == 1) begin //Sobelio algoritmas
+                    if(ctrl_algo_sel) begin //Sobelio algoritmas
 
                         if (!out_full && has_incoming_data) begin
                             if(last_frame != csr_frame_count && kiekis == FRAME_W + 5)begin
@@ -302,19 +302,22 @@ module sobel_acc (
                             Gy = rows[top][width-2] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-1];
                             out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
                         end
+
+                        wr_ptr_next = wr_ptr + 32'h1;
                         end
                         
 
                     end else begin 
                         out_wr_en = 1'b1;
                         out_din = ~fifo_dout;
+                        wr_ptr_next = wr_ptr + 32'h1;
                     end
 
 
-                    wr_ptr_next = wr_ptr + 32'h1;
+                    
                         
-                    if(ctrl_algo_sel == 1) begin
-                        if (wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+2) begin
+                    if(ctrl_algo_sel) begin
+                        if (fifo_rd_en && wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+2) begin
                             csr_frame_count_next = csr_frame_count + 32'h1;
                             wr_ptr_next          = FRAME_W + 2;
                             csr_done_next        = 1'b1;

@@ -135,8 +135,7 @@ module sobel_acc_tb;
         .fifo_rd_en  (fifo_rd_en),
         .out_wr_en   (out_wr_en),
         .out_din     (out_din),
-        .out_full    (out_full),
-        .shadow_ptr  (shadow_ptr)
+        .out_full    (out_full)
     );
 
     // -------------------------------------------------------------------------
@@ -175,7 +174,7 @@ module sobel_acc_tb;
     string       hdr_str, out_path;
     logic [31:0] status, frame_count, frame_max;
 
-    assign frame_max = 1;
+    assign frame_max = 3;
 
     initial begin
 
@@ -262,7 +261,7 @@ module sobel_acc_tb;
             // Poll STATUS.done (bit 1)
 
             if(framex == frame_max - 1)begin 
-                wb_write(`SOBEL_BASE_ADDR, 32'h0);
+                wb_write(`SOBEL_BASE_ADDR, 32'h2);
                 //$display("ball ball ball");
             end
             //$display("%0d maxFrames %0d frames", frame_max, framex);
