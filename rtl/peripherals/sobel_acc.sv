@@ -33,9 +33,9 @@ module sobel_acc (
     input  logic       out_full
     );
 
-    localparam int FRAME_W      = 320;
-    localparam int FRAME_H      = 240;
-    localparam int TOTAL_PIXELS = FRAME_W * FRAME_H; // 320 x 240 = 76800
+    localparam int FRAME_W      = 640;
+    localparam int FRAME_H      = 480;
+    localparam int TOTAL_PIXELS = FRAME_W * FRAME_H; // 320 x 240 = 76800 // 640 x 480 = 307200
 
     typedef enum logic [1:0] {
         IDLE = 2'b00,
@@ -62,7 +62,7 @@ module sobel_acc (
     reg [7:0] rows [0:2][0:FRAME_W-1]; //bitu memory triju eiliu
     logic signed [11:0] Gx;
     logic signed [11:0] Gy;
-    logic unsigned [17:0] kiekis, line, width, last_frame, last_frame_next;
+    logic unsigned [31:0] kiekis, line, width, last_frame, last_frame_next;
     logic [3:0] top, middle, bottom;
 
 `ifdef NO_MODPORT_EXPRESSIONS
@@ -92,7 +92,7 @@ module sobel_acc (
     // Consume from input FIFO only when we can simultaneously write to output FIFO.
     assign fifo_rd_en = (state == RUN) && !fifo_empty && !out_full;
 
-    assign has_incoming_data = (!fifo_empty || (kiekis >= TOTAL_PIXELS && kiekis < TOTAL_PIXELS+FRAME_W+3)) ? 1'b1 : 1'b0; 
+    assign has_incoming_data = (!fifo_empty || (wr_ptr + 1 >= TOTAL_PIXELS && wr_ptr + 1 < TOTAL_PIXELS+FRAME_W+3)) ? 1'b1 : 1'b0; 
 
     // -------------------------------------------------------------------------
     // Wishbone read mux (purely combinational)
@@ -324,7 +324,7 @@ module sobel_acc (
                     
                         
                     if(ctrl_algo_sel) begin
-                        if (fifo_rd_en && wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+2) begin
+                        if (has_incoming_data && wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+2) begin
                             csr_frame_count_next = csr_frame_count + 32'h1;
                             wr_ptr_next          = FRAME_W + 2;
                             csr_done_next        = 1'b1;
