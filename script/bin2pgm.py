@@ -27,8 +27,8 @@ import sys
 from pathlib import Path
 
 
-FRAME_W = 320
-FRAME_H = 240
+FRAME_W = 640
+FRAME_H = 480
 
 
 def decode_rle_frames(data: bytes, target_pixels: int) -> list[bytes]:
@@ -46,8 +46,8 @@ def decode_rle_frames(data: bytes, target_pixels: int) -> list[bytes]:
     data_len = len(data) - 1  # Process complete 2-byte pairs
 
     while i < data_len:
-        value = data[i]
-        count = data[i + 1]
+        value = data[i + 1]
+        count = data[i]
         i += 2
 
         if count == 0:
