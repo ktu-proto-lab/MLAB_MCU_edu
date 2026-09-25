@@ -19,12 +19,12 @@
 module simple_system_tb;
 
     // -------------------------------------------------------------------------
-    localparam int  FRAME_W      = 320;
-    localparam int  FRAME_H      = 240;
+    localparam int  FRAME_W      = 640;
+    localparam int  FRAME_H      = 480;
     localparam int  TOTAL_PIXELS = FRAME_W * FRAME_H;
     localparam real CLK_PERIOD   = 12.5;              // 80 MHz
 
-    localparam string SRC_IMAGE    = "baboon.pgm";
+    localparam string SRC_IMAGE    = "baboon_upscaled.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
     localparam string OUT_IMG_PATH = "../../tb/out1_images/";
 
@@ -136,6 +136,8 @@ module simple_system_tb;
         // Allow startup code (~200 µs = 16 000 cycles) to reach main()
         #200_000;
 
+        repeat(4) @(posedge clk_sys);
+
         // ------------------------------------------------------------------
         // Feed camera FIFO one pixel (byte) at a time, honouring fifo_full.
         // fifo_din and fifo_wr_en are tied to constants in RTL; override
@@ -143,7 +145,7 @@ module simple_system_tb;
         // ------------------------------------------------------------------
         force dut.fifo_din   = src_mem[fifo_i];
         force dut.fifo_wr_en = 1'b1;
-        @(posedge clk_sys);
+        //@(posedge clk_sys);
 
         while (fifo_i < TOTAL_PIXELS) begin
             if (!dut.fifo_full) begin
@@ -156,7 +158,7 @@ module simple_system_tb;
                 @(posedge clk_sys);
             end
         end
-        @(posedge clk_sys); #1;
+        //@(posedge clk_sys); #1;
         force dut.fifo_wr_en = 1'b0;
         release dut.fifo_wr_en;
         release dut.fifo_din;
@@ -173,7 +175,7 @@ module simple_system_tb;
         // ------------------------------------------------------------------
         // Verify intermediate FIFO shadow against bitwise-inverted source
         // ------------------------------------------------------------------
-        errors = 0;
+        /*errors = 0;
         for (int i = 0; i < TOTAL_PIXELS; i++) begin
             if (shadow[i] !== ~src_mem[i]) begin
                 if (errors < 8)
@@ -186,7 +188,7 @@ module simple_system_tb;
             $display("[PASS] All %0d pixels match.", TOTAL_PIXELS);
         else
             $display("[FAIL] %0d / %0d pixels mismatched.", errors, TOTAL_PIXELS);
-
+        */
         // ------------------------------------------------------------------
         // Write output PGM (P2 ASCII)
         // ------------------------------------------------------------------

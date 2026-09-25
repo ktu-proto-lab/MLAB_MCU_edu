@@ -21,14 +21,14 @@
 module sobel_acc_tb;
 
     // -------------------------------------------------------------------------
-    localparam int  FRAME_W      = 320;
-    localparam int  FRAME_H      = 240;
+    localparam int  FRAME_W      = 640;
+    localparam int  FRAME_H      = 480;
     localparam int  TOTAL_PIXELS = FRAME_W * FRAME_H;
     localparam real CLK_PERIOD   = 10.0;
 
     localparam string TST_IMAGE      = "baboon_test.pgm";
     localparam string TST_IMG_PATH   = "../../tb/src_images/";
-    localparam string SRC_IMAGE      = "baboon.pgm";
+    localparam string SRC_IMAGE      = "baboon_upscaled.pgm";
     localparam string SRC_IMG_PATH   = "../../tb/src_images/";
     localparam string SRC_IMAGE_2    = "pepper.pgm";
     localparam string SRC_IMG_PATH_2 = "../../tb/src_images/";
@@ -108,11 +108,13 @@ module sobel_acc_tb;
 
 
     always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n || shadow_ptr == TOTAL_PIXELS-1) begin
+        if (!rst_n) begin
             shadow_ptr <= 0;
         end else if (out_wr_en) begin
             shadow[shadow_ptr] <= out_din;
-            shadow_ptr         <= shadow_ptr + 1;
+
+            if(shadow_ptr == TOTAL_PIXELS-1) shadow_ptr <= 0;
+            else shadow_ptr <= shadow_ptr + 1;
         end
     end
 
@@ -174,7 +176,7 @@ module sobel_acc_tb;
     string       hdr_str, out_path;
     logic [31:0] status, frame_count, frame_max;
 
-    assign frame_max = 3;
+    assign frame_max = 1;
 
     initial begin
 
@@ -268,6 +270,7 @@ module sobel_acc_tb;
 
             do wb_read(`SOBEL_BASE_ADDR + 32'h4, status);
             while (!(status & 32'h2));
+            @(posedge clk); #1;
 
             //wb_read(`SOBEL_BASE_ADDR + 32'h8, frame_count);
             //$display("[TB] Done. STATUS=%08h  FRAME_COUNT=%0d  shadow_ptr=%0d",

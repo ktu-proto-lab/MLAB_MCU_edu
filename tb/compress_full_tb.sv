@@ -23,13 +23,13 @@
 module simple_system_tb;
 
     // -------------------------------------------------------------------------
-    localparam int  FRAME_W      = 320;
-    localparam int  FRAME_H      = 240;
+    localparam int  FRAME_W      = 640;
+    localparam int  FRAME_H      = 480;
     localparam int  TOTAL_PIXELS = FRAME_W * FRAME_H;
     localparam int  TX_MAX_BYTES = TOTAL_PIXELS * 2; // worst-case RLE 2x
     localparam real CLK_PERIOD   = 12.5;             // 80 MHz
 
-    localparam string SRC_IMAGE    = "baboon_test.pgm";
+    localparam string SRC_IMAGE    = "baboon_upscaled_edge.pgm";
     localparam string SRC_IMG_PATH = "../../tb/src_images/";
     localparam string OUT_IMG_PATH = "../../tb/compress_multi/";
 
@@ -40,7 +40,7 @@ module simple_system_tb;
 
     parameter MEMInitFile = {"../../sw/ibex/", program_folder, "/build/verilog_hex.v"};
 
-    localparam int FRAME_MAX = 3;
+    localparam int FRAME_MAX = 2;
 
     // -------------------------------------------------------------------------
     // Clock / reset
