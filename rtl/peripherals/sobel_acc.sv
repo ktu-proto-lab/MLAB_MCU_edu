@@ -209,6 +209,7 @@ module sobel_acc (
             RUN: begin
                     if(ctrl_algo_sel) begin //Sobelio algoritmas
 
+                        // kad sobel_acc_tb pagautu kada baigiasi frame (siaip tai redundant ant kitu tb)
                         if (!out_full && has_incoming_data) begin
                             if(last_frame != csr_frame_count && kiekis == FRAME_W + 5)begin
                                 csr_done_next = 1'b0;
