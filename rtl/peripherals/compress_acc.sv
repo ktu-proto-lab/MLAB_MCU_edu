@@ -204,8 +204,12 @@ module compress_acc (
                                      rd_ptr_next     = rd_ptr + 1;
                                      // Check if this is the last pixel
                                      if (rd_ptr + 1 > TOTAL_PIXELS) begin
-                                         if(fifo_empty)done_pending_next = 1;  // need to flush after reading
-                                         else rd_ptr_next = 0;
+                                         //done_pending_next = 1;
+                                         if(fifo_empty)done_pending_next = 1;
+                                         else begin 
+                                                //rd_ptr_next = 0;
+                                                output_phase_next = 1;
+                                         end
                                      end
                                  end 
 			         else begin
@@ -215,12 +219,17 @@ module compress_acc (
                                      // Do NOT read the new pixel yet; we will after output completes
                                          // If we have reached end, set done_pending so we know to flush later
                                          if (rd_ptr + 1  > TOTAL_PIXELS) begin
+                                            //done_pending_next = 1;
                                             if(fifo_empty)done_pending_next = 1;
-                                            else rd_ptr_next = 0;
+                                            else begin 
+                                                //rd_ptr_next = 0;
+                                                output_phase_next = 1;
+                                            end
                                          end
         	                 end
 			     end
 			 end
+             else if(rd_ptr + 1 > TOTAL_PIXELS)done_pending_next = 1;
         	    end
 
                      // If done_pending is set and we have no pending output, we need to flush
@@ -236,8 +245,9 @@ module compress_acc (
 			 if(done_pending && last_value != next_pixel) run_count_next = 1;
              if(fifo_empty)begin 
                 done_pending_next = 1;
-                run_count_next = 1;
+                //run_count_next = 1;
              end
+             if(rd_ptr + 1 > TOTAL_PIXELS + 1)rd_ptr_next = 1;
                      end
                      else if (output_phase == 2) begin
                          // Output pixel value

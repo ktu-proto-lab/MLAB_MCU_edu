@@ -211,7 +211,7 @@ module sobel_acc (
 
                         // kad sobel_acc_tb pagautu kada baigiasi frame (siaip tai redundant ant kitu tb)
                         if (!out_full && has_incoming_data) begin
-                            if(last_frame != csr_frame_count && kiekis == FRAME_W + 5)begin
+                            if(last_frame != csr_frame_count && wr_ptr == FRAME_W + 5)begin
                                 csr_done_next = 1'b0;
                                 last_frame_next = csr_frame_count;
                             end
@@ -235,80 +235,80 @@ module sobel_acc (
                             end
                         
 
-                        if (kiekis > TOTAL_PIXELS + 1)begin // paskutine eilute
+                        if (wr_ptr > TOTAL_PIXELS + 1)begin // paskutine eilute
           
                             top = 0;
                             middle = 1;
                             bottom = 2;
 
-                            if(kiekis == TOTAL_PIXELS + 2)begin
+                            if(wr_ptr == TOTAL_PIXELS + 2)begin
                                 Gx = rows[middle][width-1] + rows[bottom][width-1]*2 + rows[bottom][width-1] - rows[middle][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-2];
                                 Gy = rows[middle][width-2] + rows[middle][width-2]*2 + rows[middle][width-1] - rows[bottom][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-1];
                             end
-                            else if(kiekis < TOTAL_PIXELS + FRAME_W)begin
+                            else if(wr_ptr < TOTAL_PIXELS + FRAME_W)begin
                                 Gx = rows[middle][width-1] + rows[bottom][width-1]*2 + rows[bottom][width-1] - rows[middle][width-3] - rows[bottom][width-3]*2 - rows[bottom][width-3];
                                 Gy = rows[middle][width-3] + rows[middle][width-2]*2 + rows[middle][width-1] - rows[bottom][width-3] - rows[bottom][width-2]*2 - rows[bottom][width-1];
                             end
-                            else if (kiekis == TOTAL_PIXELS + FRAME_W + 1)begin
+                            else if (wr_ptr == TOTAL_PIXELS + FRAME_W)begin
                                 Gx = rows[middle][FRAME_W-1] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[bottom][FRAME_W-3]*2 - rows[bottom][FRAME_W-3];
                                 Gy = rows[middle][FRAME_W-3] + rows[middle][FRAME_W-2]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-3] - rows[bottom][FRAME_W-2]*2 - rows[bottom][FRAME_W-1];
                             end
-                            else if (kiekis == TOTAL_PIXELS + FRAME_W + 2)begin
+                            else if (wr_ptr == TOTAL_PIXELS + FRAME_W + 1)begin
                                 Gx = rows[middle][FRAME_W-1] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[bottom][FRAME_W-2]*2 - rows[bottom][FRAME_W-2];
                                 Gy = rows[middle][FRAME_W-2] + rows[middle][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-2] - rows[bottom][FRAME_W-1]*2 - rows[bottom][FRAME_W-1];
                             end
                             
                         end
-                        else if(kiekis > FRAME_W*2 && width > 2) begin // main thingy
+                        else if(wr_ptr > FRAME_W*2 && width > 2) begin // main thingy
                       
                             Gx = rows[top][width-1] + rows[middle][width-1]*2 + rows[bottom][width-1] - rows[top][width-3] - rows[middle][width-3]*2 - rows[bottom][width-3];
                             Gy = rows[top][width-3] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-3] - rows[bottom][width-2]*2 - rows[bottom][width-1];
    
                         end
-                        else if (kiekis> FRAME_W + 1 && kiekis < FRAME_W*2 + 2)begin // pirma eilute
+                        else if (wr_ptr> FRAME_W + 1 && wr_ptr < FRAME_W*2 + 2)begin // pirma eilute
               
                             top = 0;
                             middle = 1;
                             bottom = 2;
                             
-                            if(kiekis == FRAME_W + 2)begin
+                            if(wr_ptr == FRAME_W + 2)begin
                                 Gx = rows[top][width-1] + rows[top][width-1]*2 + rows[middle][width-1] - rows[top][width-2] - rows[top][width-2]*2 - rows[middle][width-2];
                                 Gy = rows[top][width-2] + rows[top][width-2]*2 + rows[top][width-1] - rows[middle][width-2] - rows[middle][width-2]*2 - rows[middle][width-1];
                             end
-                            else if(kiekis < FRAME_W*2)begin
+                            else if(wr_ptr < FRAME_W*2)begin
                                 Gx = rows[top][width-1] + rows[top][width-1]*2 + rows[middle][width-1] - rows[top][width-3] - rows[top][width-3]*2 - rows[middle][width-3];
                                 Gy = rows[top][width-3] + rows[top][width-2]*2 + rows[top][width-1] - rows[middle][width-3] - rows[middle][width-2]*2 - rows[middle][width-1];
                             end
-                            else if(kiekis == FRAME_W*2)begin
+                            else if(wr_ptr == FRAME_W*2)begin
                                 Gx = rows[top][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[top][FRAME_W-3] - rows[top][FRAME_W-3]*2 - rows[middle][FRAME_W-3];
                                 Gy = rows[top][FRAME_W-3] + rows[top][FRAME_W-2]*2 + rows[top][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[middle][FRAME_W-2]*2 - rows[middle][FRAME_W-1];         
                             end
-                            else if (kiekis == FRAME_W*2+1)begin
+                            else if (wr_ptr == FRAME_W*2+1)begin
                                 Gx = rows[top][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[top][FRAME_W-2] - rows[top][FRAME_W-2]*2 - rows[middle][FRAME_W-2];
                                 Gy = rows[top][FRAME_W-2] + rows[top][FRAME_W-1]*2 + rows[top][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[middle][FRAME_W-1]*2 - rows[middle][FRAME_W-1];
                             end
    
                         end
-                        else if (kiekis > FRAME_W*2 && width == 0)begin // priespaskutinis eilutes pixel
+                        else if (wr_ptr > FRAME_W*2 && width == 0)begin // priespaskutinis eilutes pixel
 
                             Gx = rows[bottom][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-3] - rows[top][FRAME_W-3]*2 - rows[middle][FRAME_W-3];
                             Gy = rows[bottom][FRAME_W-3] + rows[bottom][FRAME_W-2]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[middle][FRAME_W-2]*2 - rows[middle][FRAME_W-1];
 
                         end
-                        else if (kiekis > FRAME_W*2 && width == 1)begin // paskutinis eilutes pixel
+                        else if (wr_ptr > FRAME_W*2 && width == 1)begin // paskutinis eilutes pixel
 
                             Gx = rows[bottom][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-2] - rows[top][FRAME_W-2]*2 - rows[middle][FRAME_W-2];
                             Gy = rows[bottom][FRAME_W-2] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[middle][FRAME_W-1]*2 - rows[middle][FRAME_W-1];
 
                         end
-                        else if(kiekis > FRAME_W*2 && width == 2) begin // pirmas eilutes pixel
+                        else if(wr_ptr > FRAME_W*2 && width == 2) begin // pirmas eilutes pixel
 
                             Gx = rows[top][width-1] + rows[middle][width-1]*2 + rows[bottom][width-1] - rows[top][width-2] - rows[middle][width-2]*2 - rows[bottom][width-2];
                             Gy = rows[top][width-2] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-1];
                             
                         end
 
-                        if(kiekis > FRAME_W + 1)out_wr_en = 1'b1;
+                        if(wr_ptr > FRAME_W + 1)out_wr_en = 1'b1;
                         out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
 
                         wr_ptr_next = wr_ptr + 32'h1;
@@ -325,7 +325,7 @@ module sobel_acc (
                     
                         
                     if(ctrl_algo_sel) begin
-                        if (has_incoming_data && wr_ptr + 32'h1 >= TOTAL_PIXELS+FRAME_W+2) begin
+                        if (has_incoming_data && wr_ptr_next >= TOTAL_PIXELS+FRAME_W+2) begin
                             csr_frame_count_next = csr_frame_count + 32'h1;
                             wr_ptr_next          = FRAME_W + 2;
                             csr_done_next        = 1'b1;
