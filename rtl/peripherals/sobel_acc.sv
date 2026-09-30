@@ -59,11 +59,18 @@ module sobel_acc (
     // -------------------------------------------------------------------------
     logic [31:0] wb_wdata;
     logic [31:0] wb_rdata;
+
+    // -------------------------------------------------------------------------
+    // Sobel
+    // -------------------------------------------------------------------------
     reg [7:0] rows [0:2][0:FRAME_W-1]; //bitu memory triju eiliu
-    logic signed [11:0] Gx;
-    logic signed [11:0] Gy;
-    logic unsigned [31:0] kiekis, line, width, last_frame, last_frame_next;
-    logic [3:0] top, middle, bottom;
+    logic signed [10:0] Gx, Gy;
+    logic [11:0] G_sum;
+    logic [31:0] line, width;
+    logic [2:0] top, middle, bottom;
+    
+    // uncomment if running sobel_acc_tb with multiple images
+    //logic last_frame, last_frame_next;
 
 `ifdef NO_MODPORT_EXPRESSIONS
     assign wb_wdata = wb.dat_m;
@@ -119,7 +126,7 @@ module sobel_acc (
             csr_done        <= 1'b0;
             csr_error       <= 1'b0;
             csr_frame_count <= 32'h0;
-            last_frame      <= 32'h0;
+            //last_frame      <= 32'h0;
         end else begin
             state           <= state_next;
             wr_ptr          <= wr_ptr_next;
@@ -129,7 +136,7 @@ module sobel_acc (
             csr_done        <= csr_done_next;
             csr_error       <= csr_error_next;
             csr_frame_count <= csr_frame_count_next;
-            last_frame      <= last_frame_next;
+            //last_frame      <= last_frame_next;
         end
     end
 
@@ -137,17 +144,10 @@ module sobel_acc (
 
     always_ff @(posedge wb.clk or negedge wb.rst) begin
         if (!wb.rst) begin
-            kiekis <= 0;
             line <= 0;
             width <= 0;
         end 
         else if(ctrl_algo_sel && !out_full && state == RUN && has_incoming_data) begin
-            if(wr_ptr + 1 == TOTAL_PIXELS + FRAME_W + 2) begin
-                line <= 1;
-                width <= 2;
-                kiekis <= FRAME_W + 2;
-            end 
-            else begin
 
             if (width == FRAME_W-1) begin
                 if(line == 2)line <= 0; 
@@ -157,14 +157,16 @@ module sobel_acc (
             if(width == FRAME_W-1) width <= 0;
             else width <= width + 1;
 
-            kiekis <= kiekis + 1;
-            end
             rows[line][width] <= fifo_dout;
         end
     end
 
 
-   
+    assign out_wr_en = ctrl_algo_sel ? ((wr_ptr > FRAME_W + 1) && !out_full && has_incoming_data && state==RUN) : state==RUN; 
+    
+    assign out_din = ctrl_algo_sel ? ((G_sum > 255) ? 255 : G_sum) : ~fifo_dout;
+
+    
     // -------------------------------------------------------------------------
     // FSM combinational
     // -------------------------------------------------------------------------
@@ -179,9 +181,13 @@ module sobel_acc (
         csr_error_next       = csr_error;
         csr_frame_count_next = csr_frame_count;
 
+        Gx = 0;
+        Gy = 0;
+        G_sum = 0;
+
         // Combinational output defaults
-        out_wr_en = 1'b0;
-        out_din   = 8'h0;
+        //out_wr_en = 1'b0;
+        //out_din   = 8'h0;
         
         // CPU write to CTRL register: update config bits, clear done
         if (wb_wr && wb.adr[3:2] == 2'h0) begin
@@ -198,7 +204,7 @@ module sobel_acc (
                     csr_error_next       = 1'b0;
                     csr_busy_next        = 1'b1;
                     wr_ptr_next          = 32'h0;
-                    last_frame_next      = 32'h0;
+                    //last_frame_next      = 32'h0;
                     state_next           = RUN;
                 end
             end
@@ -209,13 +215,16 @@ module sobel_acc (
             RUN: begin
                     if(ctrl_algo_sel) begin //Sobelio algoritmas
 
-                        // kad sobel_acc_tb pagautu kada baigiasi frame (siaip tai redundant ant kitu tb)
+                        
                         if (!out_full && has_incoming_data) begin
+
+                        // kad sobel_acc_tb pagautu kada baigiasi frame (siaip tai redundant ant kitu tb)
+                        /*
                             if(last_frame != csr_frame_count && wr_ptr == FRAME_W + 5)begin
                                 csr_done_next = 1'b0;
                                 last_frame_next = csr_frame_count;
                             end
-                        
+                        */
                             
 
                             if(line == 2) begin
@@ -308,16 +317,20 @@ module sobel_acc (
                             
                         end
 
-                        if(wr_ptr > FRAME_W + 1)out_wr_en = 1'b1;
-                        out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
+                        
+                        //if(wr_ptr > FRAME_W + 1)out_wr_en = 1'b1;
+                        
+                        G_sum = (Gx[10] ? -Gx : Gx) + (Gy[10] ? -Gy : Gy);
+
+                        //out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
 
                         wr_ptr_next = wr_ptr + 32'h1;
                         end
                         
 
                     end else begin 
-                        out_wr_en = 1'b1;
-                        out_din = ~fifo_dout;
+                        //out_wr_en = 1'b1;
+                        //out_din = ~fifo_dout;
                         wr_ptr_next = wr_ptr + 32'h1;
                     end
 
@@ -328,11 +341,15 @@ module sobel_acc (
                         if (has_incoming_data && wr_ptr_next >= TOTAL_PIXELS+FRAME_W+2) begin
                             csr_frame_count_next = csr_frame_count + 32'h1;
                             wr_ptr_next          = FRAME_W + 2;
-                            csr_done_next        = 1'b1;
+
+                            //csr_done_next        = 1'b1;
+
+                            
 
                             if(!ctrl_auto_start)begin 
                                 state_next      = DONE;
                                 csr_busy_next   = 1'b0;
+                                csr_done_next   = 1'b1;
 
                             end
                         end
