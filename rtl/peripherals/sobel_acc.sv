@@ -63,7 +63,8 @@ module sobel_acc (
     // -------------------------------------------------------------------------
     // Sobel
     // -------------------------------------------------------------------------
-    reg [7:0] rows [0:2][0:FRAME_W-1]; //bitu memory triju eiliu
+    reg [7:0] rows [0:1][0:FRAME_W-1];
+    logic [7:0] run1, run2, run3;
     logic signed [10:0] Gx, Gy;
     logic [11:0] G_sum;
     logic [31:0] line, width;
@@ -140,24 +141,30 @@ module sobel_acc (
         end
     end
 
-
-
     always_ff @(posedge wb.clk or negedge wb.rst) begin
         if (!wb.rst) begin
+            run1 <= 0;
+            run2 <= 0;
+            run3 <= 0;
             line <= 0;
             width <= 0;
         end 
         else if(ctrl_algo_sel && !out_full && state == RUN && has_incoming_data) begin
 
             if (width == FRAME_W-1) begin
-                if(line == 2)line <= 0; 
+                if(line == 1)line <= 0; 
                 else line <= line + 1;
             end
 
-            if(width == FRAME_W-1) width <= 0;
+            if(width == FRAME_W-1 || wr_ptr == 2) width <= 0;
             else width <= width + 1;
 
-            rows[line][width] <= fifo_dout;
+            rows[line][width] <= run1;
+
+            run1 <= run2;
+            run2 <= run3;
+            run3 <= fifo_dout;
+
         end
     end
 
@@ -226,111 +233,81 @@ module sobel_acc (
                             end
                         */
                             
-
-                            if(line == 2) begin
+                            if(line == 0) begin
                                 top = 0;
-                                middle = 1;
-                                bottom = 2;
-                            end
-                            else if(line == 0) begin
-                                top = 1;
-                                middle = 2;
-                                bottom = 0;
+                                bottom = 1;
                             end
                             else begin
-                                top = 2;
-                                middle = 0;
-                                bottom = 1;
+                                top = 1;
+                                bottom = 0;
                             end
                         
 
-                        if (wr_ptr > TOTAL_PIXELS + 1)begin // paskutine eilute
+                        if(wr_ptr > TOTAL_PIXELS + 1)begin // paskutine eilute
           
                             top = 0;
-                            middle = 1;
-                            bottom = 2;
+                            bottom = 1;
 
                             if(wr_ptr == TOTAL_PIXELS + 2)begin
-                                Gx = rows[middle][width-1] + rows[bottom][width-1]*2 + rows[bottom][width-1] - rows[middle][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-2];
-                                Gy = rows[middle][width-2] + rows[middle][width-2]*2 + rows[middle][width-1] - rows[bottom][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-1];
+                                Gx = rows[top][1] + rows[bottom][1]*2 + rows[bottom][1]  - rows[top][0] - rows[bottom][0]*2 - rows[bottom][0];
+                                Gy = rows[top][0] + rows[top][0]*2 + rows[top][1] - rows[bottom][0] - rows[bottom][0]*2 - rows[bottom][1];
                             end
-                            else if(wr_ptr < TOTAL_PIXELS + FRAME_W)begin
-                                Gx = rows[middle][width-1] + rows[bottom][width-1]*2 + rows[bottom][width-1] - rows[middle][width-3] - rows[bottom][width-3]*2 - rows[bottom][width-3];
-                                Gy = rows[middle][width-3] + rows[middle][width-2]*2 + rows[middle][width-1] - rows[bottom][width-3] - rows[bottom][width-2]*2 - rows[bottom][width-1];
-                            end
-                            else if (wr_ptr == TOTAL_PIXELS + FRAME_W)begin
-                                Gx = rows[middle][FRAME_W-1] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[bottom][FRAME_W-3]*2 - rows[bottom][FRAME_W-3];
-                                Gy = rows[middle][FRAME_W-3] + rows[middle][FRAME_W-2]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-3] - rows[bottom][FRAME_W-2]*2 - rows[bottom][FRAME_W-1];
+                            else if(wr_ptr <= TOTAL_PIXELS + FRAME_W)begin
+                                Gx = rows[top][width+2] + rows[bottom][width+2]*2 + rows[bottom][width+2] - rows[top][width] - rows[bottom][width]*2 - rows[bottom][width];
+                                Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+2] - rows[bottom][width] - rows[bottom][width+1]*2 - rows[bottom][width+2];
                             end
                             else if (wr_ptr == TOTAL_PIXELS + FRAME_W + 1)begin
-                                Gx = rows[middle][FRAME_W-1] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[bottom][FRAME_W-2]*2 - rows[bottom][FRAME_W-2];
-                                Gy = rows[middle][FRAME_W-2] + rows[middle][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-2] - rows[bottom][FRAME_W-1]*2 - rows[bottom][FRAME_W-1];
+                                Gx = rows[top][width+1] + rows[top][width+1]*2 + rows[bottom][width+1] - rows[top][width] - rows[top][width]*2 - rows[bottom][width];
+                                Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+1] - rows[bottom][width] - rows[bottom][width+1]*2 - rows[bottom][width+1];
                             end
                             
                         end
-                        else if(wr_ptr > FRAME_W*2 && width > 2) begin // main thingy
-                      
-                            Gx = rows[top][width-1] + rows[middle][width-1]*2 + rows[bottom][width-1] - rows[top][width-3] - rows[middle][width-3]*2 - rows[bottom][width-3];
-                            Gy = rows[top][width-3] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-3] - rows[bottom][width-2]*2 - rows[bottom][width-1];
+                        else if(wr_ptr > FRAME_W*2 && width < FRAME_W-2) begin // main thingy
+
+                            Gx = rows[top][width+2] + rows[bottom][width+2]*2 + run3 - rows[top][width] - rows[bottom][width]*2 - run1;
+                            Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+2] - run1 - run2*2 - run3; 
    
                         end
                         else if (wr_ptr> FRAME_W + 1 && wr_ptr < FRAME_W*2 + 2)begin // pirma eilute
               
                             top = 0;
-                            middle = 1;
-                            bottom = 2;
+                            bottom = 1;
                             
                             if(wr_ptr == FRAME_W + 2)begin
-                                Gx = rows[top][width-1] + rows[top][width-1]*2 + rows[middle][width-1] - rows[top][width-2] - rows[top][width-2]*2 - rows[middle][width-2];
-                                Gy = rows[top][width-2] + rows[top][width-2]*2 + rows[top][width-1] - rows[middle][width-2] - rows[middle][width-2]*2 - rows[middle][width-1];
+                                Gx = rows[top][1] + rows[top][1]*2 + run3 - rows[top][0] - rows[top][0]*2 - run2;
+                                Gy = rows[top][1] + rows[top][0]*2 + rows[top][0] - run2 - run2*2 - run3;
                             end
-                            else if(wr_ptr < FRAME_W*2)begin
-                                Gx = rows[top][width-1] + rows[top][width-1]*2 + rows[middle][width-1] - rows[top][width-3] - rows[top][width-3]*2 - rows[middle][width-3];
-                                Gy = rows[top][width-3] + rows[top][width-2]*2 + rows[top][width-1] - rows[middle][width-3] - rows[middle][width-2]*2 - rows[middle][width-1];
-                            end
-                            else if(wr_ptr == FRAME_W*2)begin
-                                Gx = rows[top][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[top][FRAME_W-3] - rows[top][FRAME_W-3]*2 - rows[middle][FRAME_W-3];
-                                Gy = rows[top][FRAME_W-3] + rows[top][FRAME_W-2]*2 + rows[top][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[middle][FRAME_W-2]*2 - rows[middle][FRAME_W-1];         
+                            else if(wr_ptr <= FRAME_W*2)begin
+                                Gx = rows[top][width+2] + rows[top][width+2]*2 + run3 - rows[top][width] - rows[top][width]*2 - run1;
+                                Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+2] - run1 - run2*2 - run3;
                             end
                             else if (wr_ptr == FRAME_W*2+1)begin
-                                Gx = rows[top][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[top][FRAME_W-2] - rows[top][FRAME_W-2]*2 - rows[middle][FRAME_W-2];
-                                Gy = rows[top][FRAME_W-2] + rows[top][FRAME_W-1]*2 + rows[top][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[middle][FRAME_W-1]*2 - rows[middle][FRAME_W-1];
+                                Gx = rows[top][width+1] + rows[top][width+1]*2 + run2 - rows[top][width] - rows[top][width]*2 - run1;
+                                Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+1] - run1 - run2*2 - run2;
                             end
    
                         end
-                        else if (wr_ptr > FRAME_W*2 && width == 0)begin // priespaskutinis eilutes pixel
+                        else if (wr_ptr > FRAME_W*2 && width == FRAME_W-2)begin // paskutinis eilutes pixel
 
-                            Gx = rows[bottom][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-3] - rows[top][FRAME_W-3]*2 - rows[middle][FRAME_W-3];
-                            Gy = rows[bottom][FRAME_W-3] + rows[bottom][FRAME_W-2]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-3] - rows[middle][FRAME_W-2]*2 - rows[middle][FRAME_W-1];
-
-                        end
-                        else if (wr_ptr > FRAME_W*2 && width == 1)begin // paskutinis eilutes pixel
-
-                            Gx = rows[bottom][FRAME_W-1] + rows[top][FRAME_W-1]*2 + rows[middle][FRAME_W-1] - rows[bottom][FRAME_W-2] - rows[top][FRAME_W-2]*2 - rows[middle][FRAME_W-2];
-                            Gy = rows[bottom][FRAME_W-2] + rows[bottom][FRAME_W-1]*2 + rows[bottom][FRAME_W-1] - rows[middle][FRAME_W-2] - rows[middle][FRAME_W-1]*2 - rows[middle][FRAME_W-1];
+                            Gx = rows[top][width+1] + rows[bottom][width+1]*2 + run2 - rows[top][width] - rows[bottom][width]*2 - run1;
+                            Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+1] - run1 - run2*2 - run2;
 
                         end
-                        else if(wr_ptr > FRAME_W*2 && width == 2) begin // pirmas eilutes pixel
+                        else if(wr_ptr > FRAME_W*2 && width == FRAME_W-1) begin // pirmas eilutes pixel
 
-                            Gx = rows[top][width-1] + rows[middle][width-1]*2 + rows[bottom][width-1] - rows[top][width-2] - rows[middle][width-2]*2 - rows[bottom][width-2];
-                            Gy = rows[top][width-2] + rows[top][width-2]*2 + rows[top][width-1] - rows[bottom][width-2] - rows[bottom][width-2]*2 - rows[bottom][width-1];
+                            Gx = rows[bottom][1] + rows[top][1]*2 + run3 - rows[bottom][0] - rows[top][0]*2 - run2;
+                            Gy = rows[bottom][0] + rows[bottom][0]*2 + rows[bottom][1] - run2 - run2*2 - run3;
                             
                         end
-
                         
-                        //if(wr_ptr > FRAME_W + 1)out_wr_en = 1'b1;
                         
                         G_sum = (Gx[10] ? -Gx : Gx) + (Gy[10] ? -Gy : Gy);
-
-                        //out_din = ((((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy)) > 255) ? 255: ((Gx < 0) ? -Gx : Gx) + ((Gy < 0) ? -Gy : Gy);
 
                         wr_ptr_next = wr_ptr + 32'h1;
                         end
                         
 
                     end else begin 
-                        //out_wr_en = 1'b1;
-                        //out_din = ~fifo_dout;
                         wr_ptr_next = wr_ptr + 32'h1;
                     end
 
