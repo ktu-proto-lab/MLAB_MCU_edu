@@ -5,7 +5,7 @@
     * Image Processing Accelerator - Wishbone Slave
   Description:
     * Wishbone-mapped accelerator that reads pixels one byte at a time from the
-    * camera FIFO, processes them, and writes the result one byte at a time to
+    * sobel FIFO, processes them, and writes the result one byte at a time to
     * an intermediate FIFO consumed by the compression accelerator.
     *
     * Register map (word-aligned, byte offsets):
@@ -33,6 +33,7 @@ module sobel_acc (
     input  logic       out_full
     );
 
+    // output image size regulate in tb
     localparam int TOTAL_PIXELS = 76800; // 320 x 240
 
     typedef enum logic [1:0] {
@@ -164,8 +165,9 @@ module sobel_acc (
             RUN: begin
                 if (!fifo_empty && !out_full) begin
                     out_wr_en = 1'b1;
-                    
-                    out_din = ctrl_algo_sel ? fifo_dout : ~fifo_dout;
+
+
+                    out_din = fifo_dout;
 
                     wr_ptr_next = wr_ptr + 32'h1;
 

@@ -21,9 +21,13 @@
 module sobel_acc_tb;
 
     // -------------------------------------------------------------------------
-    localparam int  FRAME_W      = 320;
-    localparam int  FRAME_H      = 240;
-    localparam int  TOTAL_PIXELS = FRAME_W * FRAME_H;
+    localparam int  IN_FRAME_W      = 320;
+    localparam int  IN_FRAME_H      = 240;
+    localparam int  TOTAL_PIXELS = IN_FRAME_W * IN_FRAME_H; //76800
+    
+    localparam int  OUT_FRAME_W      = 320;
+    localparam int  OUT_FRAME_H      = 240;
+
     localparam real CLK_PERIOD   = 10.0;
 
     localparam string SRC_IMAGE    = "baboon.pgm";
@@ -81,7 +85,7 @@ module sobel_acc_tb;
 
     assign out_full = 1'b0;
 
-    logic [7:0] shadow [0:TOTAL_PIXELS-1];
+    logic [7:0] shadow [0:OUT_FRAME_W*OUT_FRAME_H-1];
     int         shadow_ptr;
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -97,7 +101,7 @@ module sobel_acc_tb;
     // Simulation timeout watchdog
     // -------------------------------------------------------------------------
     initial begin
-        #10_000_000; // 10 ms @ 100 MHz - far more than one frame needs
+        #50_000_000; // 10 ms @ 100 MHz - far more than one frame needs
         $fatal(1, "[TB] Simulation timeout at %0t ns", $time);
     end
 
@@ -196,8 +200,8 @@ module sobel_acc_tb;
         if (!fd) begin
             $display("[TB] Cannot open %s", out_path);
         end else begin
-            $fwrite(fd, "P2\n# Output\n%0d %0d\n255\n", FRAME_W, FRAME_H);
-            for (int i = 0; i < TOTAL_PIXELS; i++)
+            $fwrite(fd, "P2\n# Output\n%0d %0d\n255\n", OUT_FRAME_W, OUT_FRAME_H);
+            for (int i = 0; i < shadow_ptr; i++)
                 $fwrite(fd, "%0d\n", shadow[i]);
             $fclose(fd);
             $display("[TB] Output written to %s", out_path);
