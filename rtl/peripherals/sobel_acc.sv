@@ -220,10 +220,9 @@ module sobel_acc (
             // FWFT FIFO: fifo_dout is valid whenever fifo_empty=0.
             // Stall when either FIFO is not ready (fifo_rd_en handles both).
             RUN: begin
-                    if(ctrl_algo_sel) begin //Sobelio algoritmas
+                    if(!out_full && has_incoming_data) begin //Sobelio algoritmas
 
-                        
-                        if (!out_full && has_incoming_data) begin
+                        if (ctrl_algo_sel) begin
 
                         // kad sobel_acc_tb pagautu kada baigiasi frame (siaip tai redundant ant kitu tb)
                         /*
@@ -303,43 +302,41 @@ module sobel_acc (
                         
                         G_sum = (Gx[10] ? -Gx : Gx) + (Gy[10] ? -Gy : Gy);
 
-                        wr_ptr_next = wr_ptr + 32'h1;
-                        end
-                        
+     
 
-                    end else begin 
-                        wr_ptr_next = wr_ptr + 32'h1;
-                    end
-
-
-                    
-                        
-                    if(ctrl_algo_sel) begin
-                        if (has_incoming_data && wr_ptr_next >= TOTAL_PIXELS+FRAME_W+2) begin
+                        if (wr_ptr_next >= TOTAL_PIXELS+FRAME_W+1) begin
                             csr_frame_count_next = csr_frame_count + 32'h1;
                             wr_ptr_next          = FRAME_W + 2;
 
                             //csr_done_next        = 1'b1;
 
-                            
-
                             if(!ctrl_auto_start)begin 
                                 state_next      = DONE;
                                 csr_busy_next   = 1'b0;
                                 csr_done_next   = 1'b1;
-
                             end
+
                         end
+                        else wr_ptr_next = wr_ptr + 32'h1;
+
                     end else begin
+
                         if (wr_ptr + 32'h1 >= TOTAL_PIXELS) begin
                         csr_busy_next        = 1'b0;
                         csr_done_next        = 1'b1;
                         csr_frame_count_next = csr_frame_count + 32'h1;
                         state_next           = DONE;
                         end
+
+                        wr_ptr_next = wr_ptr + 32'h1;
+
                     end
+
+                        
+
+                    end
+
                 end
-            
 
             // -----------------------------------------------------------------
             DONE: begin
