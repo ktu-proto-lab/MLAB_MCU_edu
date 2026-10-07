@@ -10,7 +10,7 @@
     *
     * Register map (word-aligned, byte offsets):
     *   0x00  CTRL        R/W  bit[0]: auto_start  - start automatically when FIFO is non-empty
-    *                          bit[1]: algo_sel    - 0: inversion (default)  1: Sobel (student impl)
+    *                          bit[1]: algo_sel    - 0: idk
     *   0x04  STATUS      RO   bit[0]: busy
     *                          bit[1]: done        - High for one cycle after a frame is finished being processed
     *                          bit[2]: error       - Currently unused
@@ -19,7 +19,7 @@
     *   One pixel (1 byte) is consumed from the input FIFO and one processed pixel
     *   is written to the output FIFO per clock cycle when both FIFOs are ready.
 */
-module sobel_acc (
+module interpol_acc (
     wb_if.slave  wb,
 
     // Camera FIFO - source (FWFT, 8-bit, one pixel per word)

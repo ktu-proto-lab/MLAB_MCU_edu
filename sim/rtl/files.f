@@ -5,8 +5,6 @@
 ../../rtl/pdk/RM_IHPSG13_1P_1024x32_c2_bm_bist.v
 ../../rtl/pdk/RM_IHPSG13_1P_core_behavioral_bm_bist.v
 
-// ../../rtl/pdk/ixc013g2_iocell.v
-
 ../../rtl/primitives/prim_buf.sv
 ../../rtl/primitives/prim_generic_buf.sv
 
@@ -57,6 +55,7 @@
 ../../rtl/peripherals/uart.sv
 ../../rtl/peripherals/sobel_acc.sv
 ../../rtl/peripherals/compress_acc.sv
+../../rtl/peripherals/interpol_acc.sv
 
 ../../deps/camera_fifo/rtl/verilog/simple_dpram_sclk.v
 ../../deps/camera_fifo/rtl/verilog/fifo.v

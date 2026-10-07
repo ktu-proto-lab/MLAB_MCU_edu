@@ -22,6 +22,7 @@ module ibex_simple_system #(
   output  logic [`GPIO_IOS-1:0] gpio_o,
   output  logic [`GPIO_IOS-1:0] gpio_oe
 
+  //input   logic
   // input   logic   scan_en,
   // input   logic   scan_in,
   // output  logic   scan_out
@@ -70,7 +71,7 @@ module ibex_simple_system #(
   //==================================================
 
   localparam int NUM_MASTERS        = 3;
-  localparam int NUM_SLAVES         = 8;
+  localparam int NUM_SLAVES         = 9;
 
   //==================================================
   // Memory mapped device base addresses
@@ -104,6 +105,9 @@ module ibex_simple_system #(
 
   localparam [31:0] compress_base_addr = `COMPRESS_BASE_ADDR;
   localparam [31:0] compress_size      = 'h0C; // CTRL, STATUS, COMPRESSED_SIZE
+
+  localparam [31:0] interpol_base_addr = `INTERPOL_BASE_ADDR;
+  localparam [31:0] interpol_size      = 'h0C; // CTRL, STATUS, FRAME_COUNT
 
   //==================================================
   // Instantiate modules
@@ -276,6 +280,11 @@ module ibex_simple_system #(
   logic       inter_full,  inter_empty;
   logic [7:0] inter_din,   inter_dout;
 
+  // IP FIFO signals
+  logic       ip_wr_en, ip_rd_en;
+  logic       ip_full,  ip_empty;
+  logic [7:0] ip_din,   ip_dout;
+
   // TX FIFO signals
   logic       tx_wr_en,  tx_rd_en;
   logic       tx_full,   tx_empty;
@@ -297,7 +306,7 @@ module ibex_simple_system #(
   assign fifo_din   = 8'h0;
   assign fifo_wr_en = 1'b0;
 
-  // Intermediate FIFO: sobel_acc writes processed pixels, compress_acc reads
+  // Intermediate FIFO: sobel_acc writes processed pixels, interpol_acc reads
   fifo_fwft #(.DATA_WIDTH(8), .DEPTH_WIDTH(10)) u_inter_fifo (
       .clk   (clk_sys),
       .rst   (~rst_sync_n),
@@ -307,6 +316,18 @@ module ibex_simple_system #(
       .dout  (inter_dout),
       .full  (inter_full),
       .empty (inter_empty)
+  );
+
+  // IP FIFO: interpol_acc writes processed pixels, compress_acc reads
+  fifo_fwft #(.DATA_WIDTH(8), .DEPTH_WIDTH(10)) u_ip_fifo (
+      .clk   (clk_sys),
+      .rst   (~rst_sync_n),
+      .din   (ip_din),
+      .wr_en (ip_wr_en),
+      .rd_en (ip_rd_en),
+      .dout  (ip_dout),
+      .full  (ip_full),
+      .empty (ip_empty)
   );
 
   // TX FIFO: compress_acc writes compressed bytes, FTDI reads
@@ -328,9 +349,9 @@ module ibex_simple_system #(
   compress_acc u_compress_acc (
       .wb         (wbs[7]),
 
-      .fifo_empty (inter_empty),
-      .fifo_dout  (inter_dout),
-      .fifo_rd_en (inter_rd_en),
+      .fifo_empty (ip_empty),
+      .fifo_dout  (ip_dout),
+      .fifo_rd_en (ip_rd_en),
 
       .tx_wr_en   (tx_wr_en),
       .tx_din     (tx_din),
@@ -350,6 +371,19 @@ module ibex_simple_system #(
       .out_full   (inter_full)
   );
 
+    // Image interpolation accelerator
+  interpol_acc u_interpol_acc (
+      .wb         (wbs[8]),
+
+      .fifo_empty (inter_empty),
+      .fifo_dout  (inter_dout),
+      .fifo_rd_en (inter_rd_en),
+
+      .out_wr_en  (ip_wr_en),
+      .out_din    (ip_din),
+      .out_full   (ip_full)
+  );
+
   //==================================================
   // Shared or crossbar interconnect
   //==================================================
@@ -357,8 +391,8 @@ module ibex_simple_system #(
        wb_interconnect_sharedbus
          #(.numm      (NUM_MASTERS),
            .nums      (NUM_SLAVES),
-           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, sobel_base_addr, compress_base_addr}),
-           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, sobel_size, compress_size}))
+           .base_addr ('{imem_base_addr, dmem_base_addr, gpio_base_addr, i2c_base_addr, pit_base_addr, uart_base_addr, sobel_base_addr, compress_base_addr, interpol_base_addr}),
+           .size      ('{imem_size, dmem_size, gpio_size, i2c_size, pit_size, uart_size, sobel_size, compress_size, interpol_size}))
        u_wb_interconnect
          (.wbm, .wbs);
 endmodule

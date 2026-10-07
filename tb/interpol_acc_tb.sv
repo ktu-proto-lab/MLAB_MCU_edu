@@ -2,7 +2,7 @@
   Contributors:
     * Dovydas Liutkus (dovliu2@ktu.lt)
   Description:
-    * Isolated testbench for sobel_acc.
+    * Isolated testbench for interpol_acc.
     *
     * Workflow:
     *   1. Set SRC_IMAGE to one of the P2 PGMs in src_images/.
@@ -18,7 +18,7 @@
 */
 `include "project_defs.svh"
 
-module sobel_acc_tb;
+module interpol_acc_tb;
 
     // -------------------------------------------------------------------------
     localparam int  IN_FRAME_W      = 320;
@@ -108,7 +108,7 @@ module sobel_acc_tb;
     // -------------------------------------------------------------------------
     // DUT
     // -------------------------------------------------------------------------
-    sobel_acc u_dut (
+    interpol_acc u_dut (
         .wb         (wb),
         .fifo_empty (fifo_empty),
         .fifo_dout  (fifo_dout),
@@ -180,14 +180,14 @@ module sobel_acc_tb;
         repeat(4) @(posedge clk);
 
         // Start with auto_start=1, algo_sel=0 (pixel inversion reference)
-        wb_write(`SOBEL_BASE_ADDR, 32'h1);
+        wb_write(`INTERPOL_BASE_ADDR, 32'h1);
         $display("[TB] Started - polling for done...");
 
         // Poll STATUS.done (bit 1)
-        do wb_read(`SOBEL_BASE_ADDR + 32'h4, status);
+        do wb_read(`INTERPOL_BASE_ADDR + 32'h4, status);
         while (!(status & 32'h2));
 
-        wb_read(`SOBEL_BASE_ADDR + 32'h8, frame_count);
+        wb_read(`INTERPOL_BASE_ADDR + 32'h8, frame_count);
         $display("[TB] Done. STATUS=%08h  FRAME_COUNT=%0d  shadow_ptr=%0d",
                  status, frame_count, shadow_ptr);
 
