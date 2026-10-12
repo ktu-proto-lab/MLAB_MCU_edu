@@ -34,7 +34,11 @@ module interpol_acc (
     );
 
     // output image size regulate in tb
-    localparam int TOTAL_PIXELS = 76800; // 320 x 240
+    localparam int TOTAL_PIXELS_OLD = 76800; // 320 x 240
+    localparam int TOTAL_PIXELS_NEW = 1228800; // 1280 x 960
+    localparam int IMAGE_W_NEW = 960;
+    localparam int SIZE_COEF_X = 1280 / 320;
+    localparam int SIZE_COEF_Y = 960 / 240; 
 
     typedef enum logic [1:0] {
         IDLE = 2'b00,
@@ -51,6 +55,9 @@ module interpol_acc (
     logic        csr_error,       csr_error_next;
     logic [31:0] csr_frame_count, csr_frame_count_next;
     logic        wb_wr;
+    logic [7:0] line_buffer[1279:0];
+    logic [31:0] lines_printed, lines_printed_next;
+    logic [31:0] pixels_read, pixels_read_next;
 
     // -------------------------------------------------------------------------
     // Wishbone protocol
@@ -110,6 +117,8 @@ module interpol_acc (
             csr_done        <= 1'b0;
             csr_error       <= 1'b0;
             csr_frame_count <= 32'h0;
+    	    lines_printed <= 0'b0;
+	    pixels_read <= 0'b0;
         end else begin
             state           <= state_next;
             wr_ptr          <= wr_ptr_next;
@@ -119,6 +128,8 @@ module interpol_acc (
             csr_done        <= csr_done_next;
             csr_error       <= csr_error_next;
             csr_frame_count <= csr_frame_count_next;
+	    lines_printed <= lines_printed_next;
+	    pixels_read <= pixels_read_next;
         end
     end
 
@@ -166,12 +177,29 @@ module interpol_acc (
                 if (!fifo_empty && !out_full) begin
                     out_wr_en = 1'b1;
 
+		for(int counter_x = 0; counter_x <= IMAGE_W_NEW; counter_x++) begin
+		    out_din = fifo_dout;
+		    
+		    for(int pixel_position = 0; pixel_position <= SIZE_COEF_X; pixel_position++) begin
+	 	        line_buffer[counter_x + pixels_read * floor(SIZE_COEF_X)] = fifo_dout;
+	            end
+		    pixels_read_next = pixels_read++;
 
-                    out_din = fifo_dout;
+		    //We already outputted 1 line
+		    for(int counter_y = 1; counter_y <= SIZE_COEF_Y; counter_y++) begin
+
+			for(int pixel_position = 0; pixel_position <= IMAGE_W_NEW; pixel_position++)
+			    out_din = line_buffer[pixel_position];		
+			end	
+
+		    end
+		
+		lines_printed_next = lines_printed++;
+		end	
 
                     wr_ptr_next = wr_ptr + 32'h1;
 
-                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS) begin
+                    if (wr_ptr + 32'h1 >= TOTAL_PIXELS_NEW) begin
                         csr_busy_next        = 1'b0;
                         csr_done_next        = 1'b1;
                         csr_frame_count_next = csr_frame_count + 32'h1;

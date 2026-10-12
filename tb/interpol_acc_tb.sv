@@ -25,8 +25,8 @@ module interpol_acc_tb;
     localparam int  IN_FRAME_H      = 240;
     localparam int  TOTAL_PIXELS = IN_FRAME_W * IN_FRAME_H; //76800
     
-    localparam int  OUT_FRAME_W      = 320;
-    localparam int  OUT_FRAME_H      = 240;
+    localparam int  OUT_FRAME_W      = 1280;
+    localparam int  OUT_FRAME_H      = 960;
 
     localparam real CLK_PERIOD   = 10.0;
 

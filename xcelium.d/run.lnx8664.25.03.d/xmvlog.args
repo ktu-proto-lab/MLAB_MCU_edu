@@ -1,0 +1,20 @@
+//
+// File created by:  xrun
+// Do not modify this file
+//
+-XLMODE
+./xcelium.d/run.lnx8664.25.03.d
+-RUNMODE
+rtl/peripherals/compress_acc.sv
+tb/compress_acc_tb.sv
+-CDSLIB
+./xcelium.d/run.lnx8664.25.03.d/cdsrun.lib
+-HDLVAR
+./xcelium.d/run.lnx8664.25.03.d/hdlrun.var
+-no_analogsolver
+-MESSAGES
+-UPDATE
+-XLLIBSTORE
+./xcelium.d/run.lnx8664.25.03.d/xllibs
+-ALLOWUNBOUND
+-sv_ms

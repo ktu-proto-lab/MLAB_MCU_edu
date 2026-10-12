@@ -1,0 +1,4 @@
+#e1(22Jun2026:18:50:58): source ./xcelium.d/env.d/env.history.22Jun2026_18_50_58
+s1(22Jun2026:18:50:58):  xrun rtl/peripherals/compress_acc.sv 
+#e2(22Jun2026:18:53:25): source ./xcelium.d/env.d/env.history.22Jun2026_18_53_25
+s2(22Jun2026:18:53:25):  xrun rtl/peripherals/compress_acc.sv tb/compress_acc_tb.sv 
