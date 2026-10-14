@@ -33,8 +33,8 @@ module sobel_acc (
     input  logic       out_full
     );
 
-    localparam int FRAME_W      = 640;
-    localparam int FRAME_H      = 480;
+    parameter int FRAME_W      = 640;
+    parameter int FRAME_H      = 480;
     localparam int TOTAL_PIXELS = FRAME_W * FRAME_H; // 320 x 240 = 76800 // 640 x 480 = 307200
 
     typedef enum logic [1:0] {
@@ -63,13 +63,13 @@ module sobel_acc (
     // -------------------------------------------------------------------------
     // Sobel
     // -------------------------------------------------------------------------
-    reg [7:0] rows [0:1][0:FRAME_W-1];
-    logic [7:0] run1, run2, run3;
+    reg [7:0] linebuff0 [0:FRAME_W-1];
+    reg [7:0] linebuff1 [0:FRAME_W-1];
+    logic [7:0] run1, run2;
     logic signed [10:0] Gx, Gy;
     logic [11:0] G_sum;
-    logic [31:0] line, width;
-    logic [2:0] top, middle, bottom;
-    
+    logic [31:0] width;
+
     // uncomment if running sobel_acc_tb with multiple images
     //logic last_frame, last_frame_next;
 
@@ -100,7 +100,7 @@ module sobel_acc (
     // Consume from input FIFO only when we can simultaneously write to output FIFO.
     assign fifo_rd_en = (state == RUN) && !fifo_empty && !out_full;
 
-    assign has_incoming_data = (!fifo_empty || (wr_ptr + 1 >= TOTAL_PIXELS && wr_ptr + 1 < TOTAL_PIXELS+FRAME_W+3)) ? 1'b1 : 1'b0; 
+    assign has_incoming_data = (!fifo_empty || (wr_ptr  >= TOTAL_PIXELS && wr_ptr < TOTAL_PIXELS+FRAME_W + 1)) ? 1'b1 : 1'b0; 
 
     // -------------------------------------------------------------------------
     // Wishbone read mux (purely combinational)
@@ -145,31 +145,24 @@ module sobel_acc (
         if (!wb.rst) begin
             run1 <= 0;
             run2 <= 0;
-            run3 <= 0;
-            line <= 0;
             width <= 0;
         end 
-        else if(ctrl_algo_sel && !out_full && state == RUN && has_incoming_data) begin
+        else if(!out_full && state == RUN && has_incoming_data) begin       
 
-            if (width == FRAME_W-1) begin
-                if(line == 1)line <= 0; 
-                else line <= line + 1;
-            end
-
-            if(width == FRAME_W-1 || wr_ptr == 2) width <= 0;
+            if(width == FRAME_W-1 || wr_ptr == 1) width <= 0;
             else width <= width + 1;
 
-            rows[line][width] <= run1;
+            linebuff0[width] <= linebuff1[width];
+            linebuff1[width] <= run1;
 
             run1 <= run2;
-            run2 <= run3;
-            run3 <= fifo_dout;
+            run2 <= fifo_dout;
 
         end
     end
 
 
-    assign out_wr_en = ctrl_algo_sel ? ((wr_ptr > FRAME_W + 1) && !out_full && has_incoming_data && state==RUN) : state==RUN; 
+    assign out_wr_en = ctrl_algo_sel ? ((wr_ptr > FRAME_W ) && !out_full && has_incoming_data && (state == RUN)) : state==RUN; 
     
     assign out_din = ctrl_algo_sel ? ((G_sum > 255) ? 255 : G_sum) : ~fifo_dout;
 
@@ -231,72 +224,57 @@ module sobel_acc (
                                 last_frame_next = csr_frame_count;
                             end
                         */
-                            
-                            if(line == 0) begin
-                                top = 0;
-                                bottom = 1;
-                            end
-                            else begin
-                                top = 1;
-                                bottom = 0;
-                            end
                         
 
-                        if(wr_ptr > TOTAL_PIXELS + 1)begin // paskutine eilute
-          
-                            top = 0;
-                            bottom = 1;
+                        if(wr_ptr > TOTAL_PIXELS)begin // paskutine eilute
 
-                            if(wr_ptr == TOTAL_PIXELS + 2)begin
-                                Gx = rows[top][1] + rows[bottom][1]*2 + rows[bottom][1]  - rows[top][0] - rows[bottom][0]*2 - rows[bottom][0];
-                                Gy = rows[top][0] + rows[top][0]*2 + rows[top][1] - rows[bottom][0] - rows[bottom][0]*2 - rows[bottom][1];
+                            if(wr_ptr == TOTAL_PIXELS + 1)begin
+                                Gx = linebuff0[1] + linebuff1[1]*2 + linebuff1[1]  - linebuff0[0] - linebuff1[0]*2 - linebuff1[0];
+                                Gy = linebuff0[0] + linebuff0[0]*2 + linebuff0[1] - linebuff1[0] - linebuff1[0]*2 - linebuff1[1];
                             end
-                            else if(wr_ptr <= TOTAL_PIXELS + FRAME_W)begin
-                                Gx = rows[top][width+2] + rows[bottom][width+2]*2 + rows[bottom][width+2] - rows[top][width] - rows[bottom][width]*2 - rows[bottom][width];
-                                Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+2] - rows[bottom][width] - rows[bottom][width+1]*2 - rows[bottom][width+2];
+                            else if(wr_ptr <= TOTAL_PIXELS + FRAME_W -1)begin
+                                Gx = linebuff0[width+2] + linebuff1[width+2]*2 + linebuff1[width+2] - linebuff0[width] - linebuff1[width]*2 - linebuff1[width];
+                                Gy = linebuff0[width] + linebuff0[width+1]*2 + linebuff0[width+2] - linebuff1[width] - linebuff1[width+1]*2 - linebuff1[width+2];
                             end
-                            else if (wr_ptr == TOTAL_PIXELS + FRAME_W + 1)begin
-                                Gx = rows[top][width+1] + rows[top][width+1]*2 + rows[bottom][width+1] - rows[top][width] - rows[top][width]*2 - rows[bottom][width];
-                                Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+1] - rows[bottom][width] - rows[bottom][width+1]*2 - rows[bottom][width+1];
+                            else if (wr_ptr == TOTAL_PIXELS + FRAME_W)begin
+                                Gx = linebuff0[width+1] + linebuff0[width+1]*2 + linebuff1[width+1] - linebuff0[width] - linebuff0[width]*2 - linebuff1[width];
+                                Gy = linebuff0[width] + linebuff0[width+1]*2 + linebuff0[width+1] - linebuff1[width] - linebuff1[width+1]*2 - linebuff1[width+1];
                             end
                             
                         end
-                        else if(wr_ptr > FRAME_W*2 && width < FRAME_W-2) begin // main thingy
-
-                            Gx = rows[top][width+2] + rows[bottom][width+2]*2 + run3 - rows[top][width] - rows[bottom][width]*2 - run1;
-                            Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+2] - run1 - run2*2 - run3; 
-   
-                        end
-                        else if (wr_ptr> FRAME_W + 1 && wr_ptr < FRAME_W*2 + 2)begin // pirma eilute
-              
-                            top = 0;
-                            bottom = 1;
+                        else if (wr_ptr> FRAME_W  && wr_ptr < FRAME_W*2 + 1)begin // pirma eilute
                             
-                            if(wr_ptr == FRAME_W + 2)begin
-                                Gx = rows[top][1] + rows[top][1]*2 + run3 - rows[top][0] - rows[top][0]*2 - run2;
-                                Gy = rows[top][1] + rows[top][0]*2 + rows[top][0] - run2 - run2*2 - run3;
+                            if(wr_ptr == FRAME_W + 1)begin
+                                Gx = linebuff1[1] + linebuff1[1]*2 + fifo_dout - linebuff1[0] - linebuff1[0]*2 - run2;
+                                Gy = linebuff1[1] + linebuff1[0]*2 + linebuff1[0] - run2 - run2*2 - fifo_dout;
                             end
-                            else if(wr_ptr <= FRAME_W*2)begin
-                                Gx = rows[top][width+2] + rows[top][width+2]*2 + run3 - rows[top][width] - rows[top][width]*2 - run1;
-                                Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+2] - run1 - run2*2 - run3;
+                            else if(wr_ptr <= FRAME_W*2 - 1)begin
+                                Gx = linebuff1[width+2] + linebuff1[width+2]*2 + fifo_dout - linebuff1[width] - linebuff1[width]*2 - run1;
+                                Gy = linebuff1[width] + linebuff1[width+1]*2 + linebuff1[width+2] - run1 - run2*2 - fifo_dout;
                             end
-                            else if (wr_ptr == FRAME_W*2+1)begin
-                                Gx = rows[top][width+1] + rows[top][width+1]*2 + run2 - rows[top][width] - rows[top][width]*2 - run1;
-                                Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+1] - run1 - run2*2 - run2;
+                            else if (wr_ptr == FRAME_W*2)begin
+                                Gx = linebuff1[width+1] + linebuff1[width+1]*2 + run2 - linebuff1[width] - linebuff1[width]*2 - run1;
+                                Gy = linebuff1[width] + linebuff1[width+1]*2 + linebuff1[width+1] - run1 - run2*2 - run2;
                             end
    
                         end
                         else if (wr_ptr > FRAME_W*2 && width == FRAME_W-2)begin // paskutinis eilutes pixel
 
-                            Gx = rows[top][width+1] + rows[bottom][width+1]*2 + run2 - rows[top][width] - rows[bottom][width]*2 - run1;
-                            Gy = rows[top][width] + rows[top][width+1]*2 + rows[top][width+1] - run1 - run2*2 - run2;
+                            Gx = linebuff0[width+1] + linebuff1[width+1]*2 + run2 - linebuff0[width] - linebuff1[width]*2 - run1;
+                            Gy = linebuff0[width] + linebuff0[width+1]*2 + linebuff0[width+1] - run1 - run2*2 - run2;
 
                         end
                         else if(wr_ptr > FRAME_W*2 && width == FRAME_W-1) begin // pirmas eilutes pixel
 
-                            Gx = rows[bottom][1] + rows[top][1]*2 + run3 - rows[bottom][0] - rows[top][0]*2 - run2;
-                            Gy = rows[bottom][0] + rows[bottom][0]*2 + rows[bottom][1] - run2 - run2*2 - run3;
+                            Gx = linebuff0[1] + linebuff1[1]*2 + fifo_dout - linebuff0[0] - linebuff1[0]*2 - run2;
+                            Gy = linebuff0[0] + linebuff0[0]*2 + linebuff0[1] - run2 - run2*2 - fifo_dout;
                             
+                        end
+                        else if(wr_ptr > FRAME_W*2 && width < FRAME_W-2) begin // main thingy
+
+                            Gx = linebuff0[width+2] + linebuff1[width+2]*2 + fifo_dout - linebuff0[width] - linebuff1[width]*2 - run1;
+                            Gy = linebuff0[width] + linebuff0[width+1]*2 + linebuff0[width+2] - run1 - run2*2 - fifo_dout; 
+   
                         end
                         
                         
@@ -304,11 +282,9 @@ module sobel_acc (
 
      
 
-                        if (wr_ptr_next >= TOTAL_PIXELS+FRAME_W+1) begin
+                        if (wr_ptr  >= TOTAL_PIXELS+FRAME_W) begin
                             csr_frame_count_next = csr_frame_count + 32'h1;
-                            wr_ptr_next          = FRAME_W + 2;
-
-                            //csr_done_next        = 1'b1;
+                            wr_ptr_next          = FRAME_W + 1;
 
                             if(!ctrl_auto_start)begin 
                                 state_next      = DONE;
@@ -331,8 +307,6 @@ module sobel_acc (
                         wr_ptr_next = wr_ptr + 32'h1;
 
                     end
-
-                        
 
                     end
 
