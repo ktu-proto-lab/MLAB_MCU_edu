@@ -149,6 +149,44 @@ For the PYNQ-Z2 board, use [PYNQ-Z2 version 1.1 manual](https://dpoauwgwqsy2x.cl
 | `ft_clk`      | 24 | ACBUS5 | Pin18  |  Y7|
 | `ft_oe_n`     | 23 | ACBUS6 | Pin27  | Y16 |
 
+#### BASYS3 wiring
+
+For the  board, use [Basys3 FPGA Board Reference Manual](https://www.amd.com/content/dam/amd/en/documents/university/aup-boards/XUPBasys3/documentation/Basys3_rm_8_22_2014.pdf).
+
+<p align="center">
+  <img src="../doc/figures/basys3_pinout.svg" alt="BASYS3 pinout" width="700">
+</p>
+
+| Pmod JA | Pmod JB  | Pmod JC  | Pmod XDAC  |
+|--------------------------------------------|
+| JA1:J1  | JB1:A14  | JC1:K17  | JXADC1:J3  |
+| JA2:L2  | JB2:A16  | JC2:M18  | JXADC2:L3  |
+| JA3:J2  | JB3:B15  | JC3:N17  | JXADC3:M2  |
+| JA4:G2  | JB4:B16  | JC4:P18  | JXADC4:N2  |
+| JA7:H1  | JB7:A15  | JC7:L17  | JXADC7:K3  |
+| JA8:K2  | JB8:A17  | JC8:M19  | JXADC8:M3  |
+| JA9:H2  | JB9:C15  | JC9:P17  | JXADC9:M1  |
+| JA10:G3 | JB10:C16 | JC10:R18 | JXADC10:N1 |
+
+
+| Signal       | CN2 Pin | FT232H pin name   | Pmod    | FPGA Pin |
+|--------------|---------|-------------------|---------|----------|
+| `ft_data[0]` | 7       | ADBUS0            | JA1     | J1       |
+| `ft_data[1]` | 10      | ADBUS1            | JA2     | L2       |
+| `ft_data[2]` | 9       | ADBUS2            | JA3     | J2       |
+| `ft_data[3]` | 12      | ADBUS3            | JA4     | G2       |
+| `ft_data[4]` | 14      | ADBUS4            | JA7     | H1       |
+| `ft_data[5]` | 13      | ADBUS5            | JA8     | K2       |
+| `ft_data[6]` | 16      | ADBUS6            | JA9     | H2       |
+| `ft_data[7]` | 15      | ADBUS7            | JA10    | G3       |
+| `ft_rxf_n`   | 18      | ACBUS0            | JXADC2  | L3       |
+| `ft_txe_n`   | 17      | ACBUS1            | JXADC3  | M2       |
+| `ft_rd_n`    | 20      | ACBUS2            | JXADC4  | N2       |
+| `ft_wr_n`    | 19      | ACBUS3            | JXADC8  | M3       |
+| `ft_siwu_n`  | 22      | ACBUS4 (Tie High) | –       | –        |
+| `ft_clk`     | 24      | ACBUS5            | JXADC9  | M1       |
+| `ft_oe_n`    | 23      | ACBUS6            | JXADC10 | N1       |
+
 
 ---
 
