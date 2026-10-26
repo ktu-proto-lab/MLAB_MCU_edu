@@ -158,7 +158,7 @@ For the  board, use [Basys3 FPGA Board Reference Manual](https://www.amd.com/con
 </p>
 
 | Pmod JA | Pmod JB  | Pmod JC  | Pmod XDAC  |
-|--------------------------------------------|
+|---------|----------|----------|------------|
 | JA1:J1  | JB1:A14  | JC1:K17  | JXADC1:J3  |
 | JA2:L2  | JB2:A16  | JC2:M18  | JXADC2:L3  |
 | JA3:J2  | JB3:B15  | JC3:N17  | JXADC3:M2  |
